@@ -1,0 +1,33 @@
+# Development aliases for Fit app
+# Source this file in your shell: source .dev-aliases
+
+# Build aliases
+alias fit-build='./scripts/build.sh'
+alias fit-build-debug='./scripts/build.sh Debug'
+alias fit-build-release='./scripts/build.sh Release'
+alias fit-build-clean='./scripts/build.sh Debug "platform=iOS Simulator,name=iPhone 16e" true'
+alias fit-check='./scripts/pre-build-check.sh'
+
+# Test aliases
+alias fit-test='xcodebuild test -project Fit.xcodeproj -scheme Fit -destination "platform=iOS Simulator,name=iPhone 16e"'
+alias fit-test-debug='xcodebuild test -project Fit.xcodeproj -scheme Fit -destination "platform=iOS Simulator,name=iPhone 16e" -configuration Debug'
+
+# Clean aliases
+alias fit-clean='xcodebuild clean -project Fit.xcodeproj -scheme Fit'
+alias fit-clean-all='rm -rf DerivedData/ build-artifacts/ test-results/ logs/'
+
+# Run aliases
+alias fit-run='xcodebuild build -project Fit.xcodeproj -scheme Fit -destination "platform=iOS Simulator,name=iPhone 16e" && xcrun simctl install booted DerivedData/Build/Products/Debug-iphonesimulator/Fit.app && xcrun simctl launch booted Jason.Fit'
+
+# Format and lint aliases
+alias fit-format='swiftformat Fit/'
+alias fit-lint='swiftlint'
+alias fit-format-lint='swiftformat Fit/ && swiftlint'
+
+# Log aliases
+alias fit-logs='tail -f logs/build-$(date +%Y%m%d)*.log'
+alias fit-error-logs='grep -i error logs/build-*.log'
+
+# Project aliases
+alias fit-open='open Fit.xcodeproj'
+alias fit-status='git status && ./scripts/pre-build-check.sh'
