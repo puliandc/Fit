@@ -1,0 +1,425 @@
+//
+//  ContentView.swift
+//  Fit
+//
+//  Created by 陆家贤 on 9/10/2025.
+//
+
+import SwiftUI
+
+struct ContentView: View {
+    @EnvironmentObject var navigationManager: NavigationManager
+    @State private var selectedWorkout: WorkoutPlan?
+
+    var body: some View {
+        ZStack {
+            // Background
+            Color.appBackground
+                .ignoresSafeArea()
+
+            // Main Content - Show content based on current screen
+            switch navigationManager.currentScreen {
+            case .main:
+                mainContent
+            case .workout(let plan):
+                workoutContent(plan)
+            case .settings:
+                settingsContent
+            case .history:
+                historyContent
+            }
+
+            // Dialog Overlay
+            if let dialog = navigationManager.presentedDialog {
+                DialogOverlay(dialog: dialog)
+                    .transition(.asymmetric(
+                        insertion: .opacity.combined(with: .scale(scale: 0.9)),
+                        removal: .opacity.combined(with: .scale(scale: 1.1))
+                    ))
+            }
+        }
+        .onAppear {
+            // Initialize any needed data
+            print("🚀 ContentView appeared, current screen: \(navigationManager.currentScreen)")
+            print("📱 NavigationManager initialized: \(navigationManager)")
+        }
+    }
+
+    // MARK: - Main Content
+    private var mainContent: some View {
+        VStack(spacing: 24) {
+            // Header
+            VStack(spacing: 8) {
+                Text("Fit")
+                    .displayStyle()
+                    .foregroundColor(.appText)
+
+                Text("Your Personal Fitness Companion")
+                    .secondaryStyle()
+            }
+            .padding(.top, 40)
+
+            // Welcome Section
+            GlassCard {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        Image(systemName: "heart.fill")
+                            .foregroundColor(.red)
+                            .font(.title2)
+                        Text("Welcome Back!")
+                            .cardTitleStyle()
+                    }
+
+                    Text("Ready to crush your fitness goals today? Choose from our curated workout plans or start your custom routine.")
+                        .bodyStyle()
+
+                    HStack {
+                        Image(systemName: "flame.fill")
+                            .foregroundColor(.orange)
+                        Text("3 workouts completed this week")
+                            .captionStyle()
+                    }
+                    .padding(.top, 4)
+                }
+            }
+
+            // Featured Workouts Section
+            VStack(alignment: .leading, spacing: 16) {
+                Text("Featured Workouts")
+                    .cardTitleStyle()
+                    .padding(.horizontal)
+
+                LazyVGrid(columns: [
+                    GridItem(.flexible(), spacing: 12),
+                    GridItem(.flexible(), spacing: 12)
+                ], spacing: 16) {
+                    ForEach(MockDataProvider.shared.sampleWorkoutPlans.prefix(4), id: \.id) { workout in
+                        GlassCard(style: .small) {
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack {
+                                    Image(systemName: workout.category.systemImage)
+                                        .foregroundColor(.appPrimary)
+                                    Spacer()
+                                    Text(workout.difficulty.rawValue)
+                                        .captionStyle()
+                                        .foregroundColor(workout.difficulty.color)
+                                }
+
+                                Text(workout.name)
+                                    .bodyStyle()
+                                    .lineLimit(2)
+
+                                HStack {
+                                    Image(systemName: "clock")
+                                        .font(.caption)
+                                    Text("\(workout.duration) min")
+                                        .captionStyle()
+
+                                    Spacer()
+
+                                    Image(systemName: "flame")
+                                        .font(.caption)
+                                    Text("\(workout.estimatedCalories)")
+                                        .captionStyle()
+                                }
+                            }
+                        }
+                        .onTapGesture {
+                            selectedWorkout = workout
+                            navigationManager.startWorkout(workout)
+                        }
+                    }
+                }
+                .padding(.horizontal)
+            }
+
+            // Action Buttons
+            VStack(spacing: 12) {
+                ActionButton.primary("Start Custom Workout", icon: "plus.circle.fill") {
+                    // Navigate to custom workout creation
+                }
+
+                ActionButton.glass("View History", icon: "clock.arrow.circlepath") {
+                    navigationManager.navigate(to: .history)
+                }
+
+                HStack(spacing: 12) {
+                    IconActionButton(systemImage: "gearshape", style: .glass) {
+                        navigationManager.navigate(to: .settings)
+                    }
+
+                    IconActionButton(systemImage: "chart.bar.fill", style: .primary) {
+                        // Navigate to stats
+                    }
+
+                    IconActionButton(systemImage: "person.fill", style: .glass) {
+                        // Navigate to profile
+                    }
+                }
+            }
+            .padding(.horizontal)
+        }
+        .padding(.horizontal)
+    }
+
+    // MARK: - Workout Content
+    private func workoutContent(_ plan: WorkoutPlan) -> some View {
+        VStack(spacing: 20) {
+            // Header
+            HStack {
+                Button(action: {
+                    navigationManager.goBack()
+                }) {
+                    Image(systemName: "chevron.left")
+                        .font(.title2)
+                        .foregroundColor(.appText)
+                }
+
+                Text(plan.name)
+                    .titleStyle()
+                    .foregroundColor(.appText)
+
+                Spacer()
+            }
+            .padding(.horizontal)
+
+            Text("Workout in progress")
+                .bodyStyle()
+                .foregroundColor(.appText)
+
+            Spacer()
+
+            ActionButton.primary("Complete Workout") {
+                navigationManager.completeWorkout()
+            }
+            .padding(.horizontal)
+        }
+    }
+
+    // MARK: - Settings Content
+    private var settingsContent: some View {
+        VStack(spacing: 20) {
+            // Header
+            HStack {
+                Button(action: {
+                    navigationManager.goBack()
+                }) {
+                    Image(systemName: "chevron.left")
+                        .font(.title2)
+                        .foregroundColor(.appText)
+                }
+
+                Text("Settings")
+                    .titleStyle()
+                    .foregroundColor(.appText)
+
+                Spacer()
+            }
+            .padding(.horizontal)
+
+            Text("Settings screen - coming soon")
+                .bodyStyle()
+                .foregroundColor(.appText)
+
+            Spacer()
+        }
+    }
+
+    // MARK: - History Content
+    private var historyContent: some View {
+        VStack(spacing: 20) {
+            // Header
+            HStack {
+                Button(action: {
+                    navigationManager.goBack()
+                }) {
+                    Image(systemName: "chevron.left")
+                        .font(.title2)
+                        .foregroundColor(.appText)
+                }
+
+                Text("History")
+                    .titleStyle()
+                    .foregroundColor(.appText)
+
+                Spacer()
+            }
+            .padding(.horizontal)
+
+            Text("Workout history - coming soon")
+                .bodyStyle()
+                .foregroundColor(.appText)
+
+            Spacer()
+        }
+    }
+}
+
+// MARK: - Dialog Overlay
+struct DialogOverlay: View {
+    let dialog: DialogType
+    @EnvironmentObject var navigationManager: NavigationManager
+
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.6)
+                .ignoresSafeArea()
+                .onTapGesture {
+                    navigationManager.dismissDialog()
+                }
+
+            switch dialog {
+            case .completion:
+                CompletionDialog()
+            case .editSet(let exercise, let setIndex):
+                EditSetDialog(exercise: exercise, setIndex: setIndex)
+            case .quitWorkout:
+                QuitWorkoutDialog()
+            case .workoutComplete:
+                WorkoutCompleteDialog()
+            }
+        }
+    }
+}
+
+// MARK: - Placeholder Dialogs
+struct CompletionDialog: View {
+    @EnvironmentObject var navigationManager: NavigationManager
+
+    var body: some View {
+        GlassCard(style: .large) {
+            VStack(spacing: 20) {
+                Text("Exercise Complete!")
+                    .cardTitleStyle()
+                    .foregroundColor(.success)
+
+                Text("Great job! You've completed this exercise set.")
+                    .bodyStyle()
+                    .multilineTextAlignment(.center)
+
+                HStack(spacing: 12) {
+                    ActionButton.primary("Continue") {
+                        navigationManager.dismissDialog()
+                    }
+                    ActionButton.glass("Rest") {
+                        navigationManager.dismissDialog()
+                    }
+                }
+            }
+        }
+        .frame(maxWidth: 300)
+    }
+}
+
+struct EditSetDialog: View {
+    let exercise: Exercise
+    let setIndex: Int
+    @EnvironmentObject var navigationManager: NavigationManager
+
+    var body: some View {
+        GlassCard(style: .large) {
+            VStack(spacing: 20) {
+                Text("Edit Set")
+                    .cardTitleStyle()
+
+                Text("Edit details for set \(setIndex + 1) of \(exercise.name)")
+                    .bodyStyle()
+                    .multilineTextAlignment(.center)
+
+                ActionButton.primary("Save Changes") {
+                    navigationManager.dismissDialog()
+                }
+                ActionButton.glass("Cancel") {
+                    navigationManager.dismissDialog()
+                }
+            }
+        }
+        .frame(maxWidth: 300)
+    }
+}
+
+struct QuitWorkoutDialog: View {
+    @EnvironmentObject var navigationManager: NavigationManager
+
+    var body: some View {
+        GlassCard(style: .large) {
+            VStack(spacing: 20) {
+                Text("Quit Workout?")
+                    .cardTitleStyle()
+                    .foregroundColor(.warning)
+
+                Text("Are you sure you want to quit this workout? Your progress will be lost.")
+                    .bodyStyle()
+                    .multilineTextAlignment(.center)
+
+                HStack(spacing: 12) {
+                    ActionButton.error("Quit Workout") {
+                        navigationManager.dismissDialog()
+                        navigationManager.popToRoot()
+                    }
+                    ActionButton.glass("Continue") {
+                        navigationManager.dismissDialog()
+                    }
+                }
+            }
+        }
+        .frame(maxWidth: 300)
+    }
+}
+
+struct WorkoutCompleteDialog: View {
+    @EnvironmentObject var navigationManager: NavigationManager
+
+    var body: some View {
+        GlassCard(style: .large) {
+            VStack(spacing: 20) {
+                Text("Workout Complete! 🎉")
+                    .cardTitleStyle()
+                    .foregroundColor(.success)
+
+                Text("Congratulations! You've successfully completed your workout.")
+                    .bodyStyle()
+                    .multilineTextAlignment(.center)
+
+                ActionButton.primary("Done") {
+                    navigationManager.dismissDialog()
+                    navigationManager.popToRoot()
+                }
+            }
+        }
+        .frame(maxWidth: 300)
+    }
+}
+
+// MARK: - Extensions
+extension WorkoutCategory {
+    var systemImage: String {
+        switch self {
+        case .fullBody:
+            return "figure.walk"
+        case .upperBody:
+            return "figure.arms.open"
+        case .lowerBody:
+            return "figure.run"
+        case .core:
+            return "circle.circle" // iOS 15.0+ compatible alternative
+        case .cardio:
+            return "heart.fill"
+        case .hiit:
+            return "flame.fill"
+        case .yoga:
+            return "figure.yoga"
+        case .strength:
+            return "dumbbell.fill"
+        case .endurance:
+            return "timer"
+        }
+    }
+}
+
+// MARK: - Preview
+#Preview {
+    ContentView()
+        .environmentObject(NavigationManager.preview)
+        .preferredColorScheme(.dark)
+}
