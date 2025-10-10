@@ -50,12 +50,9 @@ struct Exercise: Identifiable, Codable, Hashable {
 struct ExerciseSet: Identifiable, Codable, Hashable {
     let id: UUID
     let exercise: Exercise
-    var targetReps: Int
-    var actualReps: Int?
-    var targetWeight: Double
-    var actualWeight: Double?
-    var restTime: Int // in seconds
-    var isCompleted: Bool
+    let targetReps: Int  // Number of sets for this exercise
+    let targetWeight: Double
+    let restTime: Int // in seconds
     var notes: String?
 
     init(
@@ -69,11 +66,8 @@ struct ExerciseSet: Identifiable, Codable, Hashable {
         self.id = id
         self.exercise = exercise
         self.targetReps = targetReps
-        self.actualReps = nil
         self.targetWeight = targetWeight
-        self.actualWeight = nil
         self.restTime = restTime
-        self.isCompleted = false
         self.notes = notes
     }
 }

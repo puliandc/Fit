@@ -191,7 +191,7 @@ extension ActionButton {
             case .primary:
                 return .appPrimary
             case .secondary:
-                return .appSecondary
+                return .appAccent
             case .tertiary:
                 return .appSurface
             case .success:
@@ -212,13 +212,13 @@ extension ActionButton {
             case .primary:
                 return [.appPrimary, .appPrimaryDark]
             case .secondary:
-                return [.appSecondary, .appSecondaryDark]
+                return [.appAccent, .appAccentDark]
             case .success:
-                return [.success, .green]
+                return [.success, .successLight]
             case .warning:
-                return [.warning, .orange]
+                return [.warning, .warning]
             case .error:
-                return [.error, .red]
+                return [.error, .error]
             case .glass:
                 return [.glassBackground, .glassBackground.opacity(0.05)]
             default:
@@ -273,7 +273,7 @@ extension ActionButton {
             case .primary:
                 return .appPrimary.opacity(0.3)
             case .secondary:
-                return .appSecondary.opacity(0.3)
+                return .appAccent.opacity(0.3)
             case .success:
                 return .success.opacity(0.3)
             case .warning:
@@ -281,7 +281,7 @@ extension ActionButton {
             case .error:
                 return .error.opacity(0.3)
             default:
-                return .glassShadow
+                return .glassShadowEffect
             }
         }
 
@@ -427,7 +427,7 @@ struct WorkoutActionButton: View {
             )
             .clipShape(RoundedRectangle(cornerRadius: 20))
             .shadow(
-                color: .workoutGradientStart.opacity(0.4),
+                color: .workoutColor.opacity(0.4),
                 radius: 20,
                 x: 0,
                 y: 8

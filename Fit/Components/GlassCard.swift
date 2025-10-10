@@ -312,7 +312,7 @@ struct BlurredGlassCard<Content: View>: View {
                 Text("Interactive Card")
                     .cardTitleStyle()
                 Text("Tap or hover to see the animation effects")
-                    .secondaryStyle()
+                    .bodySecondaryStyle()
             }
         }
 
