@@ -17,6 +17,10 @@ struct MainScreen: View {
     @State private var isAnimating: Bool = false
     @State private var showContent: Bool = false
 
+    // 调试模式状态变量
+    @State private var isDebugModeEnabled: Bool = false
+    @State private var showDebugOptions: Bool = false
+
     var body: some View {
         ZStack {
             // 现代化背景
@@ -76,6 +80,39 @@ struct MainScreen: View {
                             delay: 0.4
                         )
                     }
+
+                    // 调试模式区域
+                    if isDebugModeEnabled {
+                        DebugModeSection(
+                            showOptions: $showDebugOptions,
+                            onSimulateSuccess: {
+                                hasWorkoutPlan = true
+                            },
+                            onDirectWorkout: {
+                                if let workoutPlan = MockDataProvider.shared.sampleWorkoutPlans.first {
+                                    navigationManager.startWorkout(workoutPlan)
+                                }
+                            }
+                        )
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 20)
+                        .transition(.asymmetric(
+                            insertion: .scale.combined(with: .opacity),
+                            removal: .opacity
+                        ))
+                    }
+
+                    // 调试模式开关（固定显示）
+                    DebugModeToggle(
+                        isEnabled: $isDebugModeEnabled,
+                        onToggle: { enabled in
+                            if !enabled {
+                                showDebugOptions = false
+                            }
+                        }
+                    )
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 30)
 
                     // 底部空间
                     Spacer(minLength: 40)
@@ -534,6 +571,214 @@ struct ModernButton: View {
         case .disabled:
             return .clear
         }
+    }
+}
+
+// MARK: - Debug Mode Toggle
+struct DebugModeToggle: View {
+    @Binding var isEnabled: Bool
+    let onToggle: (Bool) -> Void
+
+    @State private var isVisible: Bool = false
+
+    var body: some View {
+        HStack {
+            Spacer()
+
+            Button(action: {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                    isEnabled.toggle()
+                    onToggle(isEnabled)
+                }
+            }) {
+                HStack(spacing: 8) {
+                    Image(systemName: isEnabled ? "ladybug.fill" : "ladybug")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(isEnabled ? .warning : .appTextMuted)
+
+                    Text("调试模式")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(isEnabled ? .warning : .appTextMuted)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(isEnabled ? Color.warning.opacity(0.15) : Color.appSurfaceLight)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .stroke(isEnabled ? Color.warning.opacity(0.3) : Color.glassBorder, lineWidth: 1)
+                        )
+                )
+            }
+            .buttonStyle(PlainButtonStyle())
+        }
+        .scaleEffect(isVisible ? 1.0 : 0.9)
+        .opacity(isVisible ? 1.0 : 0.5)
+        .animation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.8), value: isVisible)
+        .onAppear {
+            withAnimation {
+                isVisible = true
+            }
+        }
+    }
+}
+
+// MARK: - Debug Mode Section
+struct DebugModeSection: View {
+    @Binding var showOptions: Bool
+    let onSimulateSuccess: () -> Void
+    let onDirectWorkout: () -> Void
+
+    @State private var isVisible: Bool = false
+
+    var body: some View {
+        VStack(spacing: 16) {
+            // 调试模式标题
+            HStack {
+                Image(systemName: "ladybug.fill")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.warning)
+
+                Text("调试功能")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.appText)
+
+                Spacer()
+
+                // 展开/收起按钮
+                Button(action: {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                        showOptions.toggle()
+                    }
+                }) {
+                    Image(systemName: showOptions ? "chevron.up.circle.fill" : "chevron.down.circle.fill")
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(.appTextSecondary)
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+
+            // 调试选项
+            if showOptions {
+                VStack(spacing: 12) {
+                    // 模拟读取成功按钮
+                    DebugActionButton(
+                        icon: "checkmark.circle.fill",
+                        title: "模拟读取成功",
+                        subtitle: "设置训练计划读取成功状态",
+                        color: .success,
+                        action: onSimulateSuccess
+                    )
+
+                    // 直接进入训练按钮
+                    DebugActionButton(
+                        icon: "play.circle.fill",
+                        title: "直接进入训练",
+                        subtitle: "跳过读取步骤，直接开始训练",
+                        color: .workoutColor,
+                        action: onDirectWorkout
+                    )
+                }
+                .transition(.asymmetric(
+                    insertion: .scale.combined(with: .opacity),
+                    removal: .opacity
+                ))
+            }
+        }
+        .padding(20)
+        .background(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(Color.warning.opacity(0.08))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .stroke(Color.warning.opacity(0.2), lineWidth: 1)
+                )
+                .shadow(color: Color.warning.opacity(0.1), radius: 10, x: 0, y: 5)
+        )
+        .scaleEffect(isVisible ? 1.0 : 0.95)
+        .opacity(isVisible ? 1.0 : 0)
+        .offset(y: isVisible ? 0 : 20)
+        .animation(.spring(response: 0.8, dampingFraction: 0.8).delay(0.1), value: isVisible)
+        .onAppear {
+            withAnimation {
+                isVisible = true
+            }
+        }
+    }
+}
+
+// MARK: - Debug Action Button
+struct DebugActionButton: View {
+    let icon: String
+    let title: String
+    let subtitle: String
+    let color: Color
+    let action: () -> Void
+
+    @State private var isPressed: Bool = false
+    @State private var isVisible: Bool = false
+
+    var body: some View {
+        Button(action: {
+            action()
+        }) {
+            HStack(spacing: 16) {
+                // 图标
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(color.opacity(0.15))
+                        .frame(width: 44, height: 44)
+
+                    Image(systemName: icon)
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(color)
+                }
+
+                // 文本内容
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.appText)
+
+                    Text(subtitle)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.appTextMuted)
+                        .multilineTextAlignment(.leading)
+                }
+
+                Spacer()
+
+                // 箭头图标
+                Image(systemName: "arrow.right.circle")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(color.opacity(0.6))
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color.appSurfaceLight)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .stroke(color.opacity(0.2), lineWidth: 1)
+                    )
+            )
+            .scaleEffect(isPressed ? 0.98 : 1.0)
+        }
+        .buttonStyle(PlainButtonStyle())
+        .scaleEffect(isVisible ? 1.0 : 0.95)
+        .opacity(isVisible ? 1.0 : 0)
+        .onAppear {
+            withAnimation {
+                isVisible = true
+            }
+        }
+        .onLongPressGesture(minimumDuration: 0, maximumDistance: .infinity, pressing: { pressing in
+            withAnimation(.easeInOut(duration: 0.1)) {
+                isPressed = pressing
+            }
+        }, perform: {})
     }
 }
 
