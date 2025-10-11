@@ -58,7 +58,21 @@ class NavigationManager: ObservableObject {
 
     // MARK: - Workout Navigation (iOS 15.0+ Compatible)
     func startWorkout(_ plan: WorkoutPlan) {
+        print("🐛 DEBUG: NavigationManager.startWorkout called")
+        print("🐛 DEBUG: Workout plan: \(plan.name)")
+        print("🐛 DEBUG: Exercise count: \(plan.exercises.count)")
+        print("🐛 DEBUG: Current screen before navigation: \(currentScreen)")
+        print("🐛 DEBUG: Navigation stack depth: \(navigationStack.count)")
+
+        // 安全验证
+        guard !plan.exercises.isEmpty else {
+            print("🚨 ERROR: Cannot start workout - no exercises available")
+            return
+        }
+
+        print("🐛 DEBUG: Navigating to workout screen...")
         navigate(to: .workout(plan))
+        print("🐛 DEBUG: Navigation complete. Current screen: \(currentScreen)")
     }
 
     func pauseWorkout() {

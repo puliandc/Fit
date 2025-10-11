@@ -16,7 +16,44 @@ struct WorkoutScreen: View {
     @State private var showContent: Bool = false
 
     init(workoutPlan: WorkoutPlan) {
+        print("🐛 DEBUG: WorkoutScreen initializing...")
+        print("🐛 DEBUG: Workout plan: \(workoutPlan.name)")
+        print("🐛 DEBUG: Exercise count: \(workoutPlan.exercises.count)")
+
+        // 安全验证
+        guard !workoutPlan.exercises.isEmpty else {
+            print("🚨 ERROR: Cannot initialize WorkoutScreen - no exercises in workout plan")
+            // 创建一个安全的默认训练计划
+            let safeWorkoutPlan = WorkoutPlan(
+                name: "默认训练计划",
+                description: "默认训练计划，请联系开发者",
+                category: .fullBody,
+                difficulty: .beginner,
+                duration: 30,
+                exercises: [
+                    ExerciseSet(
+                        exercise: Exercise(
+                            name: "默认练习",
+                            category: .strength,
+                            muscleGroups: [.chest],
+                            equipment: .none,
+                            difficulty: .beginner,
+                            instructions: ["请联系开发者"],
+                            imageName: "default"
+                        ),
+                        targetReps: 1,
+                        targetWeight: 0
+                    )
+                ],
+                estimatedCalories: 100
+            )
+            print("🔄 FALLBACK: Using safe default workout plan")
+            _workoutViewModel = StateObject(wrappedValue: WorkoutViewModel(workoutPlan: safeWorkoutPlan))
+            return
+        }
+
         _workoutViewModel = StateObject(wrappedValue: WorkoutViewModel(workoutPlan: workoutPlan))
+        print("🐛 DEBUG: WorkoutScreen initialization complete")
     }
 
     var body: some View {
@@ -105,10 +142,23 @@ struct WorkoutScreen: View {
             }
         }
         .onAppear {
+            print("🐛 DEBUG: WorkoutScreen appeared")
+            print("🐛 DEBUG: About to start exercise...")
+
+            // 安全检查
+            if workoutViewModel.workoutPlan.exercises.isEmpty {
+                print("🚨 ERROR: Cannot start exercise - no exercises available")
+                return
+            }
+
+            print("🐛 DEBUG: Starting first exercise...")
             workoutViewModel.startExercise()
+
+            print("🐛 DEBUG: Exercise started, showing content...")
             withAnimation(.spring(response: 0.8, dampingFraction: 0.8).delay(0.2)) {
                 showContent = true
             }
+            print("🐛 DEBUG: WorkoutScreen onAppear complete")
         }
         .onDisappear {
             workoutViewModel.pauseExercise()
