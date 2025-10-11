@@ -17,9 +17,11 @@ struct MainScreen: View {
     @State private var isAnimating: Bool = false
     @State private var showContent: Bool = false
 
-    // 调试模式状态变量
+    // 调试模式状态变量 - 仅在开发构建中可用
+    #if DEBUG
     @State private var isDebugModeEnabled: Bool = false
     @State private var showDebugOptions: Bool = false
+    #endif
 
     var body: some View {
         ZStack {
@@ -81,7 +83,8 @@ struct MainScreen: View {
                         )
                     }
 
-                    // 调试模式区域
+                    #if DEBUG
+                    // 调试模式区域 - 仅在开发构建中显示
                     if isDebugModeEnabled {
                         DebugModeSection(
                             showOptions: $showDebugOptions,
@@ -120,8 +123,10 @@ struct MainScreen: View {
                             removal: .opacity
                         ))
                     }
+                    #endif
 
-                    // 调试模式开关（固定显示）
+                    #if DEBUG
+                    // 调试模式开关 - 仅在开发构建中显示
                     DebugModeToggle(
                         isEnabled: $isDebugModeEnabled,
                         onToggle: { enabled in
@@ -132,6 +137,7 @@ struct MainScreen: View {
                     )
                     .padding(.horizontal, 20)
                     .padding(.bottom, 30)
+                    #endif
 
                     // 底部空间
                     Spacer(minLength: 40)
