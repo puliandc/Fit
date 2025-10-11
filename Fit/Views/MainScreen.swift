@@ -86,12 +86,31 @@ struct MainScreen: View {
                         DebugModeSection(
                             showOptions: $showDebugOptions,
                             onSimulateSuccess: {
+                                print("🐛 DEBUG: Simulate success button clicked")
                                 hasWorkoutPlan = true
+                                print("🐛 DEBUG: hasWorkoutPlan set to true")
                             },
                             onDirectWorkout: {
-                                if let workoutPlan = MockDataProvider.shared.sampleWorkoutPlans.first {
-                                    navigationManager.startWorkout(workoutPlan)
+                                print("🐛 DEBUG: Direct workout button clicked")
+
+                                // 安全检查训练计划
+                                guard let workoutPlan = MockDataProvider.shared.sampleWorkoutPlans.first else {
+                                    print("🚨 ERROR: No workout plans available in MockDataProvider")
+                                    return
                                 }
+
+                                print("🐛 DEBUG: Selected workout plan: \(workoutPlan.name)")
+                                print("🐛 DEBUG: Workout plan has \(workoutPlan.exercises.count) exercises")
+
+                                // 验证训练计划完整性
+                                guard !workoutPlan.exercises.isEmpty else {
+                                    print("🚨 ERROR: Workout plan has no exercises")
+                                    return
+                                }
+
+                                print("🐛 DEBUG: Starting workout with safe validation...")
+                                navigationManager.startWorkout(workoutPlan)
+                                print("🐛 DEBUG: Workout start command sent")
                             }
                         )
                         .padding(.horizontal, 20)

@@ -22,20 +22,69 @@ class WorkoutViewModel: ObservableObject {
     private var restTimer: Timer?
 
     init(workoutPlan: WorkoutPlan) {
+        print("🐛 DEBUG: WorkoutViewModel initializing...")
+        print("🐛 DEBUG: Workout plan: \(workoutPlan.name)")
+        print("🐛 DEBUG: Exercise count: \(workoutPlan.exercises.count)")
+        print("🐛 DEBUG: Exercise details: \(workoutPlan.exercises.map { $0.exercise.name })")
+
         self.workoutPlan = workoutPlan
+
+        print("🐛 DEBUG: WorkoutViewModel initialization complete")
     }
 
     // MARK: - Computed Properties
     var currentExercise: Exercise {
+        print("🐛 DEBUG: currentExerciseIndex = \(currentExerciseIndex), exercises.count = \(workoutPlan.exercises.count)")
+
         guard currentExerciseIndex < workoutPlan.exercises.count else {
-            return workoutPlan.exercises.first!.exercise
+            print("🚨 ERROR: currentExerciseIndex (\(currentExerciseIndex)) >= exercises.count (\(workoutPlan.exercises.count))")
+            if let firstExercise = workoutPlan.exercises.first {
+                print("🔄 FALLBACK: Using first exercise")
+                return firstExercise.exercise
+            } else {
+                print("💥 CRITICAL: No exercises available!")
+                // 创建一个安全的默认练习
+                return Exercise(
+                    name: "默认练习",
+                    category: .strength,
+                    muscleGroups: [.chest],
+                    equipment: .none,
+                    difficulty: .beginner,
+                    instructions: ["请联系开发者"],
+                    imageName: "default"
+                )
+            }
         }
         return workoutPlan.exercises[currentExerciseIndex].exercise
     }
 
     var currentExerciseSet: ExerciseSet {
+        print("🐛 DEBUG: currentExerciseIndex = \(currentExerciseIndex), exercises.count = \(workoutPlan.exercises.count)")
+
         guard currentExerciseIndex < workoutPlan.exercises.count else {
-            return workoutPlan.exercises.first!
+            print("🚨 ERROR: currentExerciseIndex (\(currentExerciseIndex)) >= exercises.count (\(workoutPlan.exercises.count))")
+            if let firstExercise = workoutPlan.exercises.first {
+                print("🔄 FALLBACK: Using first exercise set")
+                return firstExercise
+            } else {
+                print("💥 CRITICAL: No exercise sets available!")
+                // 创建一个安全的默认练习组
+                let defaultExercise = Exercise(
+                    name: "默认练习",
+                    category: .strength,
+                    muscleGroups: [.chest],
+                    equipment: .none,
+                    difficulty: .beginner,
+                    instructions: ["请联系开发者"],
+                    imageName: "default"
+                )
+                return ExerciseSet(
+                    exercise: defaultExercise,
+                    targetReps: 1,
+                    targetWeight: 0,
+                    restTime: 60
+                )
+            }
         }
         return workoutPlan.exercises[currentExerciseIndex]
     }
@@ -43,7 +92,10 @@ class WorkoutViewModel: ObservableObject {
     var progress: Double {
         let totalExercises = workoutPlan.exercises.count
         let completedExercises = currentExerciseIndex
-        return Double(completedExercises) / Double(totalExercises)
+        let progressValue = totalExercises > 0 ? Double(completedExercises) / Double(totalExercises) : 0.0
+
+        print("🐛 DEBUG: Progress calculation - Completed: \(completedExercises)/\(totalExercises) = \(progressValue)")
+        return progressValue
     }
 
     var isWorkoutComplete: Bool {
@@ -52,11 +104,24 @@ class WorkoutViewModel: ObservableObject {
 
     // MARK: - Exercise Management
     func startExercise() {
+        print("🐛 DEBUG: WorkoutViewModel.startExercise called")
+        print("🐛 DEBUG: currentExerciseIndex = \(currentExerciseIndex)")
+        print("🐛 DEBUG: exercises.count = \(workoutPlan.exercises.count)")
+
+        // 安全检查
+        guard currentExerciseIndex < workoutPlan.exercises.count else {
+            print("🚨 ERROR: Cannot start exercise - invalid exercise index")
+            return
+        }
+
+        print("🐛 DEBUG: Starting exercise: \(currentExercise.name)")
         exerciseElapsedTime = 0
         isExerciseActive = true
         isResting = false
 
+        print("🐛 DEBUG: Starting exercise timer...")
         startExerciseTimer()
+        print("🐛 DEBUG: Exercise started successfully")
     }
 
     func pauseExercise() {
