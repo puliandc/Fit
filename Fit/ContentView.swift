@@ -44,11 +44,20 @@ struct ContentView: View {
 
             // Dialog Overlay
             if let dialog = navigationManager.presentedDialog {
-                Color.black.opacity(0.4)
-                    .ignoresSafeArea()
-                    .onTapGesture {
-                        navigationManager.dismissDialog()
-                    }
+                // Only show background overlay for non-workout dialogs
+                // Workout dialogs (quit, editSet, etc.) are handled by WorkoutScreen's CompactDialogOverlay
+                switch dialog {
+                case .quitWorkout, .quitCurrentExercise, .quitRemainingExercises, .editSet:
+                    // 训练相关的对话框不显示遮罩，由WorkoutScreen自己处理
+                    EmptyView()
+                default:
+                    // 其他对话框显示背景遮罩
+                    Color.black.opacity(0.4)
+                        .ignoresSafeArea()
+                        .onTapGesture {
+                            navigationManager.dismissDialog()
+                        }
+                }
 
                 switch dialog {
                 case .editSet(let exercise, let setIndex, let workoutViewModel):
@@ -74,19 +83,10 @@ struct ContentView: View {
                         removal: .opacity
                     ))
 
-                case .quitWorkout:
-                    QuitDialog(
-                        onConfirm: {
-                            navigationManager.popToRoot()
-                        },
-                        onCancel: {
-                            navigationManager.dismissDialog()
-                        }
-                    )
-                    .transition(.asymmetric(
-                        insertion: .scale.combined(with: .opacity),
-                        removal: .opacity
-                    ))
+                case .quitWorkout, .quitCurrentExercise, .quitRemainingExercises:
+                    // 所有训练相关的对话框都应该由WorkoutScreen的CompactDialogOverlay处理
+                    // 这样可以避免双层弹窗冲突，确保用户看到的是增强版对话框
+                    EmptyView()
 
                 case .workoutComplete:
                     WorkoutCompleteDialog(

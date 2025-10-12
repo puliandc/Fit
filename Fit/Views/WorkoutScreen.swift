@@ -553,15 +553,10 @@ struct CompactRestTimerView: View {
 struct CompactDialogOverlay: View {
     let dialog: DialogType
     let navigationManager: NavigationManager
+    @EnvironmentObject var workoutViewModel: WorkoutViewModel
 
     var body: some View {
         ZStack {
-            Color.black.opacity(0.4)
-                .ignoresSafeArea()
-                .onTapGesture {
-                    navigationManager.dismissDialog()
-                }
-
             switch dialog {
             case .editSet(let exercise, let setIndex, _):
                 CompactEditSetDialog(
@@ -576,13 +571,55 @@ struct CompactDialogOverlay: View {
                     navigationManager.dismissDialog()
                 })
             case .quitWorkout:
-                CompactQuitDialog(
-                    onConfirm: {
+                EnhancedQuitDialog(
+                    onQuitCurrentExercise: {
+                        print("🏃 DEBUG: User chose to skip current exercise")
+                        workoutViewModel.moveToNextExercise()
+                        navigationManager.dismissDialog()
+                    },
+                    onQuitAll: {
+                        print("❌ DEBUG: User chose to quit all exercises")
                         navigationManager.popToRoot()
                     },
                     onCancel: {
+                        print("🔄 DEBUG: User chose to continue training")
                         navigationManager.dismissDialog()
-                    }
+                    },
+                    currentExerciseName: workoutViewModel.currentExercise.name
+                )
+            case .quitCurrentExercise:
+                EnhancedQuitDialog(
+                    onQuitCurrentExercise: {
+                        print("🏃 DEBUG: User chose to skip current exercise")
+                        workoutViewModel.moveToNextExercise()
+                        navigationManager.dismissDialog()
+                    },
+                    onQuitAll: {
+                        print("❌ DEBUG: User chose to quit all exercises")
+                        navigationManager.popToRoot()
+                    },
+                    onCancel: {
+                        print("🔄 DEBUG: User chose to continue training")
+                        navigationManager.dismissDialog()
+                    },
+                    currentExerciseName: workoutViewModel.currentExercise.name
+                )
+            case .quitRemainingExercises:
+                EnhancedQuitDialog(
+                    onQuitCurrentExercise: {
+                        print("🏃 DEBUG: User chose to skip current exercise")
+                        workoutViewModel.moveToNextExercise()
+                        navigationManager.dismissDialog()
+                    },
+                    onQuitAll: {
+                        print("❌ DEBUG: User chose to quit all exercises")
+                        navigationManager.popToRoot()
+                    },
+                    onCancel: {
+                        print("🔄 DEBUG: User chose to continue training")
+                        navigationManager.dismissDialog()
+                    },
+                    currentExerciseName: workoutViewModel.currentExercise.name
                 )
             case .workoutComplete:
                 CompactWorkoutCompleteDialog(
