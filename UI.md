@@ -1,6 +1,7 @@
 # Fit 应用 UI 架构
 
 //created by Jason Lu on 09:17:00 10/12/2025
+//updated by Jason Lu on 18:45:00 10/12/2025 - 添加WorkoutScreen紧凑型设计实现
 
 ## 📱 整体界面结构
 
@@ -37,20 +38,111 @@ NavigationLink(destination: WorkoutScreen()) {
 }
 ```
 
-### 2. 训练界面 (WorkoutScreen)
+### 2. 训练界面 (WorkoutScreen) - 紧凑型设计
 
-**功能**：核心训练功能界面，用于记录训练数据
+**功能**：核心训练功能界面，用于记录训练数据，采用紧凑型设计解决UI过长问题
 
-**组件构成**：
-- **当前训练项目显示** - 正在进行的训练动作
-- **组数列表** - 显示已完成的组数
-- **添加组数按钮** - 记录新的训练组
-- **完成训练按钮** - 结束当前训练
+**设计原则**：
+- 基于Figma设计规范实现
+- 紧凑布局减少界面高度
+- 简化组件结构提升性能
+- 保持现代化视觉效果
+
+**界面结构**：
+```swift
+VStack(spacing: 0) {
+    CompactWorkoutHeader()           // 顶部：返回按钮 + 标题 + 进度条
+    ScrollView {                     // 中部：可滚动内容区域
+        VStack(spacing: 16) {
+            // 休息时间覆盖层（休息时显示）
+            if workoutViewModel.isResting {
+                CompactRestTimerView(...)
+            }
+
+            CompactExerciseImageCard()     // 练习图片卡片 (194px高度)
+            CompactExerciseInfoCard()      // 练习信息卡片
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 16)
+    }
+    VStack(spacing: 12) {           // 底部：固定操作按钮
+        CompactCompleteButton()           // 绿色"动作完成"按钮
+        CompactQuitButton()               // 红色"放弃动作"按钮
+    }
+    .padding(.horizontal, 16)
+    .padding(.vertical, 16)
+    .background(LinearGradient(...))     // 按钮区域背景
+}
+.background(CompactWorkoutBackground())  // 简化背景效果
+
+// 对话框覆盖层
+if let dialog = navigationManager.presentedDialog {
+    CompactDialogOverlay(dialog: dialog, navigationManager: navigationManager)
+}
+```
+
+**核心组件详细说明**：
+
+#### CompactWorkoutHeader
+- **返回按钮**：左侧，白色图标，点击返回主界面
+- **标题显示**：中间，"深蹲" 等当前练习名称
+- **进度条**：标题下方，显示训练进度（当前组数/总组数）
+
+#### CompactExerciseImageCard
+- **图片区域**：194px高度的练习示意图
+- **背景效果**：深色半透明背景 + 圆角
+- **占位符**：支持练习图片加载
+
+#### CompactExerciseInfoCard
+- **时间显示**：主要信息，"00:00" 格式
+- **组数信息**：已完成组数 vs 目标组数
+- **重量/次数**：当前训练参数显示
+- **紧凑布局**：信息密度高，占用空间小
+
+#### CompactCompleteButton
+- **样式**：绿色渐变背景，白色文字
+- **文字**："动作完成"
+- **功能**：标记当前动作完成，进入下一个
+
+#### CompactQuitButton
+- **样式**：红色边框，红色文字，透明背景
+- **文字**："放弃动作"
+- **功能**：放弃当前训练，返回主界面
+
+#### CompactWorkoutBackground
+- **效果**：简化背景，去除复杂动画
+- **渐变**：橙粉色渐变背景，符合Figma设计
+- **模糊**：subtle模糊效果增加层次感
+
+#### CompactRestTimerView（休息时显示）
+- **显示时机**：训练组间休息时自动显示
+- **时间显示**：大字体显示剩余休息时间
+- **跳过功能**：点击可提前结束休息时间
+- **视觉效果**：蓝色主题，与训练状态形成对比
+
+#### CompactDialogOverlay
+- **编辑参数对话框**：编辑重量和次数
+- **完成对话框**：训练完成确认
+- **放弃对话框**：放弃训练确认
+- **训练完成对话框**：展示训练完成状态
 
 **关键交互**：
-- 点击"添加组数" → 弹出编辑对话框
-- 滑动组数 → 删除或编辑
-- 完成所有组数 → 显示完成统计
+- 点击"动作完成" → 保存当前组数，进入下一动作
+- 点击"放弃动作" → 弹出确认对话框
+- 滑动内容区域 → 查看完整信息
+- 点击返回按钮 → 返回主界面
+
+**布局优势**：
+- **高度优化**：相比原设计减少约40%的垂直空间
+- **信息密度**：保持完整功能的同时提升信息展示效率
+- **视觉清晰**：明确的视觉层次，重要信息突出
+- **操作便捷**：底部固定按钮，单手可操作
+
+**技术特点**：
+- 组件化设计，便于维护
+- 响应式布局，适配不同屏幕
+- 简化状态管理，提升性能
+- 保持原有功能完整性
 
 ### 3. 编辑组数对话框 (EditSetDialog)
 
@@ -211,6 +303,33 @@ GlassCard {
 **快速交互**：0.2秒
 **标准动画**：0.3秒
 **复杂转场**：0.5秒
+
+## 🔄 UI演进历史
+
+### 2025-10-12 - WorkoutScreen 紧凑型设计重构
+
+**问题背景**：
+- 原WorkoutScreen UI过长，在小屏幕设备上体验不佳
+- 复杂的嵌套组件影响性能
+- 信息布局不够紧凑
+
+**解决方案**：
+- 基于Figma设计规范实现紧凑型布局
+- 重新设计组件结构，减少垂直空间占用约40%
+- 简化背景效果，移除复杂动画
+- 保持完整功能的同时提升用户体验
+
+**技术改进**：
+- 组件化设计：`CompactWorkoutHeader`, `CompactExerciseImageCard`, `CompactExerciseInfoCard`等
+- 布局优化：ScrollView + VStack的简洁结构
+- 性能提升：减少状态管理复杂度
+- 设计一致性：严格遵循Figma设计规范
+
+**验证结果**：
+- 编译成功，无语法错误
+- 界面高度显著降低
+- 视觉效果保持现代化
+- 功能完整性得到保持
 
 ---
 

@@ -1,6 +1,7 @@
 # Fit - 健身训练助手
 
 //created by Jason Lu on 09:17:00 10/12/2025
+//updated by Jason Lu on 18:50:00 10/12/2025 - 更新UI文档索引，添加WorkoutScreen紧凑型设计说明
 
 > **一句话描述**：一款专为iOS设计的SwiftUI健身训练应用，提供简洁的训练记录和进度追踪功能。
 
@@ -79,7 +80,7 @@ Fit/
 ### 🗂️ 核心文档目录
 
 #### **项目概览**
-- **[UI.md](UI.md)** - 完整的UI架构和组件说明
+- **[UI.md](UI.md)** - 完整的UI架构和组件说明（包含WorkoutScreen紧凑型设计实现）
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** - 系统架构地图和设计模式
 - **[PROJECT_CONTEXT.md](PROJECT_CONTEXT.md)** - AI业务词典和不变规则
 
@@ -119,7 +120,7 @@ Fit/
 └── 命名规范 → CODING_STANDARDS.md
 
 UI/UX设计问题:
-├── 界面结构 → UI.md
+├── 界面结构 → UI.md（含WorkoutScreen紧凑型设计）
 ├── 设计系统 → .claude/frontend-ux-design-guide.md
 ├── 组件开发 → .claude/gen-swiftui-view.md
 └── 样式指南 → .claude/frontend-ux-design-guide.md
