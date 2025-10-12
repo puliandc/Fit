@@ -90,11 +90,12 @@ class WorkoutViewModel: ObservableObject {
     }
 
     var progress: Double {
-        let totalExercises = workoutPlan.exercises.count
-        let completedExercises = currentExerciseIndex
-        let progressValue = totalExercises > 0 ? Double(completedExercises) / Double(totalExercises) : 0.0
+        // 根据workout.md要求：进度条比例 = 整个计划已完成组数/整个计划总组数 * 100% 取整
+        let totalSets = workoutPlan.exercises.count
+        let completedSetsCount = completedSets.count
+        let progressValue = totalSets > 0 ? Double(completedSetsCount) / Double(totalSets) : 0.0
 
-        print("🐛 DEBUG: Progress calculation - Completed: \(completedExercises)/\(totalExercises) = \(progressValue)")
+        print("🐛 DEBUG: Progress calculation - Completed sets: \(completedSetsCount)/\(totalSets) = \(progressValue)")
         return progressValue
     }
 
@@ -146,6 +147,7 @@ class WorkoutViewModel: ObservableObject {
 
     // 新增：完成指定参数的练习
     func completeExerciseWith(actualReps: Int, actualWeight: Double) {
+        print("🐛 DEBUG: completeExerciseWith called - reps: \(actualReps), weight: \(actualWeight)")
         pauseExercise()
 
         // Record completed set with user-specified parameters
@@ -156,22 +158,24 @@ class WorkoutViewModel: ObservableObject {
             completedAt: Date()
         )
         completedSets.append(completedSet)
+        print("🐛 DEBUG: Completed set recorded. Total completed sets: \(completedSets.count)")
 
-        // Check if current exercise is complete
-        if currentSet >= getTargetSetsForCurrentExercise() {
-            // Move to next exercise
-            if currentExerciseIndex < workoutPlan.exercises.count - 1 {
-                currentExerciseIndex += 1
-                currentSet = 1
-                startRest()
-            } else {
-                // Workout complete
-                pauseExercise()
-            }
-        } else {
-            // Move to next set
-            currentSet += 1
+        // 更新进度 - 触发UI刷新
+        objectWillChange.send()
+
+        // 检查是否还有更多的组需要完成
+        let remainingSetsInWorkout = workoutPlan.exercises.count - completedSets.count
+        print("🐛 DEBUG: Remaining sets in workout: \(remainingSetsInWorkout)")
+
+        if remainingSetsInWorkout > 0 {
+            // 进入休息状态，然后继续下一组/下一个动作
+            print("🐛 DEBUG: Starting rest period...")
             startRest()
+        } else {
+            // 训练完成
+            print("🐛 DEBUG: Workout completed!")
+            pauseExercise()
+            // TODO: 显示训练完成对话框
         }
     }
 
@@ -202,11 +206,29 @@ class WorkoutViewModel: ObservableObject {
     }
 
     func startRest() {
+        print("🐛 DEBUG: startRest called")
         isResting = true
         isExerciseActive = false
         timeLeft = currentExerciseSet.restTime
 
+        // 更新当前练习索引到下一个动作
+        moveToNextExerciseOrSet()
+
+        print("🐛 DEBUG: Rest period started, timeLeft: \(timeLeft)")
         startRestTimer()
+    }
+
+    // 新增：移动到下一个练习或组
+    private func moveToNextExerciseOrSet() {
+        print("🐛 DEBUG: Moving to next exercise/set. Current index: \(currentExerciseIndex)")
+
+        // 简化逻辑：每次完成一组后移动到下一个ExerciseSet
+        if currentExerciseIndex < workoutPlan.exercises.count - 1 {
+            currentExerciseIndex += 1
+            print("🐛 DEBUG: Moved to next exercise. New index: \(currentExerciseIndex)")
+        } else {
+            print("🐛 DEBUG: Already at last exercise")
+        }
     }
 
     func skipRest() {
@@ -227,10 +249,13 @@ class WorkoutViewModel: ObservableObject {
     private func startRestTimer() {
         restTimer?.invalidate()
 
+        print("🐛 DEBUG: Rest timer started, \(timeLeft) seconds")
         restTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
             if self.timeLeft > 0 {
                 self.timeLeft -= 1
+                print("🐛 DEBUG: Rest timer ticking: \(self.timeLeft)s remaining")
             } else {
+                print("🐛 DEBUG: Rest timer finished, starting next exercise")
                 self.restTimer?.invalidate()
                 self.isResting = false
                 self.startExercise()
