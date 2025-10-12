@@ -192,36 +192,29 @@ struct CompactWorkoutHeader: View {
                             Image("back-icon")
                                 .resizable()
                                 .renderingMode(.template)
-                                .foregroundColor(.orange)
+                                .foregroundColor(.black)
                                 .frame(width: 16, height: 16)
                         )
                 }
                 .buttonStyle(PlainButtonStyle())
 
-                // 标题
-                Text("快速训练计划")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [Color.orange, Color.pink],
-                            startPoint: .leading,
-                            endPoint: .trailing
+                // 标题和百分比
+                HStack(spacing: 8) {
+                    Text("快速训练计划")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [Color.orange, Color.pink],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
                         )
-                    )
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
 
-            // 进度条
-            HStack {
-                Text("训练进度")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.gray)
-
-                Spacer()
-
-                Text("\(Int(progress * 100))%")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.orange)
+                    Text("\(Int(progress * 100))%")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(.orange)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
 
             GeometryReader { geometry in
