@@ -140,17 +140,25 @@ class WorkoutViewModel: ObservableObject {
     func completeExercise() {
         pauseExercise()
 
-        // Record completed set
+        // 触发参数编辑对话框，而不是直接完成
+        // 这将通过WorkoutScreen中的NavigationManager来处理
+    }
+
+    // 新增：完成指定参数的练习
+    func completeExerciseWith(actualReps: Int, actualWeight: Double) {
+        pauseExercise()
+
+        // Record completed set with user-specified parameters
         let completedSet = CompletedSet(
             exerciseSetId: currentExerciseSet.id,
-            actualReps: currentExerciseSet.targetReps,
-            actualWeight: currentExerciseSet.targetWeight,
+            actualReps: actualReps,
+            actualWeight: actualWeight,
             completedAt: Date()
         )
         completedSets.append(completedSet)
 
         // Check if current exercise is complete
-        if currentSet >= currentExerciseSet.targetReps {
+        if currentSet >= getTargetSetsForCurrentExercise() {
             // Move to next exercise
             if currentExerciseIndex < workoutPlan.exercises.count - 1 {
                 currentExerciseIndex += 1
@@ -165,6 +173,32 @@ class WorkoutViewModel: ObservableObject {
             currentSet += 1
             startRest()
         }
+    }
+
+    // 新增：获取当前练习的目标组数（基于实际的训练计划逻辑）
+    private func getTargetSetsForCurrentExercise() -> Int {
+        // 这里根据实际的训练计划逻辑来确定组数
+        // 从MockData看，每个ExerciseSet代表一组，所以需要统计同一个练习的组数
+        let currentExerciseId = currentExercise.id
+        return workoutPlan.exercises.filter { $0.exercise.id == currentExerciseId }.count
+    }
+
+    // 新增：获取当前练习的默认次数和重量
+    func getDefaultParametersForCurrentExercise() -> (reps: Int, weight: Double) {
+        return (currentExerciseSet.targetReps, currentExerciseSet.targetWeight)
+    }
+
+    // 新增：获取指定练习的已完成组数
+    func getCompletedSetsCount(for exercise: Exercise) -> Int {
+        let exerciseSetIds = workoutPlan.exercises.filter { $0.exercise.id == exercise.id }.map { $0.id }
+        return completedSets.filter { exerciseSetIds.contains($0.exerciseSetId) }.count
+    }
+
+    // 新增：获取指定练习的剩余组数
+    func getRemainingSetsCount(for exercise: Exercise) -> Int {
+        let totalSets = workoutPlan.exercises.filter { $0.exercise.id == exercise.id }.count
+        let completedSets = getCompletedSetsCount(for: exercise)
+        return max(0, totalSets - completedSets)
     }
 
     func startRest() {

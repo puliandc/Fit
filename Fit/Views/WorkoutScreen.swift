@@ -63,47 +63,45 @@ struct WorkoutScreen: View {
                     }
                 )
 
-                // 主要内容区域 - 滚动视图
-                ScrollView {
-                    VStack(spacing: 16) {
-                        // 休息时间覆盖层（休息时显示）
-                        if workoutViewModel.isResting {
-                            CompactRestTimerView(
-                                timeLeft: workoutViewModel.timeLeft,
-                                onSkip: {
-                                    workoutViewModel.skipRest()
-                                }
-                            )
-                            .transition(.asymmetric(
-                                insertion: .scale.combined(with: .opacity),
-                                removal: .opacity
-                            ))
-                        }
-
-  
-                        // 运动信息卡片 - 基于Figma设计
-                        CompactExerciseInfoCard(
-                            exercise: workoutViewModel.currentExercise,
-                            currentSet: workoutViewModel.currentSet,
-                            totalSets: workoutViewModel.currentExerciseSet.targetReps,
-                            targetReps: workoutViewModel.currentExerciseSet.targetReps,
-                            targetWeight: workoutViewModel.currentExerciseSet.targetWeight,
-                            elapsedTime: workoutViewModel.exerciseElapsedTime,
-                            onEditSet: {
-                                navigationManager.presentDialog(.editSet(workoutViewModel.currentExercise, workoutViewModel.currentSet))
+                // 主要内容区域 - 移除滚动属性
+                VStack(spacing: 16) {
+                    // 休息时间覆盖层（休息时显示）
+                    if workoutViewModel.isResting {
+                        CompactRestTimerView(
+                            timeLeft: workoutViewModel.timeLeft,
+                            onSkip: {
+                                workoutViewModel.skipRest()
                             }
                         )
+                        .transition(.asymmetric(
+                            insertion: .scale.combined(with: .opacity),
+                            removal: .opacity
+                        ))
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 16)
-                }
 
-                // 底部固定按钮区域 - 基于Figma设计
-                VStack(spacing: 12) {
+
+                    // 运动信息卡片 - 基于Figma设计，移除滚动和编辑按钮
+                    CompactExerciseInfoCard(
+                        exercise: workoutViewModel.currentExercise,
+                        currentSet: workoutViewModel.currentSet,
+                        totalSets: workoutViewModel.getCompletedSetsCount(for: workoutViewModel.currentExercise) + workoutViewModel.getRemainingSetsCount(for: workoutViewModel.currentExercise),
+                        targetReps: workoutViewModel.currentExerciseSet.targetReps,
+                        targetWeight: workoutViewModel.currentExerciseSet.targetWeight,
+                        elapsedTime: workoutViewModel.exerciseElapsedTime
+                    )
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 16)
+
+                Spacer()
+
+                // 底部固定按钮区域 - 并排放置，减少高度
+                HStack(spacing: 12) {
                     CompactCompleteButton(
                         isDisabled: workoutViewModel.isResting,
                         onComplete: {
-                            workoutViewModel.completeExercise()
+                            // 点击动作完成时，弹出参数编辑对话框
+                            navigationManager.presentDialog(.editSet(workoutViewModel.currentExercise, workoutViewModel.currentSet))
                         }
                     )
 
@@ -115,19 +113,12 @@ struct WorkoutScreen: View {
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 16)
-                .background(
-                    // 按钮区域背景
-                    LinearGradient(
-                        colors: [Color.appBackground.opacity(0.9), Color.appBackground],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
             }
 
             // 对话框覆盖层
             if let dialog = navigationManager.presentedDialog {
                 CompactDialogOverlay(dialog: dialog, navigationManager: navigationManager)
+                    .environmentObject(workoutViewModel)
                     .transition(.asymmetric(
                         insertion: .scale.combined(with: .opacity),
                         removal: .opacity
@@ -275,7 +266,6 @@ struct CompactExerciseInfoCard: View {
     let targetReps: Int
     let targetWeight: Double
     let elapsedTime: Int
-    let onEditSet: () -> Void
 
     private var formattedTime: String {
         let minutes = elapsedTime / 60
@@ -297,8 +287,8 @@ struct CompactExerciseInfoCard: View {
                 )
                 .frame(maxWidth: .infinity)
 
-  
-            // 组数、次数和重量模块 - 基于Figma设计的优化布局
+
+            // 组数、次数和重量模块 - 基于Figma设计的优化布局，移除编辑按钮
             VStack(spacing: 12) {
                 // 运动时间模块 - 橙色背景
                 HStack {
@@ -382,10 +372,6 @@ struct CompactExerciseInfoCard: View {
                             Image(systemName: "target")
                                 .font(.system(size: 18, weight: .medium))
                                 .foregroundColor(.green)
-
-                            Image(systemName: "plus.circle.fill")
-                                .font(.system(size: 12))
-                                .foregroundColor(.green)
                         }
 
                         Text("次数")
@@ -414,10 +400,6 @@ struct CompactExerciseInfoCard: View {
                                 .resizable()
                                 .frame(width: 20, height: 20)
                                 .foregroundColor(.purple)
-
-                            Image(systemName: "plus.circle.fill")
-                                .font(.system(size: 12))
-                                .foregroundColor(.purple)
                         }
 
                         Text("重量 (kg)")
@@ -445,45 +427,6 @@ struct CompactExerciseInfoCard: View {
                             )
                     )
                 }
-
-                // 编辑按钮 - 如果有重量显示编辑，否则显示添加重量
-                HStack {
-                    Spacer()
-
-                    Button(action: onEditSet) {
-                        HStack(spacing: 6) {
-                            if targetWeight > 0 {
-                                Image(systemName: "pencil.circle.fill")
-                                    .font(.system(size: 14))
-                                    .foregroundColor(.purple)
-
-                                Text("编辑")
-                                    .font(.system(size: 11, weight: .medium))
-                                    .foregroundColor(.purple.opacity(0.7))
-                            } else {
-                                Image(systemName: "plus.circle.fill")
-                                    .font(.system(size: 16))
-                                    .foregroundColor(.orange)
-
-                                Text("添加重量")
-                                    .font(.system(size: 13, weight: .medium))
-                                    .foregroundColor(.orange)
-                            }
-                        }
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(targetWeight > 0 ? Color.purple.opacity(0.1) : Color.orange.opacity(0.1))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .stroke(targetWeight > 0 ? Color.purple.opacity(0.3) : Color.orange.opacity(0.3), lineWidth: 1)
-                                )
-                        )
-                    }
-
-                    Spacer()
-                }
             }
 
           }
@@ -507,7 +450,7 @@ struct CompactCompleteButton: View {
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
-                .frame(height: 56)
+                .frame(height: 48) // 减少高度
                 .background(
                     LinearGradient(
                         colors: [Color.green, Color(red: 0, green: 0.6, blue: 0.4)],
@@ -515,8 +458,8 @@ struct CompactCompleteButton: View {
                         endPoint: .trailing
                     )
                 )
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-                .shadow(color: .green.opacity(0.3), radius: 25, x: 0, y: 12)
+                .clipShape(RoundedRectangle(cornerRadius: 14)) // 稍微减小圆角
+                .shadow(color: .green.opacity(0.3), radius: 15, x: 0, y: 6) // 减小阴影
         }
         .disabled(isDisabled)
         .opacity(isDisabled ? 0.5 : 1.0)
@@ -533,14 +476,14 @@ struct CompactQuitButton: View {
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(.red)
                 .frame(maxWidth: .infinity)
-                .frame(height: 48)
-                .background(Color.white.opacity(0.5))
-                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .frame(height: 48) // 与完成按钮保持一致高度
+                .background(Color.white.opacity(0.6)) // 稍微增加透明度
+                .clipShape(RoundedRectangle(cornerRadius: 14)) // 与完成按钮保持一致圆角
                 .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color.white.opacity(0.5), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(Color.white.opacity(0.6), lineWidth: 1)
                 )
-                .shadow(color: .black.opacity(0.1), radius: 15, x: 0, y: 8)
+                .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 4) // 减小阴影
         }
     }
 }
@@ -558,26 +501,26 @@ struct CompactRestTimerView: View {
 
     var body: some View {
         Button(action: onSkip) {
-            VStack(spacing: 16) {
-                // 休息标题
+            VStack(spacing: 12) {
+                // 休息标题 - 减小字体和间距
                 HStack {
                     Image(systemName: "bed.double.fill")
-                        .font(.system(size: 24))
+                        .font(.system(size: 18))
                         .foregroundColor(.blue)
 
                     Text("休息时间")
-                        .font(.system(size: 18, weight: .semibold))
+                        .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(.blue)
 
                     Spacer()
                 }
 
-                // 时间显示
+                // 时间显示 - 减小字体
                 Text(formattedTime)
-                    .font(.system(size: 32, weight: .bold))
+                    .font(.system(size: 24, weight: .bold))
                     .foregroundColor(.blue)
 
-                // 跳过提示
+                // 跳过提示 - 增大点击区域
                 HStack {
                     Text("点击跳过休息")
                         .font(.system(size: 12))
@@ -585,15 +528,16 @@ struct CompactRestTimerView: View {
 
                     Spacer()
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(Color.gray.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
+                .frame(maxWidth: .infinity, minHeight: 44) // 增大点击区域到最小44pt
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(Color.gray.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
             }
-            .padding(20)
+            .padding(16) // 减小内部padding
             .background(
-                RoundedRectangle(cornerRadius: 20)
+                RoundedRectangle(cornerRadius: 16)
                     .fill(Color.white.opacity(0.7))
-                    .shadow(color: .black.opacity(0.08), radius: 25, x: 0, y: 12)
+                    .shadow(color: .black.opacity(0.08), radius: 20, x: 0, y: 8)
             )
         }
         .buttonStyle(PlainButtonStyle())
@@ -647,31 +591,107 @@ struct CompactDialogOverlay: View {
     }
 }
 
-// MARK: - Simple Dialog Components (placeholder)
+// MARK: - Edit Set Dialog with Parameter Input
 struct CompactEditSetDialog: View {
     let exercise: Exercise
     let setIndex: Int
     let onDismiss: () -> Void
+    @EnvironmentObject var workoutViewModel: WorkoutViewModel
+    @EnvironmentObject var navigationManager: NavigationManager
+
+    @State private var reps: String = ""
+    @State private var weight: String = ""
+
+    init(exercise: Exercise, setIndex: Int, onDismiss: @escaping () -> Void) {
+        self.exercise = exercise
+        self.setIndex = setIndex
+        self.onDismiss = onDismiss
+    }
 
     var body: some View {
         VStack(spacing: 20) {
+            // 标题
             Text("编辑参数")
                 .font(.system(size: 18, weight: .semibold))
+                .foregroundColor(.primary)
 
             Text("编辑 \(exercise.name) 第\(setIndex)组")
                 .font(.system(size: 14))
                 .foregroundColor(.gray)
 
-            Button("取消") {
-                onDismiss()
+            // 输入区域
+            VStack(spacing: 16) {
+                // 次数输入
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("次数")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.primary)
+
+                    TextField("请输入完成的次数", text: $reps)
+                        .keyboardType(.numberPad)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .font(.system(size: 16))
+                }
+
+                // 重量输入
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("重量 (kg)")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.primary)
+
+                    TextField("请输入使用的重量", text: $weight)
+                        .keyboardType(.decimalPad)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .font(.system(size: 16))
+                }
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 12)
-            .background(Color.gray.opacity(0.2), in: RoundedRectangle(cornerRadius: 8))
+
+            // 按钮区域
+            HStack(spacing: 12) {
+                // 取消按钮
+                Button("取消") {
+                    onDismiss()
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(Color.gray.opacity(0.2), in: RoundedRectangle(cornerRadius: 8))
+                .foregroundColor(.primary)
+
+                // 保存按钮
+                Button("保存") {
+                    saveParameters()
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(Color.green, in: RoundedRectangle(cornerRadius: 8))
+                .foregroundColor(.white)
+                .disabled(reps.isEmpty || weight.isEmpty)
+                .opacity(reps.isEmpty || weight.isEmpty ? 0.5 : 1.0)
+            }
         }
         .padding(20)
         .background(Color.white, in: RoundedRectangle(cornerRadius: 16))
-        .frame(maxWidth: 300)
+        .frame(maxWidth: 320)
+        .onAppear {
+            loadDefaultParameters()
+        }
+    }
+
+    private func loadDefaultParameters() {
+        let defaultParams = workoutViewModel.getDefaultParametersForCurrentExercise()
+        reps = String(defaultParams.reps)
+        weight = defaultParams.weight > 0 ? String(defaultParams.weight) : "0"
+    }
+
+    private func saveParameters() {
+        guard let actualReps = Int(reps),
+              let actualWeight = Double(weight) else {
+            return
+        }
+
+        // 使用新的方法保存参数并完成练习
+        workoutViewModel.completeExerciseWith(actualReps: actualReps, actualWeight: actualWeight)
+        onDismiss()
     }
 }
 
