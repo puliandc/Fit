@@ -51,13 +51,14 @@ struct ContentView: View {
                     }
 
                 switch dialog {
-                case .editSet(let exercise, let setIndex):
+                case .editSet(let exercise, let setIndex, let workoutViewModel):
                     EditSetDialog(
                         exercise: exercise,
                         setIndex: setIndex,
                         onDismiss: {
                             navigationManager.dismissDialog()
-                        }
+                        },
+                        workoutViewModel: workoutViewModel
                     )
                     .transition(.asymmetric(
                         insertion: .scale.combined(with: .opacity),

@@ -142,15 +142,15 @@ enum AppScreen: Hashable, Codable {
 }
 
 // MARK: - Dialog Type Enum
-enum DialogType: Identifiable, Hashable {
-    case editSet(Exercise, Int)
+enum DialogType: Identifiable, Equatable {
+    case editSet(Exercise, Int, WorkoutViewModel)
     case completion
     case quitWorkout
     case workoutComplete
 
     var id: String {
         switch self {
-        case .editSet(let exercise, let setIndex):
+        case .editSet(let exercise, let setIndex, _):
             return "edit_set_\(exercise.id)_\(setIndex)"
         case .completion:
             return "completion"
@@ -158,6 +158,40 @@ enum DialogType: Identifiable, Hashable {
             return "quit_workout"
         case .workoutComplete:
             return "workout_complete"
+        }
+    }
+
+    static func == (lhs: DialogType, rhs: DialogType) -> Bool {
+        switch (lhs, rhs) {
+        case (.editSet(let lhsExercise, let lhsSetIndex, let lhsViewModel),
+             .editSet(let rhsExercise, let rhsSetIndex, let rhsViewModel)):
+            return lhsExercise.id == rhsExercise.id &&
+                   lhsSetIndex == rhsSetIndex &&
+                   lhsViewModel.workoutPlan.id == rhsViewModel.workoutPlan.id
+        case (.completion, .completion):
+            return true
+        case (.quitWorkout, .quitWorkout):
+            return true
+        case (.workoutComplete, .workoutComplete):
+            return true
+        default:
+            return false
+        }
+    }
+
+    func hash(into hasher: inout Hasher) {
+        switch self {
+        case .editSet(let exercise, let setIndex, let viewModel):
+            hasher.combine("editSet")
+            hasher.combine(exercise.id)
+            hasher.combine(setIndex)
+            hasher.combine(viewModel.workoutPlan.id)
+        case .completion:
+            hasher.combine("completion")
+        case .quitWorkout:
+            hasher.combine("quitWorkout")
+        case .workoutComplete:
+            hasher.combine("workoutComplete")
         }
     }
 }

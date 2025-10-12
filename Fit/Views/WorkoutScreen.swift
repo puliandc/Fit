@@ -101,7 +101,7 @@ struct WorkoutScreen: View {
                         isDisabled: workoutViewModel.isResting,
                         onComplete: {
                             // 点击动作完成时，弹出参数编辑对话框
-                            navigationManager.presentDialog(.editSet(workoutViewModel.currentExercise, workoutViewModel.currentSet))
+                            navigationManager.presentDialog(.editSet(workoutViewModel.currentExercise, workoutViewModel.currentSet, workoutViewModel))
                         }
                     )
 
@@ -493,7 +493,10 @@ struct CompactRestTimerView: View {
     }
 
     var body: some View {
-        Button(action: onSkip) {
+        Button(action: {
+            print("🔚 DEBUG: Rest timer view tapped - timeLeft: \(timeLeft)")
+            onSkip()
+        }) {
             VStack(spacing: 12) {
                 // 休息标题 - 减小字体和间距
                 HStack {
@@ -512,6 +515,9 @@ struct CompactRestTimerView: View {
                 Text(formattedTime)
                     .font(.system(size: 24, weight: .bold))
                     .foregroundColor(.blue)
+                    .onAppear {
+                        print("🔔 DEBUG: Rest timer view appeared with timeLeft: \(timeLeft)")
+                    }
 
                 // 跳过提示 - 增大点击区域
                 HStack {
@@ -534,6 +540,12 @@ struct CompactRestTimerView: View {
             )
         }
         .buttonStyle(PlainButtonStyle())
+        .onAppear {
+            print("🔔 DEBUG: CompactRestTimerView appeared")
+        }
+        .onDisappear {
+            print("🔔 DEBUG: CompactRestTimerView disappeared")
+        }
     }
 }
 
@@ -551,7 +563,7 @@ struct CompactDialogOverlay: View {
                 }
 
             switch dialog {
-            case .editSet(let exercise, let setIndex):
+            case .editSet(let exercise, let setIndex, _):
                 CompactEditSetDialog(
                     exercise: exercise,
                     setIndex: setIndex,
@@ -604,11 +616,11 @@ struct CompactEditSetDialog: View {
     var body: some View {
         VStack(spacing: 20) {
             // 标题
-            Text("编辑参数")
+            Text("动作完成")
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundColor(.primary)
 
-            Text("编辑 \(exercise.name) 第\(setIndex)组")
+            Text("完成 \(exercise.name) 第\(setIndex)组")
                 .font(.system(size: 14))
                 .foregroundColor(.gray)
 
@@ -679,12 +691,34 @@ struct CompactEditSetDialog: View {
     private func saveParameters() {
         guard let actualReps = Int(reps),
               let actualWeight = Double(weight) else {
+            print("❌ ERROR: Invalid input parameters - reps: \(reps), weight: \(weight)")
             return
+        }
+
+        print("💾 DEBUG: saveParameters called - reps: \(actualReps), weight: \(actualWeight)")
+
+        // 添加按钮禁用状态，防止重复点击
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = windowScene.windows.first {
+            let saveButton = window.rootViewController?.view.subviews.compactMap { $0 as? UIButton }.first
+            saveButton?.isEnabled = false
         }
 
         // 使用新的方法保存参数并完成练习
         workoutViewModel.completeExerciseWith(actualReps: actualReps, actualWeight: actualWeight)
-        onDismiss()
+
+        // 延迟关闭对话框，确保状态更新完成
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            print("🔚 DEBUG: Dialog dismissed after delay")
+            onDismiss()
+
+            // 重新启用按钮
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first {
+                let saveButton = window.rootViewController?.view.subviews.compactMap { $0 as? UIButton }.first
+                saveButton?.isEnabled = true
+            }
+        }
     }
 }
 
