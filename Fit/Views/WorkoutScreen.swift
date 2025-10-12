@@ -3,7 +3,8 @@
 //  Fit
 //
 //  Created by 陆家贤 on 9/10/2025.
-//  Updated: 2025-01-12 - 基于Figma设计优化紧凑布局
+//  Updated: 2025-01-12 - 移除图片组件，基于Figma设计优化信息卡片布局
+//  Architecture: 单一信息卡片设计，垂直布局，模块化组件
 //
 
 import SwiftUI
@@ -79,11 +80,7 @@ struct WorkoutScreen: View {
                             ))
                         }
 
-                        // 运动图片卡片 - 基于Figma设计
-                        CompactExerciseImageCard(
-                            exercise: workoutViewModel.currentExercise
-                        )
-
+  
                         // 运动信息卡片 - 基于Figma设计
                         CompactExerciseInfoCard(
                             exercise: workoutViewModel.currentExercise,
@@ -267,33 +264,6 @@ struct CompactWorkoutHeader: View {
     }
 }
 
-// MARK: - Compact Exercise Image Card
-struct CompactExerciseImageCard: View {
-    let exercise: Exercise
-
-    var body: some View {
-        RoundedRectangle(cornerRadius: 14)
-            .fill(Color.white.opacity(0.7))
-            .frame(height: 194)
-            .overlay(
-                // 图片占位符
-                RoundedRectangle(cornerRadius: 14)
-                    .fill(Color.gray.opacity(0.2))
-                    .overlay(
-                        VStack {
-                            Image(systemName: "dumbbell.fill")
-                                .font(.system(size: 40))
-                                .foregroundColor(.gray)
-
-                            Text("动作图片")
-                                .font(.system(size: 14))
-                                .foregroundColor(.gray)
-                        }
-                    )
-            )
-            .shadow(color: .black.opacity(0.08), radius: 32, x: 0, y: 8)
-    }
-}
 
 // MARK: - Compact Exercise Info Card
 struct CompactExerciseInfoCard: View {
@@ -361,85 +331,21 @@ struct CompactExerciseInfoCard: View {
                     )
             )
 
-            // 组数和次数
-            HStack(spacing: 12) {
-                // 组数
-                VStack(spacing: 4) {
-                    Image(systemName: "repeat")
-                        .font(.system(size: 16))
-                        .foregroundColor(.blue)
-
-                    Text("组数")
-                        .font(.system(size: 12))
-                        .foregroundColor(.gray)
-
-                    Text("\(currentSet) / \(totalSets)")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.blue)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 13)
-                .background(
-                    RoundedRectangle(cornerRadius: 14)
-                        .fill(Color.blue.opacity(0.1))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 14)
-                                .stroke(Color.blue.opacity(0.3), lineWidth: 1)
-                        )
-                )
-
-                // 次数
-                VStack(spacing: 4) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "target")
-                            .font(.system(size: 16))
-                            .foregroundColor(.green)
-
-                        Image(systemName: "plus.circle.fill")
-                            .font(.system(size: 12))
-                            .foregroundColor(.green)
-                    }
-
-                    Text("次数")
-                        .font(.system(size: 12))
-                        .foregroundColor(.gray)
-
-                    Text("\(targetReps)")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.green)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 13)
-                .background(
-                    RoundedRectangle(cornerRadius: 14)
-                        .fill(Color.green.opacity(0.1))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 14)
-                                .stroke(Color.green.opacity(0.3), lineWidth: 1)
-                        )
-                )
-            }
-
-            // 重量
-            if targetWeight > 0 {
+            // 组数、次数和重量模块 - 基于Figma设计的优化布局
+            VStack(spacing: 12) {
+                // 运动时间模块 - 橙色背景
                 HStack {
-                    HStack(spacing: 4) {
-                        Image(systemName: "scalemass")
-                            .font(.system(size: 16))
-                            .foregroundColor(.purple)
+                    Image(systemName: "timer")
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(.orange)
 
-                        Image(systemName: "plus.circle.fill")
-                            .font(.system(size: 12))
-                            .foregroundColor(.purple)
-                    }
-
-                    Text("重量：")
+                    Text("动作时间：")
                         .font(.system(size: 14))
                         .foregroundColor(.gray)
 
-                    Text("\(Int(targetWeight)) kg")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.purple)
+                    Text(formattedTime)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.orange)
 
                     Spacer()
                 }
@@ -450,7 +356,7 @@ struct CompactExerciseInfoCard: View {
                         .fill(
                             LinearGradient(
                                 colors: [
-                                    Color(red: 0.98, green: 0.96, blue: 1.0),
+                                    Color(red: 1.0, green: 0.97, blue: 0.93),
                                     Color(red: 1.0, green: 0.95, blue: 0.98)
                                 ],
                                 startPoint: .leading,
@@ -459,11 +365,158 @@ struct CompactExerciseInfoCard: View {
                         )
                         .overlay(
                             RoundedRectangle(cornerRadius: 14)
-                                .stroke(Color.purple.opacity(0.3), lineWidth: 1)
+                                .stroke(Color.orange.opacity(0.3), lineWidth: 1)
                         )
                 )
+
+                // 当前组数模块 - 蓝色背景
+                HStack {
+                    Image(systemName: "repeat")
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(.blue)
+
+                    Text("当前组数：")
+                        .font(.system(size: 14))
+                        .foregroundColor(.gray)
+
+                    Text("\(currentSet) / \(totalSets)")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.blue)
+
+                    Spacer()
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 14)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color(red: 0.94, green: 0.96, blue: 1.0),
+                                    Color(red: 0.93, green: 1.0, blue: 1.0)
+                                ],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14)
+                                .stroke(Color.blue.opacity(0.3), lineWidth: 1)
+                        )
+                )
+
+                // 次数和重量模块 - 水平排列，基于Figma设计
+                HStack(spacing: 12) {
+                    // 次数模块 - 绿色主题
+                    VStack(spacing: 8) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "target")
+                                .font(.system(size: 18, weight: .medium))
+                                .foregroundColor(.green)
+
+                            Image(systemName: "plus.circle.fill")
+                                .font(.system(size: 12))
+                                .foregroundColor(.green)
+                        }
+
+                        Text("次数")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.gray)
+
+                        Text("\(targetReps)")
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundColor(.green)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 17)
+                    .background(
+                        RoundedRectangle(cornerRadius: 14)
+                            .fill(Color.green.opacity(0.1))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 14)
+                                    .stroke(Color.green.opacity(0.3), lineWidth: 1)
+                            )
+                    )
+
+                    // 重量模块 - 紫色主题
+                    VStack(spacing: 8) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "scalemass")
+                                .font(.system(size: 18, weight: .medium))
+                                .foregroundColor(.purple)
+
+                            Image(systemName: "plus.circle.fill")
+                                .font(.system(size: 12))
+                                .foregroundColor(.purple)
+                        }
+
+                        Text("重量 (kg)")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.gray)
+
+                        if targetWeight > 0 {
+                            Text("\(Int(targetWeight))")
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundColor(.purple)
+                        } else {
+                            Text("0")
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundColor(.purple.opacity(0.5))
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 17)
+                    .background(
+                        RoundedRectangle(cornerRadius: 14)
+                            .fill(Color.purple.opacity(0.1))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 14)
+                                    .stroke(Color.purple.opacity(0.3), lineWidth: 1)
+                            )
+                    )
+                }
+
+                // 编辑按钮 - 如果有重量显示编辑，否则显示添加重量
+                HStack {
+                    Spacer()
+
+                    Button(action: onEditSet) {
+                        HStack(spacing: 6) {
+                            if targetWeight > 0 {
+                                Image(systemName: "pencil.circle.fill")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.purple)
+
+                                Text("编辑")
+                                    .font(.system(size: 11, weight: .medium))
+                                    .foregroundColor(.purple.opacity(0.7))
+                            } else {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.system(size: 16))
+                                    .foregroundColor(.orange)
+
+                                Text("添加重量")
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundColor(.orange)
+                            }
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(targetWeight > 0 ? Color.purple.opacity(0.1) : Color.orange.opacity(0.1))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(targetWeight > 0 ? Color.purple.opacity(0.3) : Color.orange.opacity(0.3), lineWidth: 1)
+                                )
+                        )
+                    }
+
+                    Spacer()
+                }
             }
-        }
+
+          }
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 14)
