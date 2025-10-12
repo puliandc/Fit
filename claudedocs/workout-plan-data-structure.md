@@ -1,5 +1,7 @@
 # Workout Plan Data Structure Specification
 
+//created by Jason Lu on 09:17:00 10/12/2025
+
 ## Overview
 
 This document defines the complete data structure for workout plans in the iOS Fit app V0.2, supporting three set types (热身组, 正式组, 超级组) with comprehensive rest time management.

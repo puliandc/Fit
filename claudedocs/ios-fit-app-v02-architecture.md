@@ -1,5 +1,7 @@
 # iOS Fit App V0.2 - System Architecture Design
 
+//created by Jason Lu on 09:17:00 10/12/2025
+
 ## Executive Summary
 
 The iOS Fit app V0.2 is designed as a native iOS application targeting iOS 26.0 with iPhone-only support. The architecture prioritizes UI fluency matching React-level animations, offline functionality, and local data persistence for workout management.

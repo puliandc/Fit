@@ -265,9 +265,7 @@ class MockDataProvider {
     private var _sampleWorkoutPlans: [WorkoutPlan]?
 
     private init() {
-        print("🐛 DEBUG: MockDataProvider initializing...")
         initializeData()
-        print("🐛 DEBUG: MockDataProvider initialization complete")
     }
 
     // 延迟初始化的示例练习数据
@@ -430,13 +428,9 @@ class MockDataProvider {
 
     // 安全初始化方法
     private func initializeData() {
-        print("🐛 DEBUG: Starting safe data initialization...")
-
         // 预先初始化数据以避免循环依赖
         _ = sampleExercises
         _ = sampleWorkoutPlans
-
-        print("🐛 DEBUG: Data initialization completed. Exercises: \(_sampleExercises?.count ?? 0), Plans: \(_sampleWorkoutPlans?.count ?? 0)")
     }
 
     // MARK: - Helper Methods

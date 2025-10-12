@@ -1,5 +1,7 @@
 # iOS Fit App V0.2 - Implementation Guide
 
+//created by Jason Lu on 09:17:00 10/12/2025
+
 ## Overview
 
 This guide provides step-by-step instructions for implementing the iOS Fit app V0.2 with focus on React-level animations, offline functionality, and local data persistence.
