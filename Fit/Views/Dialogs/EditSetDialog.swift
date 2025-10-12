@@ -11,6 +11,7 @@ struct EditSetDialog: View {
     let exercise: Exercise
     let setIndex: Int
     let onDismiss: () -> Void
+    let workoutViewModel: WorkoutViewModel
 
     @State private var reps: String = ""
     @State private var weight: String = ""
@@ -138,8 +139,27 @@ struct EditSetDialog: View {
     }
 
     private func saveChanges() {
-        // Save the changes (implementation would depend on your data model)
-        print("Saving changes - Reps: \(reps), Weight: \(weight), Notes: \(notes)")
+        print("💾 DEBUG: EditSetDialog saveChanges called - reps: \(reps), weight: \(weight)")
+
+        guard let actualReps = Int(reps),
+              let actualWeight = Double(weight) else {
+            print("❌ ERROR: Invalid input parameters - reps: \(reps), weight: \(weight)")
+            return
+        }
+
+        print("💾 DEBUG: EditSetDialog saving with validated parameters - reps: \(actualReps), weight: \(actualWeight)")
+        print("🐛 DEBUG: Thread: \(Thread.isMainThread ? "Main" : "Background")")
+
+        // 使用WorkoutViewModel的增强方法保存参数并完成练习
+        workoutViewModel.completeExerciseWith(actualReps: actualReps, actualWeight: actualWeight)
+
+        print("💾 DEBUG: EditSetDialog called completeExerciseWith, preparing to dismiss dialog")
+
+        // 延迟关闭对话框，确保状态更新完成
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            print("🔚 DEBUG: EditSetDialog dismissed after delay")
+            onDismiss()
+        }
     }
 }
 
@@ -440,7 +460,8 @@ struct DangerButtonStyle: ButtonStyle {
     EditSetDialog(
         exercise: MockDataProvider.previewExercise,
         setIndex: 1,
-        onDismiss: {}
+        onDismiss: {},
+        workoutViewModel: WorkoutViewModel.preview
     )
     .preferredColorScheme(.dark)
 }

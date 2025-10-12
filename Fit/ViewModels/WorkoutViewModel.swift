@@ -148,7 +148,12 @@ class WorkoutViewModel: ObservableObject {
     // 新增：完成指定参数的练习
     func completeExerciseWith(actualReps: Int, actualWeight: Double) {
         print("🐛 DEBUG: completeExerciseWith called - reps: \(actualReps), weight: \(actualWeight)")
+        print("🐛 DEBUG: Thread: \(Thread.isMainThread ? "Main" : "Background")")
+        print("🐛 DEBUG: Before pause - isExerciseActive: \(isExerciseActive), isResting: \(isResting)")
+
         pauseExercise()
+
+        print("🐛 DEBUG: After pause - isExerciseActive: \(isExerciseActive), isResting: \(isResting)")
 
         // Record completed set with user-specified parameters
         let completedSet = CompletedSet(
@@ -161,7 +166,13 @@ class WorkoutViewModel: ObservableObject {
         print("🐛 DEBUG: Completed set recorded. Total completed sets: \(completedSets.count)")
 
         // 更新进度 - 触发UI刷新
+        print("🐛 DEBUG: Triggering UI refresh with objectWillChange.send()")
         objectWillChange.send()
+
+        // 强制更新主线程上的UI
+        DispatchQueue.main.async {
+            print("🐛 DEBUG: UI refresh triggered on main thread")
+        }
 
         // 检查是否还有更多的组需要完成
         let remainingSetsInWorkout = workoutPlan.exercises.count - completedSets.count
@@ -207,15 +218,26 @@ class WorkoutViewModel: ObservableObject {
 
     func startRest() {
         print("🐛 DEBUG: startRest called")
-        isResting = true
-        isExerciseActive = false
-        timeLeft = currentExerciseSet.restTime
+        print("🐛 DEBUG: Thread: \(Thread.isMainThread ? "Main" : "Background")")
 
-        // 更新当前练习索引到下一个动作
-        moveToNextExerciseOrSet()
+        // 确保在主线程上更新UI状态
+        DispatchQueue.main.async {
+            print("🐛 DEBUG: Updating rest state on main thread")
+            self.isResting = true
+            self.isExerciseActive = false
+            self.timeLeft = self.currentExerciseSet.restTime
 
-        print("🐛 DEBUG: Rest period started, timeLeft: \(timeLeft)")
-        startRestTimer()
+            // 更新当前练习索引到下一个动作
+            self.moveToNextExerciseOrSet()
+
+            print("🐛 DEBUG: Rest period started, timeLeft: \(self.timeLeft)")
+            print("🐛 DEBUG: Before starting rest timer - isResting: \(self.isResting)")
+
+            // 在主线程上启动休息计时器
+            self.startRestTimer()
+
+            print("🐛 DEBUG: Rest timer started - isResting: \(self.isResting)")
+        }
     }
 
     // 新增：移动到下一个练习或组
@@ -247,19 +269,51 @@ class WorkoutViewModel: ObservableObject {
     }
 
     private func startRestTimer() {
+        // 清理之前的计时器
         restTimer?.invalidate()
+        restTimer = nil
 
         print("🐛 DEBUG: Rest timer started, \(timeLeft) seconds")
-        restTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-            if self.timeLeft > 0 {
-                self.timeLeft -= 1
-                print("🐛 DEBUG: Rest timer ticking: \(self.timeLeft)s remaining")
-            } else {
-                print("🐛 DEBUG: Rest timer finished, starting next exercise")
-                self.restTimer?.invalidate()
-                self.isResting = false
-                self.startExercise()
+        print("🐛 DEBUG: Thread: \(Thread.isMainThread ? "Main" : "Background")")
+
+        // 确保在主线程上创建和启动计时器
+        DispatchQueue.main.async {
+            print("🐛 DEBUG: Creating rest timer on main thread")
+
+            self.restTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] timer in
+                guard let self = self else {
+                    print("🚨 ERROR: Timer callback after deallocation")
+                    timer.invalidate()
+                    return
+                }
+
+                // 确保UI更新在主线程上
+                DispatchQueue.main.async {
+                    if self.timeLeft > 0 {
+                        let previousTimeLeft = self.timeLeft
+                        self.timeLeft -= 1
+
+                        // 只在时间变化时打印日志，减少日志量
+                        if previousTimeLeft % 5 == 0 || self.timeLeft <= 5 {
+                            print("🐛 DEBUG: Rest timer ticking: \(self.timeLeft)s remaining")
+                        }
+                    } else {
+                        print("🐛 DEBUG: Rest timer finished, starting next exercise")
+                        timer.invalidate()
+                        self.restTimer = nil
+                        self.isResting = false
+
+                        // 确保下一个动作也在主线程上开始
+                        self.startExercise()
+                    }
+                }
             }
+
+            // 将计时器添加到RunLoop中，确保在真机上正常工作
+            let runLoop = RunLoop.current
+            print("🐛 DEBUG: Adding timer to runloop")
+            self.restTimer?.fireDate = Date().addingTimeInterval(1.0)
+            runLoop.add(self.restTimer!, forMode: .common)
         }
     }
 
