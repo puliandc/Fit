@@ -65,19 +65,25 @@ struct WorkoutScreen: View {
 
                 // 主要内容区域 - 移除滚动属性
                 VStack(spacing: 16) {
-                    // 休息时间覆盖层（休息时显示）
-                    if workoutViewModel.isResting {
-                        CompactRestTimerView(
-                            timeLeft: workoutViewModel.timeLeft,
-                            onSkip: {
-                                workoutViewModel.skipRest()
-                            }
-                        )
-                        .transition(.asymmetric(
-                            insertion: .scale.combined(with: .opacity),
-                            removal: .opacity
-                        ))
+                    // 统一时间模块显示（始终显示，根据状态切换内容）
+                CompactTimerView(
+                    isResting: workoutViewModel.isResting,
+                    elapsedTime: workoutViewModel.exerciseElapsedTime,
+                    timeLeft: workoutViewModel.timeLeft,
+                    isExerciseActive: workoutViewModel.isExerciseActive,
+                    onCompleteAction: {
+                        // 动作时间模式下点击"动作完成"
+                        navigationManager.presentDialog(.editSet(workoutViewModel.currentExercise, workoutViewModel.currentSet, workoutViewModel))
+                    },
+                    onSkipRest: {
+                        // 休息时间模式下点击"跳过休息"
+                        workoutViewModel.skipRest()
                     }
+                )
+                .transition(.asymmetric(
+                    insertion: .scale.combined(with: .opacity),
+                    removal: .opacity
+                ))
 
 
                     // 运动信息卡片 - 基于Figma设计，移除滚动和编辑按钮
@@ -95,22 +101,12 @@ struct WorkoutScreen: View {
 
                 Spacer()
 
-                // 底部固定按钮区域 - 并排放置，减少高度
-                HStack(spacing: 12) {
-                    CompactQuitButton(
-                        onQuit: {
-                            navigationManager.quitWorkout()
-                        }
-                    )
-
-                    CompactCompleteButton(
-                        isDisabled: workoutViewModel.isResting,
-                        onComplete: {
-                            // 点击动作完成时，弹出参数编辑对话框
-                            navigationManager.presentDialog(.editSet(workoutViewModel.currentExercise, workoutViewModel.currentSet, workoutViewModel))
-                        }
-                    )
-                }
+                // 底部固定按钮区域 - 只保留放弃按钮并居中
+                CompactQuitButton(
+                    onQuit: {
+                        navigationManager.quitWorkout()
+                    }
+                )
                 .padding(.horizontal, 16)
                 .padding(.vertical, 16)
             }
@@ -137,6 +133,15 @@ struct WorkoutScreen: View {
         }
         .onDisappear {
             workoutViewModel.pauseExercise()
+        }
+        .onChange(of: workoutViewModel.progress) { newValue in
+            // 监听进度变化，当达到100%时触发训练完成对话框
+            if newValue >= 1.0 {
+                print("🎉 DEBUG: Workout completed! Progress reached 100%")
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    navigationManager.completeWorkout()
+                }
+            }
         }
     }
 }
@@ -189,11 +194,9 @@ struct CompactWorkoutHeader: View {
                         .fill(Color.white.opacity(0.7))
                         .frame(width: 36, height: 32)
                         .overlay(
-                            Image("back-icon")
-                                .resizable()
-                                .renderingMode(.template)
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 16, weight: .medium))
                                 .foregroundColor(.black)
-                                .frame(width: 16, height: 16)
                         )
                 }
                 .buttonStyle(PlainButtonStyle())
@@ -283,48 +286,10 @@ struct CompactExerciseInfoCard: View {
 
             // 组数、次数和重量模块 - 基于Figma设计的优化布局，移除编辑按钮
             VStack(spacing: 12) {
-                // 运动时间模块 - 橙色背景
-                HStack {
-                    Image("time-icon")
-                        .resizable()
-                        .frame(width: 20, height: 20)
-                        .foregroundColor(.orange)
-
-                    Text("动作时间：")
-                        .font(.system(size: 14))
-                        .foregroundColor(.gray)
-
-                    Text(formattedTime)
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.orange)
-
-                    Spacer()
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 14)
-                        .fill(
-                            LinearGradient(
-                                colors: [
-                                    Color(red: 1.0, green: 0.97, blue: 0.93),
-                                    Color(red: 1.0, green: 0.95, blue: 0.98)
-                                ],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 14)
-                                .stroke(Color.orange.opacity(0.3), lineWidth: 1)
-                        )
-                )
-
                 // 当前组数模块 - 蓝色背景
                 HStack {
-                    Image("sets-icon")
-                        .resizable()
-                        .frame(width: 20, height: 20)
+                    Image(systemName: "number")
+                        .font(.system(size: 20, weight: .medium))
                         .foregroundColor(.blue)
 
                     Text("当前组数：")
@@ -389,9 +354,8 @@ struct CompactExerciseInfoCard: View {
                     // 重量模块 - 紫色主题
                     VStack(spacing: 8) {
                         HStack(spacing: 6) {
-                            Image("weight-icon")
-                                .resizable()
-                                .frame(width: 20, height: 20)
+                            Image(systemName: "scalemass.fill")
+                                .font(.system(size: 20, weight: .medium))
                                 .foregroundColor(.purple)
                         }
 
@@ -404,9 +368,9 @@ struct CompactExerciseInfoCard: View {
                                 .font(.system(size: 20, weight: .bold))
                                 .foregroundColor(.purple)
                         } else {
-                            Text("0")
-                                .font(.system(size: 20, weight: .bold))
-                                .foregroundColor(.purple.opacity(0.5))
+                            Text("自重")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.purple)
                         }
                     }
                     .frame(maxWidth: .infinity)
@@ -481,25 +445,58 @@ struct CompactQuitButton: View {
     }
 }
 
-// MARK: - Compact Rest Timer View
-struct CompactRestTimerView: View {
+// MARK: - Compact Timer View (Unified Time Module)
+struct CompactTimerView: View {
+    let isResting: Bool
+    let elapsedTime: Int
     let timeLeft: Int
-    let onSkip: () -> Void
+    let isExerciseActive: Bool
+    let onCompleteAction: () -> Void
+    let onSkipRest: () -> Void
 
     private var formattedTime: String {
-        let minutes = timeLeft / 60
-        let seconds = timeLeft % 60
-        return String(format: "%d:%02d", minutes, seconds)
+        if isResting {
+            // 休息时间：显示倒计时
+            let minutes = timeLeft / 60
+            let seconds = timeLeft % 60
+            return String(format: "%d:%02d", minutes, seconds)
+        } else {
+            // 动作时间：显示正计时
+            let minutes = elapsedTime / 60
+            let seconds = elapsedTime % 60
+            return String(format: "%d:%02d", minutes, seconds)
+        }
+    }
+
+    private var buttonColor: Color {
+        if isResting {
+            return .gray
+        } else {
+            return .green
+        }
+    }
+
+    private var buttonTextColor: Color {
+        if isResting {
+            return .white
+        } else {
+            return .white
+        }
+    }
+
+    private var buttonTitle: String {
+        if isResting {
+            return "跳过休息"
+        } else {
+            return "动作完成"
+        }
     }
 
     var body: some View {
-        Button(action: {
-            print("🔚 DEBUG: Rest timer view tapped - timeLeft: \(timeLeft)")
-            onSkip()
-        }) {
-            VStack(spacing: 12) {
-                // 休息标题 - 减小字体和间距
-                HStack {
+        VStack(spacing: 16) {
+            // 标题区域
+            HStack {
+                if isResting {
                     Image(systemName: "bed.double.fill")
                         .font(.system(size: 18))
                         .foregroundColor(.blue)
@@ -507,45 +504,51 @@ struct CompactRestTimerView: View {
                     Text("休息时间")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(.blue)
+                } else {
+                    Image(systemName: "figure.run")
+                        .font(.system(size: 18))
+                        .foregroundColor(.green)
 
-                    Spacer()
+                    Text("动作时间")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.green)
                 }
 
-                // 时间显示 - 减小字体
-                Text(formattedTime)
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(.blue)
-                    .onAppear {
-                        print("🔔 DEBUG: Rest timer view appeared with timeLeft: \(timeLeft)")
-                    }
-
-                // 跳过提示 - 增大点击区域
-                HStack {
-                    Text("点击跳过休息")
-                        .font(.system(size: 12))
-                        .foregroundColor(.gray)
-
-                    Spacer()
-                }
-                .frame(maxWidth: .infinity, minHeight: 44) // 增大点击区域到最小44pt
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-                .background(Color.gray.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
+                Spacer()
             }
-            .padding(16) // 减小内部padding
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.white.opacity(0.7))
-                    .shadow(color: .black.opacity(0.08), radius: 20, x: 0, y: 8)
-            )
+
+            // 时间显示
+            Text(formattedTime)
+                .font(.system(size: 28, weight: .bold))
+                .foregroundColor(isResting ? .blue : .green)
+
+            // 按钮 - 动态颜色和标题
+            Button(action: {
+                if isResting {
+                    print("🔚 DEBUG: User clicked skip rest - timeLeft: \(timeLeft)")
+                    onSkipRest()
+                } else {
+                    print("✅ DEBUG: User clicked complete exercise - elapsedTime: \(elapsedTime)")
+                    onCompleteAction()
+                }
+            }) {
+                Text(buttonTitle)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(buttonTextColor)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 48)
+                    .background(buttonColor, in: RoundedRectangle(cornerRadius: 14))
+                    .shadow(color: buttonColor.opacity(0.3), radius: 15, x: 0, y: 6)
+            }
+            .disabled(!isExerciseActive && !isResting)
+            .opacity(!isExerciseActive && !isResting ? 0.5 : 1.0)
         }
-        .buttonStyle(PlainButtonStyle())
-        .onAppear {
-            print("🔔 DEBUG: CompactRestTimerView appeared")
-        }
-        .onDisappear {
-            print("🔔 DEBUG: CompactRestTimerView disappeared")
-        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.white.opacity(0.7))
+                .shadow(color: .black.opacity(0.08), radius: 20, x: 0, y: 8)
+        )
     }
 }
 
@@ -722,14 +725,24 @@ struct CompactEditSetDialog: View {
     private func loadDefaultParameters() {
         let defaultParams = workoutViewModel.getDefaultParametersForCurrentExercise()
         reps = String(defaultParams.reps)
-        weight = defaultParams.weight > 0 ? String(defaultParams.weight) : "0"
+        weight = defaultParams.weight > 0 ? String(defaultParams.weight) : "自重"
     }
 
     private func saveParameters() {
-        guard let actualReps = Int(reps),
-              let actualWeight = Double(weight) else {
-            print("❌ ERROR: Invalid input parameters - reps: \(reps), weight: \(weight)")
+        guard let actualReps = Int(reps) else {
+            print("❌ ERROR: Invalid reps input: \(reps)")
             return
+        }
+
+        let actualWeight: Double
+        if weight.lowercased() == "自重" {
+            actualWeight = 0.0
+        } else {
+            guard let weightValue = Double(weight) else {
+                print("❌ ERROR: Invalid weight input: \(weight)")
+                return
+            }
+            actualWeight = weightValue
         }
 
         print("💾 DEBUG: saveParameters called - reps: \(actualReps), weight: \(actualWeight)")
