@@ -330,6 +330,117 @@ struct QuitDialog: View {
     }
 }
 
+// MARK: - Enhanced Quit Dialog
+struct EnhancedQuitDialog: View {
+    let onQuitCurrentExercise: () -> Void
+    let onQuitAll: () -> Void
+    let onCancel: () -> Void
+    let currentExerciseName: String
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header
+            VStack(spacing: 8) {
+                Image(systemName: "flag.checkered")
+                    .font(.system(size: 32, weight: .medium))
+                    .foregroundColor(.blue)
+
+                Text("结束训练")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.primary)
+            }
+            .padding(.top, 20)
+            .padding(.bottom, 16)
+
+            // Content
+            VStack(spacing: 16) {
+                Text("请选择如何结束训练")
+                    .font(.system(size: 14, weight: .regular))
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+
+                // Options - 三个按钮按用户要求
+                VStack(spacing: 12) {
+                    // Option 1: Skip current exercise
+                    QuitOptionCard(
+                        icon: "forward.end.fill",
+                        title: "跳过当前动作",
+                        description: "跳过「\(currentExerciseName)」，继续下一个动作",
+                        color: .orange,
+                        action: onQuitCurrentExercise
+                    )
+
+                    // Option 2: Quit all training
+                    QuitOptionCard(
+                        icon: "xmark.circle.fill",
+                        title: "放弃全部训练",
+                        description: "放弃所有训练，进度将丢失",
+                        color: .red,
+                        action: onQuitAll
+                    )
+
+                    // Option 3: Continue training (Cancel button)
+                    QuitOptionCard(
+                        icon: "play.circle.fill",
+                        title: "继续训练",
+                        description: "继续当前动作的训练",
+                        color: .green,
+                        action: onCancel
+                    )
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 20)
+        }
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))
+        .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
+        .frame(maxWidth: 360)
+    }
+}
+
+// MARK: - Quit Option Card
+struct QuitOptionCard: View {
+    let icon: String
+    let title: String
+    let description: String
+    let color: Color
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                Image(systemName: icon)
+                    .font(.system(size: 20, weight: .medium))
+                    .foregroundColor(color)
+                    .frame(width: 24, height: 24)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.primary)
+                        .multilineTextAlignment(.leading)
+
+                    Text(description)
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.leading)
+                        .lineLimit(2)
+                }
+
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(color.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(color.opacity(0.3), lineWidth: 1)
+            )
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
 // MARK: - Workout Complete Dialog
 struct WorkoutCompleteDialog: View {
     let onDismiss: () -> Void

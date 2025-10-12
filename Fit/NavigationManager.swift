@@ -91,6 +91,14 @@ class NavigationManager: ObservableObject {
         presentDialog(.quitWorkout)
     }
 
+    func quitCurrentExercise() {
+        presentDialog(.quitCurrentExercise)
+    }
+
+    func quitRemainingExercises() {
+        presentDialog(.quitRemainingExercises)
+    }
+
     // MARK: - iOS 15.0+ Compatibility Methods
     func canGoBack() -> Bool {
         return !navigationStack.isEmpty
@@ -146,6 +154,8 @@ enum DialogType: Identifiable, Equatable {
     case editSet(Exercise, Int, WorkoutViewModel)
     case completion
     case quitWorkout
+    case quitCurrentExercise
+    case quitRemainingExercises
     case workoutComplete
 
     var id: String {
@@ -156,6 +166,10 @@ enum DialogType: Identifiable, Equatable {
             return "completion"
         case .quitWorkout:
             return "quit_workout"
+        case .quitCurrentExercise:
+            return "quit_current_exercise"
+        case .quitRemainingExercises:
+            return "quit_remaining_exercises"
         case .workoutComplete:
             return "workout_complete"
         }
@@ -171,6 +185,10 @@ enum DialogType: Identifiable, Equatable {
         case (.completion, .completion):
             return true
         case (.quitWorkout, .quitWorkout):
+            return true
+        case (.quitCurrentExercise, .quitCurrentExercise):
+            return true
+        case (.quitRemainingExercises, .quitRemainingExercises):
             return true
         case (.workoutComplete, .workoutComplete):
             return true
@@ -190,6 +208,10 @@ enum DialogType: Identifiable, Equatable {
             hasher.combine("completion")
         case .quitWorkout:
             hasher.combine("quitWorkout")
+        case .quitCurrentExercise:
+            hasher.combine("quitCurrentExercise")
+        case .quitRemainingExercises:
+            hasher.combine("quitRemainingExercises")
         case .workoutComplete:
             hasher.combine("workoutComplete")
         }

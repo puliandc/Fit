@@ -253,6 +253,31 @@ class WorkoutViewModel: ObservableObject {
         }
     }
 
+    // 新增：公共方法用于跳过当前练习
+    func moveToNextExercise() {
+        print("🐛 DEBUG: moveToNextExercise called - current index: \(currentExerciseIndex)")
+
+        // 暂停当前练习
+        pauseExercise()
+
+        // 移动到下一个练习
+        if currentExerciseIndex < workoutPlan.exercises.count - 1 {
+            currentExerciseIndex += 1
+            currentSet = 1 // 重置组数
+            exerciseElapsedTime = 0 // 重置时间
+            print("🐛 DEBUG: Skipped to next exercise. New index: \(currentExerciseIndex)")
+
+            // 自动开始新练习
+            startExercise()
+        } else {
+            print("🐛 DEBUG: No more exercises to skip to, completing workout")
+            // 如果没有更多练习，完成训练
+            DispatchQueue.main.async {
+                self.pauseExercise()
+            }
+        }
+    }
+
     func skipRest() {
         restTimer?.invalidate()
         isResting = false
