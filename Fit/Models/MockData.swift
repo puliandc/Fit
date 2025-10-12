@@ -396,9 +396,9 @@ class MockDataProvider {
                 difficulty: .intermediate,
                 duration: 45,
                 exercises: [
-                    ExerciseSet(exercise: exercises[2], targetReps: 12, targetWeight: 20),
-                    ExerciseSet(exercise: exercises[2], targetReps: 10, targetWeight: 22.5),
-                    ExerciseSet(exercise: exercises[2], targetReps: 8, targetWeight: 25),
+                    ExerciseSet(exercise: exercises[2], targetReps: 12, targetWeight: 15),
+                    ExerciseSet(exercise: exercises[2], targetReps: 10, targetWeight: 17.5),
+                    ExerciseSet(exercise: exercises[2], targetReps: 8, targetWeight: 20),
                     ExerciseSet(exercise: exercises[0], targetReps: 15, targetWeight: 0),
                     ExerciseSet(exercise: exercises[0], targetReps: 12, targetWeight: 0),
                     ExerciseSet(exercise: exercises[0], targetReps: 10, targetWeight: 0)

@@ -95,8 +95,11 @@ class WorkoutViewModel: ObservableObject {
         let completedSetsCount = completedSets.count
         let progressValue = totalSets > 0 ? Double(completedSetsCount) / Double(totalSets) : 0.0
 
-        print("🐛 DEBUG: Progress calculation - Completed sets: \(completedSetsCount)/\(totalSets) = \(progressValue)")
-        return progressValue
+        // 防止进度超过100%
+        let clampedProgress = min(progressValue, 1.0)
+
+        print("🐛 DEBUG: Progress calculation - Completed sets: \(completedSetsCount)/\(totalSets) = \(progressValue) (clamped: \(clampedProgress))")
+        return clampedProgress
     }
 
     var isWorkoutComplete: Bool {
@@ -151,6 +154,14 @@ class WorkoutViewModel: ObservableObject {
         print("🐛 DEBUG: Thread: \(Thread.isMainThread ? "Main" : "Background")")
         print("🐛 DEBUG: Before pause - isExerciseActive: \(isExerciseActive), isResting: \(isResting)")
 
+        // 防护：检查训练是否已经完成
+        let completedSetsCount = completedSets.count
+        let totalSets = workoutPlan.exercises.count
+        if completedSetsCount >= totalSets {
+            print("⚠️ WARNING: Workout already completed! Ignoring additional completion.")
+            return
+        }
+
         pauseExercise()
 
         print("🐛 DEBUG: After pause - isExerciseActive: \(isExerciseActive), isResting: \(isResting)")
@@ -175,7 +186,7 @@ class WorkoutViewModel: ObservableObject {
         }
 
         // 检查是否还有更多的组需要完成
-        let remainingSetsInWorkout = workoutPlan.exercises.count - completedSets.count
+        let remainingSetsInWorkout = totalSets - completedSets.count
         print("🐛 DEBUG: Remaining sets in workout: \(remainingSetsInWorkout)")
 
         if remainingSetsInWorkout > 0 {
@@ -186,7 +197,7 @@ class WorkoutViewModel: ObservableObject {
             // 训练完成
             print("🐛 DEBUG: Workout completed!")
             pauseExercise()
-            // TODO: 显示训练完成对话框
+            // 训练完成对话框将由WorkoutScreen中的进度监听器处理
         }
     }
 
@@ -200,7 +211,43 @@ class WorkoutViewModel: ObservableObject {
 
     // 新增：获取当前练习的默认次数和重量
     func getDefaultParametersForCurrentExercise() -> (reps: Int, weight: Double) {
-        return (currentExerciseSet.targetReps, currentExerciseSet.targetWeight)
+        let targetReps = currentExerciseSet.targetReps
+        var targetWeight = currentExerciseSet.targetWeight
+
+        // 如果目标重量为0，根据器械类型提供智能默认值
+        if targetWeight == 0 {
+            targetWeight = getSmartDefaultWeight(for: currentExercise)
+        }
+
+        return (targetReps, targetWeight)
+    }
+
+    // 新增：根据器械类型提供智能默认重量
+    private func getSmartDefaultWeight(for exercise: Exercise) -> Double {
+        switch exercise.equipment {
+        case .none:
+            return 0 // 自重练习
+        case .dumbbells:
+            return 10 // 哑铃默认10kg
+        case .barbell:
+            return 20 // 杠铃默认20kg
+        case .kettlebell:
+            return 8 // 壶铃默认8kg
+        case .resistanceBands:
+            return 5 // 弹力带等效重量
+        case .pullUpBar:
+            return 0 // 引体向上杠，自重
+        case .bench:
+            return 0 // 卧推架，本身不增加重量
+        case .machine:
+            return 15 // 器械默认15kg
+        case .cable:
+            return 10 // 拉力机默认10kg
+        case .medicineBall:
+            return 3 // 药球默认3kg
+        case .foamRoller:
+            return 0 // 泡沫轴，自重
+        }
     }
 
     // 新增：获取指定练习的已完成组数
