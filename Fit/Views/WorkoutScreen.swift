@@ -198,9 +198,11 @@ struct CompactWorkoutHeader: View {
                         .fill(Color.white.opacity(0.7))
                         .frame(width: 36, height: 32)
                         .overlay(
-                            Image(systemName: "chevron.left")
-                                .font(.system(size: 16, weight: .semibold))
+                            Image("back-icon")
+                                .resizable()
+                                .renderingMode(.template)
                                 .foregroundColor(.orange)
+                                .frame(width: 16, height: 16)
                         )
                 }
                 .buttonStyle(PlainButtonStyle())
@@ -295,48 +297,14 @@ struct CompactExerciseInfoCard: View {
                 )
                 .frame(maxWidth: .infinity)
 
-            // 运动时间
-            HStack {
-                Image(systemName: "timer")
-                    .font(.system(size: 16))
-                    .foregroundColor(.orange)
-
-                Text("动作时间：")
-                    .font(.system(size: 14))
-                    .foregroundColor(.gray)
-
-                Text(formattedTime)
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.orange)
-
-                Spacer()
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(
-                RoundedRectangle(cornerRadius: 14)
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                Color(red: 1.0, green: 0.97, blue: 0.93),
-                                Color(red: 1.0, green: 0.95, blue: 0.98)
-                            ],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 14)
-                            .stroke(Color.orange.opacity(0.3), lineWidth: 1)
-                    )
-            )
-
+  
             // 组数、次数和重量模块 - 基于Figma设计的优化布局
             VStack(spacing: 12) {
                 // 运动时间模块 - 橙色背景
                 HStack {
-                    Image(systemName: "timer")
-                        .font(.system(size: 18, weight: .medium))
+                    Image("time-icon")
+                        .resizable()
+                        .frame(width: 20, height: 20)
                         .foregroundColor(.orange)
 
                     Text("动作时间：")
@@ -371,8 +339,9 @@ struct CompactExerciseInfoCard: View {
 
                 // 当前组数模块 - 蓝色背景
                 HStack {
-                    Image(systemName: "repeat")
-                        .font(.system(size: 18, weight: .medium))
+                    Image("sets-icon")
+                        .resizable()
+                        .frame(width: 20, height: 20)
                         .foregroundColor(.blue)
 
                     Text("当前组数：")
@@ -441,8 +410,9 @@ struct CompactExerciseInfoCard: View {
                     // 重量模块 - 紫色主题
                     VStack(spacing: 8) {
                         HStack(spacing: 6) {
-                            Image(systemName: "scalemass")
-                                .font(.system(size: 18, weight: .medium))
+                            Image("weight-icon")
+                                .resizable()
+                                .frame(width: 20, height: 20)
                                 .foregroundColor(.purple)
 
                             Image(systemName: "plus.circle.fill")
