@@ -103,31 +103,26 @@ struct ContentView: View {
         .animation(.easeInOut(duration: 0.3), value: navigationManager.currentScreen)
         .animation(.easeInOut(duration: 0.3), value: navigationManager.presentedDialog)
         .onAppear {
-            print("🚀 ContentView appeared successfully!")
-            print("📱 NavigationManager state: \(navigationManager.currentScreen)")
+            // ContentView loaded successfully
         }
     }
 }
 
-// MARK: - Settings Screen (Placeholder)
 struct SettingsScreen: View {
     @EnvironmentObject var navigationManager: NavigationManager
 
     var body: some View {
-        VStack {
+        VStack(spacing: 20) {
             Text("设置")
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .foregroundColor(.white)
-                .padding()
+                .padding(.top, 40)
 
             Button("返回主页") {
                 navigationManager.popToRoot()
             }
-            .foregroundColor(.white)
-            .padding()
-            .background(Color.blue)
-            .cornerRadius(10)
+            .buttonStyle(SettingsButtonStyle())
 
             Spacer()
         }
@@ -136,30 +131,40 @@ struct SettingsScreen: View {
     }
 }
 
-// MARK: - History Screen (Placeholder)
 struct HistoryScreen: View {
     @EnvironmentObject var navigationManager: NavigationManager
 
     var body: some View {
-        VStack {
+        VStack(spacing: 20) {
             Text("历史记录")
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .foregroundColor(.white)
-                .padding()
+                .padding(.top, 40)
 
             Button("返回主页") {
                 navigationManager.popToRoot()
             }
-            .foregroundColor(.white)
-            .padding()
-            .background(Color.blue)
-            .cornerRadius(10)
+            .buttonStyle(SettingsButtonStyle())
 
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.black)
+    }
+}
+
+// MARK: - Settings Button Style
+struct SettingsButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .foregroundColor(.white)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 12)
+            .background(Color.blue)
+            .cornerRadius(10)
+            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
     }
 }
 

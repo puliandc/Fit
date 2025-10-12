@@ -1,5 +1,7 @@
 # iOS Fit App V0.2 - UI Component Design Specification
 
+//created by Jason Lu on 09:17:00 10/12/2025
+
 ## Overview
 
 This document defines the complete UI component hierarchy for the iOS Fit app V0.2, focusing on React-level animation smoothness and intuitive workout management interface.

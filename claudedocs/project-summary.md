@@ -1,5 +1,7 @@
 # iOS Fit App V0.2 - Project Summary
 
+//created by Jason Lu on 09:17:00 10/12/2025
+
 ## Executive Overview
 
 The iOS Fit app V0.2 is a comprehensive workout management application designed for iOS 26.0 with iPhone-only support. The application focuses on delivering React-level animation smoothness while providing robust offline functionality for workout plan management and tracking.
