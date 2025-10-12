@@ -97,17 +97,17 @@ struct WorkoutScreen: View {
 
                 // 底部固定按钮区域 - 并排放置，减少高度
                 HStack(spacing: 12) {
+                    CompactQuitButton(
+                        onQuit: {
+                            navigationManager.quitWorkout()
+                        }
+                    )
+
                     CompactCompleteButton(
                         isDisabled: workoutViewModel.isResting,
                         onComplete: {
                             // 点击动作完成时，弹出参数编辑对话框
                             navigationManager.presentDialog(.editSet(workoutViewModel.currentExercise, workoutViewModel.currentSet, workoutViewModel))
-                        }
-                    )
-
-                    CompactQuitButton(
-                        onQuit: {
-                            navigationManager.quitWorkout()
                         }
                     )
                 }
