@@ -30,7 +30,7 @@ struct EditSetDialog: View {
 
                 Spacer()
 
-                Text("编辑参数")
+                Text("动作完成")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(.primary)
 
