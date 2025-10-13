@@ -34,6 +34,9 @@ class WorkoutViewModel: ObservableObject {
         self.workoutPlan = workoutPlan
 
         print("🐛 DEBUG: WorkoutViewModel initialization complete")
+
+        // 初始化当前组数显示
+        updateCurrentSetDisplay()
     }
 
     // MARK: - Computed Properties
@@ -185,6 +188,9 @@ class WorkoutViewModel: ObservableObject {
         let newProgress = completedSets.count > 0 ? (Double(completedSets.count) / Double(totalSets) * 100) : 0
         print("🐛 DEBUG: 进度更新 - 已完成组数: \(completedSets.count)/\(totalSets) = \(Int(newProgress))%")
 
+        // 更新当前组数显示
+        updateCurrentSetDisplay()
+
         // 更新进度 - 触发UI刷新
         objectWillChange.send()
 
@@ -255,7 +261,25 @@ class WorkoutViewModel: ObservableObject {
         // 简化逻辑：每次完成一组后移动到下一个ExerciseSet
         if currentExerciseIndex < workoutPlan.exercises.count - 1 {
             currentExerciseIndex += 1
+            // 更新组数显示
+            updateCurrentSetDisplay()
         }
+    }
+
+    // 新增：更新当前组数显示
+    private func updateCurrentSetDisplay() {
+        let currentExerciseId = currentExercise.id
+        let exerciseSetsForThisExercise = workoutPlan.exercises.filter { $0.exercise.id == currentExerciseId }
+        let totalSetsForThisExercise = exerciseSetsForThisExercise.count
+
+        // 计算当前是第几组（基于当前ExerciseSet在所有相同练习中的位置）
+        let currentExerciseSet = currentExerciseSet
+        let currentSetNumber = exerciseSetsForThisExercise.firstIndex(where: { $0.id == currentExerciseSet.id }) ?? 0
+
+        // 更新当前组数（从1开始计数）
+        currentSet = currentSetNumber + 1
+
+        print("🐛 DEBUG: 更新组数显示 - 练习: \(currentExercise.name), 当前组: \(currentSet)/\(totalSetsForThisExercise), ExerciseSet位置: \(currentSetNumber)")
     }
 
     // 新增：公共方法用于跳过当前练习
@@ -268,9 +292,11 @@ class WorkoutViewModel: ObservableObject {
         // 移动到下一个练习
         if currentExerciseIndex < workoutPlan.exercises.count - 1 {
             currentExerciseIndex += 1
-            currentSet = 1 // 重置组数
             exerciseElapsedTime = 0 // 重置时间
             print("🐛 DEBUG: Skipped to next exercise. New index: \(currentExerciseIndex)")
+
+            // 更新组数显示（这会重置为新练习的组数）
+            updateCurrentSetDisplay()
 
             // 自动开始新练习
             startExercise()
