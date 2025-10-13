@@ -282,6 +282,34 @@ class WorkoutViewModel: ObservableObject {
         let currentExerciseId = currentExercise.id
         print("🐛 DEBUG: Current exercise ID: \(currentExerciseId)")
 
+        // 为当前练习的所有组添加跳过记录，以更新完成度
+        let currentExerciseSets = workoutPlan.exercises.filter { $0.exercise.id == currentExerciseId }
+        let currentSetPosition = currentExerciseSets.firstIndex(where: { $0.id == currentExerciseSet.id }) ?? 0
+
+        // 为当前组及后续所有相同练习的组添加跳过记录
+        for i in currentSetPosition..<currentExerciseSets.count {
+            let exerciseSetToSkip = currentExerciseSets[i]
+            let skippedSet = CompletedSet(
+                exerciseSetId: exerciseSetToSkip.id,
+                actualReps: 0,  // 跳过的组记为0次
+                actualWeight: 0,  // 跳过的组记为0重量
+                completedAt: Date()
+            )
+            completedSets.append(skippedSet)
+            print("🐛 DEBUG: 添加跳过记录 - 练习: \(exerciseSetToSkip.exercise.name), 组ID: \(exerciseSetToSkip.id)")
+        }
+
+        // 打印进度更新
+        let totalSets = workoutPlan.exercises.count
+        let newProgress = completedSets.count > 0 ? (Double(completedSets.count) / Double(totalSets) * 100) : 0
+        print("🐛 DEBUG: 跳过动作后进度更新 - 已完成组数: \(completedSets.count)/\(totalSets) = \(Int(newProgress))%")
+
+        // 更新当前组数显示
+        updateCurrentSetDisplay()
+
+        // 更新进度 - 触发UI刷新
+        objectWillChange.send()
+
         // 找到下一个不同练习的索引
         var nextExerciseIndex = currentExerciseIndex + 1
         while nextExerciseIndex < workoutPlan.exercises.count {
@@ -345,6 +373,43 @@ class WorkoutViewModel: ObservableObject {
         restTimer?.invalidate()
         isResting = false
         startExercise()
+    }
+
+    // 新增：跳过所有剩余练习，完成训练
+    func skipAllRemainingExercises() {
+        print("🐛 DEBUG: skipAllRemainingExercises called - marking all remaining exercises as completed")
+
+        // 暂停当前练习
+        pauseExercise()
+
+        // 为当前及所有剩余的练习组添加跳过记录
+        let totalSets = workoutPlan.exercises.count
+        let currentExerciseSet = currentExerciseSet
+
+        // 找到当前ExerciseSet在计划中的位置
+        if let currentPosition = workoutPlan.exercises.firstIndex(where: { $0.id == currentExerciseSet.id }) {
+            // 从当前位置开始，为所有剩余的练习组添加跳过记录
+            for i in currentPosition..<totalSets {
+                let exerciseSetToSkip = workoutPlan.exercises[i]
+                let skippedSet = CompletedSet(
+                    exerciseSetId: exerciseSetToSkip.id,
+                    actualReps: 0,  // 跳过的组记为0次
+                    actualWeight: 0,  // 跳过的组记为0重量
+                    completedAt: Date()
+                )
+                completedSets.append(skippedSet)
+                print("🐛 DEBUG: 添加跳过记录 - 练习: \(exerciseSetToSkip.exercise.name), 组ID: \(exerciseSetToSkip.id)")
+            }
+        }
+
+        // 打印最终进度更新
+        let finalProgress = completedSets.count > 0 ? (Double(completedSets.count) / Double(totalSets) * 100) : 0
+        print("🐛 DEBUG: 跳过全部训练后进度更新 - 已完成组数: \(completedSets.count)/\(totalSets) = \(Int(finalProgress))%")
+
+        // 更新进度 - 触发UI刷新
+        objectWillChange.send()
+
+        print("🐛 DEBUG: All exercises skipped, workout complete")
     }
 
     // 简化计时方案：处理应用恢复时的计时同步

@@ -480,6 +480,7 @@ struct QuitOptionCard: View {
 // MARK: - Workout Complete Dialog
 struct WorkoutCompleteDialog: View {
     let onDismiss: () -> Void
+    let workoutViewModel: WorkoutViewModel
 
     var body: some View {
         VStack(spacing: 0) {
@@ -510,19 +511,9 @@ struct WorkoutCompleteDialog: View {
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(.appTextTertiary)
                         Spacer()
-                        Text("45:30")
+                        Text(formatTime(workoutViewModel.totalWorkoutTime))
                             .font(.system(size: 14, weight: .semibold, design: .monospaced))
                             .foregroundColor(.appPrimary)
-                    }
-
-                    HStack {
-                        Text("消耗卡路里:")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.appTextTertiary)
-                        Spacer()
-                        Text("280 kcal")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(.green)
                     }
 
                     HStack {
@@ -530,7 +521,7 @@ struct WorkoutCompleteDialog: View {
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(.appTextTertiary)
                         Spacer()
-                        Text("12 组")
+                        Text("\(workoutViewModel.completedSets.count) 组")
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(.appPrimary)
                     }
@@ -559,6 +550,13 @@ struct WorkoutCompleteDialog: View {
         )
         .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
         .frame(maxWidth: 320)
+    }
+
+    // Helper function to format time
+    private func formatTime(_ seconds: Int) -> String {
+        let minutes = seconds / 60
+        let secs = seconds % 60
+        return String(format: "%d:%02d", minutes, secs)
     }
 }
 
