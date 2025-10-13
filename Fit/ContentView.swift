@@ -22,6 +22,7 @@ struct ContentView: View {
 
             case .workout(let workoutPlan):
                 WorkoutScreen(workoutPlan: workoutPlan)
+                    .environmentObject(WorkoutViewModel(workoutPlan: workoutPlan))
                     .transition(.asymmetric(
                         insertion: .move(edge: .trailing),
                         removal: .move(edge: .leading)
