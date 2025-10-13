@@ -52,7 +52,32 @@ struct MainScreen: View {
 
                     // 主要功能区域
                     VStack(spacing: 24) {
-                        // 读取计划卡片
+                        // 开始训练卡片 - 只在有计划时显示，放在最前面
+                        if hasWorkoutPlan {
+                            FeatureCard(
+                                icon: "figure.run",
+                                title: "开始训练",
+                                subtitle: "您的健身计划已准备就绪，开始今天的训练吧！",
+                                hasContent: true,
+                                contentText: externalTrainingService.currentWorkoutPlan?.name ?? "准备就绪",
+                                isLoading: false,
+                                buttonText: "开始训练",
+                                buttonAction: {
+                                    // 版本1.2: 优先使用解析的训练计划，fallback到MockData
+                                    let workoutPlan = externalTrainingService.currentWorkoutPlan ?? MockDataProvider.shared.sampleWorkoutPlans.first!
+                                    navigationManager.startWorkout(workoutPlan)
+                                },
+                                cardColor: .appAccent,
+                                delay: 0.2
+                            )
+                        }
+
+                        // 版本1.3: 完整训练计划显示 - 放在开始训练卡片后面
+                        if hasWorkoutPlan, let workoutPlan = externalTrainingService.currentWorkoutPlan {
+                            CompleteWorkoutPlanCard(workoutPlan: workoutPlan, delay: 0.3)
+                        }
+
+                        // 读取计划卡片 - 移到最底部
                         FeatureCard(
                             icon: "doc.text.fill",
                             title: "读取健身计划",
@@ -69,34 +94,7 @@ struct MainScreen: View {
                                 }
                             },
                             cardColor: .appPrimary,
-                            delay: 0.2
-                        )
-
-                        // 版本1.3: 完整训练计划显示
-                        if hasWorkoutPlan, let workoutPlan = externalTrainingService.currentWorkoutPlan {
-                            CompleteWorkoutPlanCard(workoutPlan: workoutPlan, delay: 0.3)
-                        }
-
-                        // 开始训练卡片
-                        FeatureCard(
-                            icon: "figure.run",
-                            title: "开始训练",
-                            subtitle: hasWorkoutPlan ? "您的健身计划已准备就绪，开始今天的训练吧！" : "请先读取健身计划以开始训练",
-                            hasContent: hasWorkoutPlan,
-                            contentText: hasWorkoutPlan ?
-                                (externalTrainingService.currentWorkoutPlan?.name ?? "准备就绪") :
-                                "准备就绪",
-                            isLoading: false,
-                            buttonText: "开始训练",
-                            buttonAction: {
-                                if hasWorkoutPlan {
-                                    // 版本1.2: 优先使用解析的训练计划，fallback到MockData
-                                    let workoutPlan = externalTrainingService.currentWorkoutPlan ?? MockDataProvider.shared.sampleWorkoutPlans.first!
-                                    navigationManager.startWorkout(workoutPlan)
-                                }
-                            },
-                            cardColor: .appAccent,
-                            delay: 0.4
+                            delay: hasWorkoutPlan ? 0.4 : 0.2
                         )
                     }
 
