@@ -84,16 +84,43 @@ struct WorkoutScreen: View {
                 .padding(.vertical, 16)
             }
 
-            // 对话框覆盖层
+            // Dialog Overlay for workout-related dialogs
             if let dialog = navigationManager.presentedDialog {
-                CompactDialogOverlay(dialog: dialog, navigationManager: navigationManager)
-                    .environmentObject(workoutViewModel)
+                switch dialog {
+                case .quitWorkout, .quitCurrentExercise, .quitRemainingExercises:
+                    // Background overlay
+                    Color.black.opacity(0.4)
+                        .ignoresSafeArea()
+                        .onTapGesture {
+                            navigationManager.dismissDialog()
+                        }
+
+                    // Enhanced Quit Dialog
+                    EnhancedQuitDialog(
+                        onQuitCurrentExercise: {
+                            workoutViewModel.moveToNextExercise()
+                            navigationManager.dismissDialog()
+                        },
+                        onQuitAll: {
+                            navigationManager.popToRoot()
+                            navigationManager.dismissDialog()
+                        },
+                        onCancel: {
+                            navigationManager.dismissDialog()
+                        },
+                        currentExerciseName: workoutViewModel.currentExercise.name
+                    )
                     .transition(.asymmetric(
                         insertion: .scale.combined(with: .opacity),
                         removal: .opacity
                     ))
+
+                default:
+                    EmptyView()
+                }
             }
-        }
+          }
+        .animation(.easeInOut(duration: 0.3), value: navigationManager.presentedDialog)
         .onAppear {
             // 安全检查
             guard !workoutViewModel.workoutPlan.exercises.isEmpty else { return }
@@ -107,9 +134,9 @@ struct WorkoutScreen: View {
         .onDisappear {
             workoutViewModel.pauseExercise()
         }
-        .onChange(of: workoutViewModel.progress) { newValue in
+        .onChange(of: workoutViewModel.progress) {
             // 监听进度变化，当达到100%时触发训练完成对话框
-            if newValue >= 1.0 {
+            if workoutViewModel.progress >= 1.0 {
                 print("🎉 DEBUG: Workout completed! Progress reached 100%")
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     navigationManager.completeWorkout()
@@ -176,7 +203,7 @@ struct CompactWorkoutHeader: View {
 
                 // 标题和百分比
                 HStack(spacing: 8) {
-                    Text("快速训练计划")
+                    Text(workoutPlan.name)
                         .font(.system(size: 16, weight: .medium))
                         .foregroundStyle(
                             LinearGradient(
@@ -473,10 +500,14 @@ struct CompactQuitButton: View {
                 .clipShape(RoundedRectangle(cornerRadius: 14)) // 与完成按钮保持一致圆角
                 .overlay(
                     RoundedRectangle(cornerRadius: 14)
-                        .stroke(Color.white.opacity(0.6), lineWidth: 1)
+                        .stroke(Color.red.opacity(0.3), lineWidth: 1.5) // 增强边框可见性
                 )
                 .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 4) // 减小阴影
         }
+        .buttonStyle(PlainButtonStyle())
+        .accessibilityLabel("放弃当前动作")
+        .accessibilityHint("点击这里可以放弃当前的动作并返回主界面")
+        .accessibilityAddTraits(.isButton)
     }
 }
 
@@ -577,6 +608,9 @@ struct CompactTimerView: View {
             }
             .disabled(!isExerciseActive && !isResting)
             .opacity(!isExerciseActive && !isResting ? 0.5 : 1.0)
+            .accessibilityLabel(isResting ? "跳过休息时间" : "完成当前动作")
+            .accessibilityHint(isResting ? "点击这里可以跳过剩余的休息时间，直接开始下一个动作" : "点击这里记录当前动作的完成并打开参数编辑对话框")
+            .accessibilityAddTraits(.isButton)
         }
         .padding(16)
         .background(
@@ -584,310 +618,8 @@ struct CompactTimerView: View {
                 .fill(Color.white.opacity(0.7))
                 .shadow(color: .black.opacity(0.08), radius: 20, x: 0, y: 8)
         )
-    }
-}
-
-// MARK: - Compact Dialog Overlay
-struct CompactDialogOverlay: View {
-    let dialog: DialogType
-    let navigationManager: NavigationManager
-    @EnvironmentObject var workoutViewModel: WorkoutViewModel
-
-    var body: some View {
-        ZStack {
-            switch dialog {
-            case .editSet(let exercise, let setIndex, _):
-                CompactEditSetDialog(
-                    exercise: exercise,
-                    setIndex: setIndex,
-                    onDismiss: {
-                        navigationManager.dismissDialog()
-                    }
-                )
-            case .completion:
-                CompactCompletionDialog(onDismiss: {
-                    navigationManager.dismissDialog()
-                })
-            case .quitWorkout:
-                EnhancedQuitDialog(
-                    onQuitCurrentExercise: {
-                        print("🏃 DEBUG: User chose to skip current exercise")
-                        workoutViewModel.moveToNextExercise()
-                        navigationManager.dismissDialog()
-                    },
-                    onQuitAll: {
-                        print("❌ DEBUG: User chose to quit all exercises")
-                        navigationManager.popToRoot()
-                    },
-                    onCancel: {
-                        print("🔄 DEBUG: User chose to continue training")
-                        navigationManager.dismissDialog()
-                    },
-                    currentExerciseName: workoutViewModel.currentExercise.name
-                )
-            case .quitCurrentExercise:
-                EnhancedQuitDialog(
-                    onQuitCurrentExercise: {
-                        print("🏃 DEBUG: User chose to skip current exercise")
-                        workoutViewModel.moveToNextExercise()
-                        navigationManager.dismissDialog()
-                    },
-                    onQuitAll: {
-                        print("❌ DEBUG: User chose to quit all exercises")
-                        navigationManager.popToRoot()
-                    },
-                    onCancel: {
-                        print("🔄 DEBUG: User chose to continue training")
-                        navigationManager.dismissDialog()
-                    },
-                    currentExerciseName: workoutViewModel.currentExercise.name
-                )
-            case .quitRemainingExercises:
-                EnhancedQuitDialog(
-                    onQuitCurrentExercise: {
-                        print("🏃 DEBUG: User chose to skip current exercise")
-                        workoutViewModel.moveToNextExercise()
-                        navigationManager.dismissDialog()
-                    },
-                    onQuitAll: {
-                        print("❌ DEBUG: User chose to quit all exercises")
-                        navigationManager.popToRoot()
-                    },
-                    onCancel: {
-                        print("🔄 DEBUG: User chose to continue training")
-                        navigationManager.dismissDialog()
-                    },
-                    currentExerciseName: workoutViewModel.currentExercise.name
-                )
-            case .workoutComplete:
-                CompactWorkoutCompleteDialog(
-                    onDismiss: {
-                        navigationManager.popToRoot()
-                    }
-                )
-            }
-        }
-        .zIndex(1000)
-    }
-}
-
-// MARK: - Edit Set Dialog with Parameter Input
-struct CompactEditSetDialog: View {
-    let exercise: Exercise
-    let setIndex: Int
-    let onDismiss: () -> Void
-    @EnvironmentObject var workoutViewModel: WorkoutViewModel
-    @EnvironmentObject var navigationManager: NavigationManager
-
-    @State private var reps: String = ""
-    @State private var weight: String = ""
-
-    init(exercise: Exercise, setIndex: Int, onDismiss: @escaping () -> Void) {
-        self.exercise = exercise
-        self.setIndex = setIndex
-        self.onDismiss = onDismiss
-    }
-
-    var body: some View {
-        VStack(spacing: 20) {
-            // 标题
-            Text("动作完成")
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundColor(.primary)
-
-            Text("完成 \(exercise.name) 第\(setIndex)组")
-                .font(.system(size: 14))
-                .foregroundColor(.gray)
-
-            // 输入区域
-            VStack(spacing: 16) {
-                // 次数输入
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("次数")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.primary)
-
-                    TextField("请输入完成的次数", text: $reps)
-                        .keyboardType(.numberPad)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .font(.system(size: 16))
-                }
-
-                // 重量输入
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("重量 (kg)")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.primary)
-
-                    TextField("请输入使用的重量", text: $weight)
-                        .keyboardType(.decimalPad)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .font(.system(size: 16))
-                }
-            }
-
-            // 按钮区域
-            HStack(spacing: 12) {
-                // 取消按钮
-                Button("取消") {
-                    onDismiss()
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .background(Color.gray.opacity(0.2), in: RoundedRectangle(cornerRadius: 8))
-                .foregroundColor(.primary)
-
-                // 保存按钮
-                Button("保存") {
-                    saveParameters()
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .background(Color.green, in: RoundedRectangle(cornerRadius: 8))
-                .foregroundColor(.white)
-                .disabled(reps.isEmpty || weight.isEmpty)
-                .opacity(reps.isEmpty || weight.isEmpty ? 0.5 : 1.0)
-            }
-        }
-        .padding(20)
-        .background(Color.white, in: RoundedRectangle(cornerRadius: 16))
-        .frame(maxWidth: 320)
-        .onAppear {
-            loadDefaultParameters()
-        }
-    }
-
-    private func loadDefaultParameters() {
-        let defaultParams = workoutViewModel.getDefaultParametersForCurrentExercise()
-        reps = String(defaultParams.reps)
-        weight = defaultParams.weight > 0 ? String(defaultParams.weight) : "自重"
-    }
-
-    private func saveParameters() {
-        guard let actualReps = Int(reps) else {
-            print("❌ ERROR: Invalid reps input: \(reps)")
-            return
-        }
-
-        let actualWeight: Double
-        if weight.lowercased() == "自重" {
-            actualWeight = 0.0
-        } else {
-            guard let weightValue = Double(weight) else {
-                print("❌ ERROR: Invalid weight input: \(weight)")
-                return
-            }
-            actualWeight = weightValue
-        }
-
-        print("💾 DEBUG: saveParameters called - reps: \(actualReps), weight: \(actualWeight)")
-
-        // 添加按钮禁用状态，防止重复点击
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let window = windowScene.windows.first {
-            let saveButton = window.rootViewController?.view.subviews.compactMap { $0 as? UIButton }.first
-            saveButton?.isEnabled = false
-        }
-
-        // 使用新的方法保存参数并完成练习
-        workoutViewModel.completeExerciseWith(actualReps: actualReps, actualWeight: actualWeight)
-
-        // 延迟关闭对话框，确保状态更新完成
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            print("🔚 DEBUG: Dialog dismissed after delay")
-            onDismiss()
-
-            // 重新启用按钮
-            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-               let window = windowScene.windows.first {
-                let saveButton = window.rootViewController?.view.subviews.compactMap { $0 as? UIButton }.first
-                saveButton?.isEnabled = true
-            }
-        }
-    }
-}
-
-struct CompactCompletionDialog: View {
-    let onDismiss: () -> Void
-
-    var body: some View {
-        VStack(spacing: 20) {
-            Text("训练完成")
-                .font(.system(size: 18, weight: .semibold))
-
-            Button("确定") {
-                onDismiss()
-            }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 12)
-            .background(Color.green, in: RoundedRectangle(cornerRadius: 8))
-            .foregroundColor(.white)
-        }
-        .padding(20)
-        .background(Color.white, in: RoundedRectangle(cornerRadius: 16))
-        .frame(maxWidth: 300)
-    }
-}
-
-struct CompactQuitDialog: View {
-    let onConfirm: () -> Void
-    let onCancel: () -> Void
-
-    var body: some View {
-        VStack(spacing: 20) {
-            Text("放弃训练")
-                .font(.system(size: 18, weight: .semibold))
-
-            Text("确定要放弃当前训练吗？")
-                .font(.system(size: 14))
-                .foregroundColor(.gray)
-
-            HStack(spacing: 12) {
-                Button("取消") {
-                    onCancel()
-                }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 12)
-                .background(Color.gray.opacity(0.2), in: RoundedRectangle(cornerRadius: 8))
-
-                Button("放弃") {
-                    onConfirm()
-                }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 12)
-                .background(Color.red, in: RoundedRectangle(cornerRadius: 8))
-                .foregroundColor(.white)
-            }
-        }
-        .padding(20)
-        .background(Color.white, in: RoundedRectangle(cornerRadius: 16))
-        .frame(maxWidth: 300)
-    }
-}
-
-struct CompactWorkoutCompleteDialog: View {
-    let onDismiss: () -> Void
-
-    var body: some View {
-        VStack(spacing: 20) {
-            Text("🎉 训练完成！")
-                .font(.system(size: 18, weight: .semibold))
-
-            Text("恭喜你完成了今天的训练")
-                .font(.system(size: 14))
-                .foregroundColor(.gray)
-
-            Button("完成") {
-                onDismiss()
-            }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 12)
-            .background(Color.green, in: RoundedRectangle(cornerRadius: 8))
-            .foregroundColor(.white)
-        }
-        .padding(20)
-        .background(Color.white, in: RoundedRectangle(cornerRadius: 16))
-        .frame(maxWidth: 300)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(isResting ? "休息时间模块" : "动作时间模块")
     }
 }
 

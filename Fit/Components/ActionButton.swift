@@ -441,8 +441,8 @@ struct WorkoutActionButton: View {
                 pulseAnimation = true
             }
         }
-        .onChange(of: isRunning) { newValue in
-            pulseAnimation = newValue
+        .onChange(of: isRunning) {
+            pulseAnimation = isRunning
         }
     }
 }
