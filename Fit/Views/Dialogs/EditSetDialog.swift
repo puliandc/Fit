@@ -35,7 +35,7 @@ struct EditSetDialog: View {
 
                 Text("动作完成")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.primary)
+                    .foregroundColor(.appPrimary)
 
                 Spacer()
             }
@@ -46,20 +46,20 @@ struct EditSetDialog: View {
             VStack(spacing: 16) {
                 Text("请输入实际完成次数和重量")
                     .font(.system(size: 14, weight: .regular))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.appTextTertiary)
                     .multilineTextAlignment(.center)
 
                 // Reps Input
                 VStack(alignment: .leading, spacing: 8) {
                     Text("完成次数")
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.primary)
+                        .foregroundColor(.appTextTertiary)
 
                     TextField("0", text: $reps)
                         .keyboardType(.numberPad)
                         .textFieldStyle(PlainTextFieldStyle())
                         .font(.system(size: 16, weight: .medium, design: .monospaced))
-                        .foregroundColor(.primary)
+                        .foregroundColor(.appTextTertiary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 12)
@@ -74,13 +74,13 @@ struct EditSetDialog: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("重量 (kg)")
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.primary)
+                        .foregroundColor(.appTextTertiary)
 
                     TextField("0.0", text: $weight)
                         .keyboardType(.decimalPad)
                         .textFieldStyle(PlainTextFieldStyle())
                         .font(.system(size: 16, weight: .medium, design: .monospaced))
-                        .foregroundColor(.primary)
+                        .foregroundColor(.appTextTertiary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 12)
@@ -95,12 +95,12 @@ struct EditSetDialog: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("备注 (可选)")
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.primary)
+                        .foregroundColor(.appTextTertiary)
 
                     TextField("添加备注...", text: $notes)
                         .textFieldStyle(PlainTextFieldStyle())
                         .font(.system(size: 14, weight: .regular))
-                        .foregroundColor(.primary)
+                        .foregroundColor(.appTextTertiary)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 12)
                         .background(Color.gray.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
@@ -197,7 +197,7 @@ struct CompletionDialog: View {
 
                 Text("完成记录")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.primary)
+                    .foregroundColor(.appPrimary)
 
                 Spacer()
             }
@@ -208,7 +208,7 @@ struct CompletionDialog: View {
             VStack(spacing: 16) {
                 Text("请输入您实际完成的次数和重量")
                     .font(.system(size: 14, weight: .regular))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.appTextTertiary)
                     .multilineTextAlignment(.center)
 
                 // Reps Input
@@ -311,7 +311,7 @@ struct QuitDialog: View {
 
                 Text("放弃训练")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.primary)
+                    .foregroundColor(.appPrimary)
             }
             .padding(.top, 20)
             .padding(.bottom, 16)
@@ -320,7 +320,7 @@ struct QuitDialog: View {
             VStack(spacing: 16) {
                 Text("确定要放弃当前训练吗？")
                     .font(.system(size: 14, weight: .regular))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.appTextTertiary)
                     .multilineTextAlignment(.center)
 
                 Text("您的进度将会丢失")
@@ -373,9 +373,9 @@ struct EnhancedQuitDialog: View {
                     .font(.system(size: 32, weight: .medium))
                     .foregroundColor(.blue)
 
-                Text("结束训练")
+                Text("放弃动作")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.primary)
+                    .foregroundColor(.appPrimary)
             }
             .padding(.top, 20)
             .padding(.bottom, 16)
@@ -384,7 +384,7 @@ struct EnhancedQuitDialog: View {
             VStack(spacing: 16) {
                 Text("请选择如何结束训练")
                     .font(.system(size: 14, weight: .regular))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.appTextTertiary)
                     .multilineTextAlignment(.center)
 
                 // Options - 三个按钮按用户要求
@@ -453,12 +453,12 @@ struct QuitOptionCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.primary)
+                        .foregroundColor(.appPrimary)
                         .multilineTextAlignment(.leading)
 
                     Text(description)
                         .font(.system(size: 12, weight: .regular))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.appTextTertiary)
                         .multilineTextAlignment(.leading)
                         .lineLimit(2)
                 }
@@ -491,7 +491,7 @@ struct WorkoutCompleteDialog: View {
 
                 Text("训练完成!")
                     .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.primary)
+                    .foregroundColor(.appPrimary)
             }
             .padding(.top, 20)
             .padding(.bottom, 16)
@@ -500,7 +500,7 @@ struct WorkoutCompleteDialog: View {
             VStack(spacing: 16) {
                 Text("恭喜您完成了今天的训练！")
                     .font(.system(size: 14, weight: .regular))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.appTextTertiary)
                     .multilineTextAlignment(.center)
 
                 // Stats
@@ -508,17 +508,17 @@ struct WorkoutCompleteDialog: View {
                     HStack {
                         Text("总时长:")
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.secondary)
+                            .foregroundColor(.appTextTertiary)
                         Spacer()
                         Text("45:30")
                             .font(.system(size: 14, weight: .semibold, design: .monospaced))
-                            .foregroundColor(.primary)
+                            .foregroundColor(.appPrimary)
                     }
 
                     HStack {
                         Text("消耗卡路里:")
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.secondary)
+                            .foregroundColor(.appTextTertiary)
                         Spacer()
                         Text("280 kcal")
                             .font(.system(size: 14, weight: .semibold))
@@ -528,11 +528,11 @@ struct WorkoutCompleteDialog: View {
                     HStack {
                         Text("完成组数:")
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.secondary)
+                            .foregroundColor(.appTextTertiary)
                         Spacer()
                         Text("12 组")
                             .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(.blue)
+                            .foregroundColor(.appPrimary)
                     }
                 }
                 .padding(.horizontal, 16)
@@ -566,17 +566,11 @@ struct WorkoutCompleteDialog: View {
 struct PrimaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.system(size: 16, weight: .semibold))
+            .font(.system(size: 16, weight: .medium))
             .foregroundColor(.white)
             .frame(height: 56)
             .frame(maxWidth: .infinity)
-            .background(
-                LinearGradient(
-                    colors: [Color.orange, Color.pink, Color.purple],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
-            )
+            .background(Color(hex: "#007AFF"))
             .clipShape(RoundedRectangle(cornerRadius: 16))
             .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
             .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
@@ -587,7 +581,7 @@ struct SecondaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(size: 16, weight: .semibold))
-            .foregroundColor(.primary)
+            .foregroundColor(.appTextTertiary)
             .frame(height: 56)
             .frame(maxWidth: .infinity)
             .background(
