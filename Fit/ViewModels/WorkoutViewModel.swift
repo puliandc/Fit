@@ -34,15 +34,11 @@ class WorkoutViewModel: ObservableObject {
 
     // MARK: - Computed Properties
     var currentExercise: Exercise {
-        print("🐛 DEBUG: currentExerciseIndex = \(currentExerciseIndex), exercises.count = \(workoutPlan.exercises.count)")
-
         guard currentExerciseIndex < workoutPlan.exercises.count else {
             print("🚨 ERROR: currentExerciseIndex (\(currentExerciseIndex)) >= exercises.count (\(workoutPlan.exercises.count))")
             if let firstExercise = workoutPlan.exercises.first {
-                print("🔄 FALLBACK: Using first exercise")
                 return firstExercise.exercise
             } else {
-                print("💥 CRITICAL: No exercises available!")
                 // 创建一个安全的默认练习
                 return Exercise(
                     name: "默认练习",
@@ -59,15 +55,11 @@ class WorkoutViewModel: ObservableObject {
     }
 
     var currentExerciseSet: ExerciseSet {
-        print("🐛 DEBUG: currentExerciseIndex = \(currentExerciseIndex), exercises.count = \(workoutPlan.exercises.count)")
-
         guard currentExerciseIndex < workoutPlan.exercises.count else {
             print("🚨 ERROR: currentExerciseIndex (\(currentExerciseIndex)) >= exercises.count (\(workoutPlan.exercises.count))")
             if let firstExercise = workoutPlan.exercises.first {
-                print("🔄 FALLBACK: Using first exercise set")
                 return firstExercise
             } else {
-                print("💥 CRITICAL: No exercise sets available!")
                 // 创建一个安全的默认练习组
                 let defaultExercise = Exercise(
                     name: "默认练习",
@@ -97,8 +89,6 @@ class WorkoutViewModel: ObservableObject {
 
         // 防止进度超过100%
         let clampedProgress = min(progressValue, 1.0)
-
-        print("🐛 DEBUG: Progress calculation - Completed sets: \(completedSetsCount)/\(totalSets) = \(progressValue) (clamped: \(clampedProgress))")
         return clampedProgress
     }
 
@@ -108,10 +98,6 @@ class WorkoutViewModel: ObservableObject {
 
     // MARK: - Exercise Management
     func startExercise() {
-        print("🐛 DEBUG: WorkoutViewModel.startExercise called")
-        print("🐛 DEBUG: currentExerciseIndex = \(currentExerciseIndex)")
-        print("🐛 DEBUG: exercises.count = \(workoutPlan.exercises.count)")
-
         // 安全检查
         guard currentExerciseIndex < workoutPlan.exercises.count else {
             print("🚨 ERROR: Cannot start exercise - invalid exercise index")
@@ -123,9 +109,7 @@ class WorkoutViewModel: ObservableObject {
         isExerciseActive = true
         isResting = false
 
-        print("🐛 DEBUG: Starting exercise timer...")
         startExerciseTimer()
-        print("🐛 DEBUG: Exercise started successfully")
     }
 
     func pauseExercise() {
@@ -150,21 +134,17 @@ class WorkoutViewModel: ObservableObject {
 
     // 新增：完成指定参数的练习
     func completeExerciseWith(actualReps: Int, actualWeight: Double) {
-        print("🐛 DEBUG: completeExerciseWith called - reps: \(actualReps), weight: \(actualWeight)")
-        print("🐛 DEBUG: Thread: \(Thread.isMainThread ? "Main" : "Background")")
-        print("🐛 DEBUG: Before pause - isExerciseActive: \(isExerciseActive), isResting: \(isResting)")
+        print("🐛 DEBUG: 完成练习 - 次数: \(actualReps), 重量: \(actualWeight)kg")
 
         // 防护：检查训练是否已经完成
         let completedSetsCount = completedSets.count
         let totalSets = workoutPlan.exercises.count
         if completedSetsCount >= totalSets {
-            print("⚠️ WARNING: Workout already completed! Ignoring additional completion.")
+            print("⚠️ WARNING: 训练已完成！忽略额外的完成操作。")
             return
         }
 
         pauseExercise()
-
-        print("🐛 DEBUG: After pause - isExerciseActive: \(isExerciseActive), isResting: \(isResting)")
 
         // Record completed set with user-specified parameters
         let completedSet = CompletedSet(
@@ -174,28 +154,24 @@ class WorkoutViewModel: ObservableObject {
             completedAt: Date()
         )
         completedSets.append(completedSet)
-        print("🐛 DEBUG: Completed set recorded. Total completed sets: \(completedSets.count)")
+
+        // 打印进度更新
+        let newProgress = completedSets.count > 0 ? (Double(completedSets.count) / Double(totalSets) * 100) : 0
+        print("🐛 DEBUG: 进度更新 - 已完成组数: \(completedSets.count)/\(totalSets) = \(Int(newProgress))%")
 
         // 更新进度 - 触发UI刷新
-        print("🐛 DEBUG: Triggering UI refresh with objectWillChange.send()")
         objectWillChange.send()
-
-        // 强制更新主线程上的UI
-        DispatchQueue.main.async {
-            print("🐛 DEBUG: UI refresh triggered on main thread")
-        }
 
         // 检查是否还有更多的组需要完成
         let remainingSetsInWorkout = totalSets - completedSets.count
-        print("🐛 DEBUG: Remaining sets in workout: \(remainingSetsInWorkout)")
 
         if remainingSetsInWorkout > 0 {
             // 进入休息状态，然后继续下一组/下一个动作
-            print("🐛 DEBUG: Starting rest period...")
+            print("🐛 DEBUG: 开始休息时间...")
             startRest()
         } else {
             // 训练完成
-            print("🐛 DEBUG: Workout completed!")
+            print("🐛 DEBUG: 训练完成！")
             pauseExercise()
             // 训练完成对话框将由WorkoutScreen中的进度监听器处理
         }
@@ -264,12 +240,8 @@ class WorkoutViewModel: ObservableObject {
     }
 
     func startRest() {
-        print("🐛 DEBUG: startRest called")
-        print("🐛 DEBUG: Thread: \(Thread.isMainThread ? "Main" : "Background")")
-
         // 确保在主线程上更新UI状态
         DispatchQueue.main.async {
-            print("🐛 DEBUG: Updating rest state on main thread")
             self.isResting = true
             self.isExerciseActive = false
             self.timeLeft = self.currentExerciseSet.restTime
@@ -277,26 +249,18 @@ class WorkoutViewModel: ObservableObject {
             // 更新当前练习索引到下一个动作
             self.moveToNextExerciseOrSet()
 
-            print("🐛 DEBUG: Rest period started, timeLeft: \(self.timeLeft)")
-            print("🐛 DEBUG: Before starting rest timer - isResting: \(self.isResting)")
+            print("🐛 DEBUG: 休息开始，时间: \(self.timeLeft)秒")
 
             // 在主线程上启动休息计时器
             self.startRestTimer()
-
-            print("🐛 DEBUG: Rest timer started - isResting: \(self.isResting)")
         }
     }
 
     // 新增：移动到下一个练习或组
     private func moveToNextExerciseOrSet() {
-        print("🐛 DEBUG: Moving to next exercise/set. Current index: \(currentExerciseIndex)")
-
         // 简化逻辑：每次完成一组后移动到下一个ExerciseSet
         if currentExerciseIndex < workoutPlan.exercises.count - 1 {
             currentExerciseIndex += 1
-            print("🐛 DEBUG: Moved to next exercise. New index: \(currentExerciseIndex)")
-        } else {
-            print("🐛 DEBUG: Already at last exercise")
         }
     }
 
@@ -345,16 +309,10 @@ class WorkoutViewModel: ObservableObject {
         restTimer?.invalidate()
         restTimer = nil
 
-        print("🐛 DEBUG: Rest timer started, \(timeLeft) seconds")
-        print("🐛 DEBUG: Thread: \(Thread.isMainThread ? "Main" : "Background")")
-
         // 确保在主线程上创建和启动计时器
         DispatchQueue.main.async {
-            print("🐛 DEBUG: Creating rest timer on main thread")
-
             self.restTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] timer in
                 guard let self = self else {
-                    print("🚨 ERROR: Timer callback after deallocation")
                     timer.invalidate()
                     return
                 }
@@ -365,12 +323,12 @@ class WorkoutViewModel: ObservableObject {
                         let previousTimeLeft = self.timeLeft
                         self.timeLeft -= 1
 
-                        // 只在时间变化时打印日志，减少日志量
-                        if previousTimeLeft % 5 == 0 || self.timeLeft <= 5 {
-                            print("🐛 DEBUG: Rest timer ticking: \(self.timeLeft)s remaining")
+                        // 只在关键时间点打印日志
+                        if previousTimeLeft % 10 == 0 || self.timeLeft <= 3 {
+                            print("🐛 DEBUG: 休息时间剩余: \(self.timeLeft)秒")
                         }
                     } else {
-                        print("🐛 DEBUG: Rest timer finished, starting next exercise")
+                        print("🐛 DEBUG: 休息结束，开始下一个练习")
                         timer.invalidate()
                         self.restTimer = nil
                         self.isResting = false
@@ -383,7 +341,6 @@ class WorkoutViewModel: ObservableObject {
 
             // 将计时器添加到RunLoop中，确保在真机上正常工作
             let runLoop = RunLoop.current
-            print("🐛 DEBUG: Adding timer to runloop")
             self.restTimer?.fireDate = Date().addingTimeInterval(1.0)
             runLoop.add(self.restTimer!, forMode: .common)
         }

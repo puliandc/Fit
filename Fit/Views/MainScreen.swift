@@ -20,6 +20,11 @@ struct MainScreen: View {
     // 版本1.0: 外部训练计划服务集成
     @StateObject private var externalTrainingService = ExternalTrainingPlanService()
 
+    // 版本1.1: 文件选择功能状态变量
+    @State private var showFilePicker: Bool = false
+    @State private var selectedFileURL: URL?
+    @State private var fileSelectionError: String?
+
     // 调试模式状态变量 - 仅在开发构建中可用
     #if DEBUG
     @State private var isDebugModeEnabled: Bool = false
@@ -153,6 +158,28 @@ struct MainScreen: View {
         .onAppear {
             startAnimations()
         }
+        // 版本1.1: 文件选择器集成
+        .sheet(isPresented: $showFilePicker) {
+            FilePickerView(
+                isPresented: $showFilePicker,
+                onFileSelected: { url in
+                    handleFileSelection(url)
+                },
+                onError: { error in
+                    handleFileSelectionError(error)
+                }
+            )
+        }
+        // 版本1.1: 文件选择错误提示
+        .alert("文件选择错误", isPresented: .constant(fileSelectionError != nil)) {
+            Button("确定") {
+                fileSelectionError = nil
+            }
+        } message: {
+            if let error = fileSelectionError {
+                Text(error)
+            }
+        }
     }
 
     private func startAnimations() {
@@ -175,26 +202,39 @@ struct MainScreen: View {
     }
 
     private func readWorkoutPlan() {
+        print("📱 用户点击文件选择按钮")
+        print("📂 正在从下载文件夹打开文档选择器")
+
+        // 版本1.1: 打开文件选择器而不是模拟处理
+        showFilePicker = true
+    }
+
+    // 版本1.1: 处理文件选择成功
+    private func handleFileSelection(_ url: URL) {
+        print("👆 用户选择了文件: \(url.lastPathComponent)")
+        print("📄 文件路径确认: \(url.path)")
+
+        selectedFileURL = url
         isReadingPlan = true
 
-        print("🔄 版本1.0: 启动训练计划读取流程")
-        print("🏗️ 使用ExternalTrainingPlanService架构")
-        print("📝 注意: 版本1.0保持MockData数据源不变")
-
-        // 版本1.0: 使用外部服务架构，但仍返回MockData
+        // 版本1.1: 使用外部服务处理选中的文件
         Task {
-            // 模拟文件处理流程（版本1.0架构验证）
-            // 使用模拟的文件URL进行架构测试
-            let mockFileURL = URL(fileURLWithPath: "/mock/path/test.json")
-            await externalTrainingService.loadWorkoutPlan(from: mockFileURL)
+            await externalTrainingService.loadWorkoutPlan(from: url)
 
-            // 版本1.0: 完成后仍然使用MockData
+            // 版本1.1: 暂时仍然设置MockData成功状态（将在版本1.2中实际解析）
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 hasWorkoutPlan = true
                 isReadingPlan = false
-                print("✅ 版本1.0: 架构验证完成，继续使用MockData数据源")
+                print("✅ 版本1.1: 文件选择完成，准备进行JSON解析（版本1.2）")
             }
         }
+    }
+
+    // 版本1.1: 处理文件选择错误
+    private func handleFileSelectionError(_ error: String) {
+        print("❌ 文件选择出现错误: \(error)")
+        fileSelectionError = error
+        isReadingPlan = false
     }
 }
 
