@@ -271,7 +271,50 @@ class WorkoutViewModel: ObservableObject {
         print("🐛 DEBUG: 更新组数显示 - 练习: \(currentExercise.name), 当前组: \(currentSet)/\(totalSetsForThisExercise), ExerciseSet位置: \(currentSetNumber)")
     }
 
-    // 新增：公共方法用于跳过当前练习
+    // 新增：跳过当前动作的所有组，移动到下一个不同的动作
+    func skipCurrentExerciseCompletely() {
+        print("🐛 DEBUG: skipCurrentExerciseCompletely called - current exercise: \(currentExercise.name)")
+
+        // 暂停当前练习
+        pauseExercise()
+
+        // 获取当前练习的ID
+        let currentExerciseId = currentExercise.id
+        print("🐛 DEBUG: Current exercise ID: \(currentExerciseId)")
+
+        // 找到下一个不同练习的索引
+        var nextExerciseIndex = currentExerciseIndex + 1
+        while nextExerciseIndex < workoutPlan.exercises.count {
+            let nextExercise = workoutPlan.exercises[nextExerciseIndex].exercise
+            if nextExercise.id != currentExerciseId {
+                // 找到了不同的练习
+                print("🐛 DEBUG: Found next different exercise: \(nextExercise.name) at index \(nextExerciseIndex)")
+                break
+            }
+            nextExerciseIndex += 1
+        }
+
+        if nextExerciseIndex < workoutPlan.exercises.count {
+            // 移动到下一个不同的练习
+            currentExerciseIndex = nextExerciseIndex
+            exerciseElapsedTime = 0
+            print("🐛 DEBUG: Skipped entire exercise \(currentExercise.name). New index: \(currentExerciseIndex)")
+
+            // 更新组数显示
+            updateCurrentSetDisplay()
+
+            // 自动开始新练习
+            startExercise()
+        } else {
+            print("🐛 DEBUG: No more different exercises to skip to, completing workout")
+            // 没有更多不同练习，完成训练
+            DispatchQueue.main.async {
+                self.pauseExercise()
+            }
+        }
+    }
+
+    // 新增：公共方法用于跳过当前练习（保持向后兼容）
     func moveToNextExercise() {
         print("🐛 DEBUG: moveToNextExercise called - current index: \(currentExerciseIndex)")
 

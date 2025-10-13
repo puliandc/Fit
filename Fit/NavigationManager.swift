@@ -73,13 +73,9 @@ class NavigationManager: ObservableObject {
             return
         }
 
-        // 版本1.3: 创建或重用WorkoutViewModel
-        if currentWorkoutViewModel == nil {
-            print("🐛 DEBUG: Creating new WorkoutViewModel for plan: \(plan.name)")
-            currentWorkoutViewModel = WorkoutViewModel(workoutPlan: plan)
-        } else {
-            print("🐛 DEBUG: Reusing existing WorkoutViewModel for plan: \(plan.name)")
-        }
+        // 每次都创建全新的WorkoutViewModel，确保状态完全重置
+        print("🐛 DEBUG: Creating fresh WorkoutViewModel for plan: \(plan.name)")
+        currentWorkoutViewModel = WorkoutViewModel(workoutPlan: plan)
 
         print("🐛 DEBUG: Navigating to workout screen...")
         navigate(to: .workout(plan))

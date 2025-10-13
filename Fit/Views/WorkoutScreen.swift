@@ -98,7 +98,7 @@ struct WorkoutScreen: View {
                     // Enhanced Quit Dialog
                     EnhancedQuitDialog(
                         onQuitCurrentExercise: {
-                            workoutViewModel.moveToNextExercise()
+                            workoutViewModel.skipCurrentExerciseCompletely()
                             navigationManager.dismissDialog()
                         },
                         onQuitAll: {
