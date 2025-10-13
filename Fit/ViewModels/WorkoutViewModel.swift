@@ -21,6 +21,10 @@ class WorkoutViewModel: ObservableObject {
     private var exerciseTimer: Timer?
     private var restTimer: Timer?
 
+    // 版本1.3: 总训练时间跟踪
+    private var workoutStartTime: Date?
+    private var totalRestTime: Int = 0
+
     init(workoutPlan: WorkoutPlan) {
         print("🐛 DEBUG: WorkoutViewModel initializing...")
         print("🐛 DEBUG: Workout plan: \(workoutPlan.name)")
@@ -96,12 +100,34 @@ class WorkoutViewModel: ObservableObject {
         return currentExerciseIndex >= workoutPlan.exercises.count
     }
 
+    // 版本1.3: 计算整个训练计划的总时长
+    var totalWorkoutTime: Int {
+        guard let startTime = workoutStartTime else { return 0 }
+        let elapsed = Int(Date().timeIntervalSince(startTime))
+
+        // 计算总时间：当前经过的时间 + 已完成的休息时间
+        var totalTime = elapsed
+
+        // 如果正在休息，需要减去当前休息的剩余时间（因为我们已经包含了这段时间）
+        if isResting {
+            totalTime -= timeLeft
+        }
+
+        return totalTime
+    }
+
     // MARK: - Exercise Management
     func startExercise() {
         // 安全检查
         guard currentExerciseIndex < workoutPlan.exercises.count else {
             print("🚨 ERROR: Cannot start exercise - invalid exercise index")
             return
+        }
+
+        // 版本1.3: 初始化训练开始时间（仅在第一次开始时）
+        if workoutStartTime == nil {
+            workoutStartTime = Date()
+            print("🐛 DEBUG: 训练开始时间已记录")
         }
 
         print("🐛 DEBUG: Starting exercise: \(currentExercise.name)")
@@ -185,47 +211,15 @@ class WorkoutViewModel: ObservableObject {
         return workoutPlan.exercises.filter { $0.exercise.id == currentExerciseId }.count
     }
 
-    // 新增：获取当前练习的默认次数和重量
+    // 获取当前练习的默认次数和重量
     func getDefaultParametersForCurrentExercise() -> (reps: Int, weight: Double) {
         let targetReps = currentExerciseSet.targetReps
-        var targetWeight = currentExerciseSet.targetWeight
-
-        // 如果目标重量为0，根据器械类型提供智能默认值
-        if targetWeight == 0 {
-            targetWeight = getSmartDefaultWeight(for: currentExercise)
-        }
+        let targetWeight = currentExerciseSet.targetWeight
 
         return (targetReps, targetWeight)
     }
 
-    // 新增：根据器械类型提供智能默认重量
-    private func getSmartDefaultWeight(for exercise: Exercise) -> Double {
-        switch exercise.equipment {
-        case .none:
-            return 0 // 自重练习
-        case .dumbbells:
-            return 10 // 哑铃默认10kg
-        case .barbell:
-            return 20 // 杠铃默认20kg
-        case .kettlebell:
-            return 8 // 壶铃默认8kg
-        case .resistanceBands:
-            return 5 // 弹力带等效重量
-        case .pullUpBar:
-            return 0 // 引体向上杠，自重
-        case .bench:
-            return 0 // 卧推架，本身不增加重量
-        case .machine:
-            return 15 // 器械默认15kg
-        case .cable:
-            return 10 // 拉力机默认10kg
-        case .medicineBall:
-            return 3 // 药球默认3kg
-        case .foamRoller:
-            return 0 // 泡沫轴，自重
-        }
-    }
-
+    
     // 新增：获取指定练习的已完成组数
     func getCompletedSetsCount(for exercise: Exercise) -> Int {
         let exerciseSetIds = workoutPlan.exercises.filter { $0.exercise.id == exercise.id }.map { $0.id }

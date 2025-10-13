@@ -13,6 +13,9 @@ class NavigationManager: ObservableObject {
     @Published var navigationStack: [AppScreen] = []  // iOS 15.0 compatible navigation stack
     @Published var presentedDialog: DialogType?
 
+    // 版本1.3: WorkoutViewModel管理
+    @Published var currentWorkoutViewModel: WorkoutViewModel?
+
     init() {
         print("🎯 NavigationManager initialized with currentScreen: \(currentScreen)")
     }
@@ -68,6 +71,14 @@ class NavigationManager: ObservableObject {
         guard !plan.exercises.isEmpty else {
             print("🚨 ERROR: Cannot start workout - no exercises available")
             return
+        }
+
+        // 版本1.3: 创建或重用WorkoutViewModel
+        if currentWorkoutViewModel == nil {
+            print("🐛 DEBUG: Creating new WorkoutViewModel for plan: \(plan.name)")
+            currentWorkoutViewModel = WorkoutViewModel(workoutPlan: plan)
+        } else {
+            print("🐛 DEBUG: Reusing existing WorkoutViewModel for plan: \(plan.name)")
         }
 
         print("🐛 DEBUG: Navigating to workout screen...")

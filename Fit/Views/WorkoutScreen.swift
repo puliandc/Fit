@@ -242,6 +242,14 @@ struct CompactExerciseInfoCard: View {
         return String(format: "%d:%02d", minutes, seconds)
     }
 
+    // 版本1.3: 计算整个训练计划的总时长
+    private var formattedTotalTime: String {
+        let totalTime = workoutViewModel.totalWorkoutTime
+        let minutes = totalTime / 60
+        let seconds = totalTime % 60
+        return String(format: "%d:%02d", minutes, seconds)
+    }
+
     // 版本1.3: 从workoutViewModel获取当前练习的所有组数信息
     @EnvironmentObject var workoutViewModel: WorkoutViewModel
 
@@ -272,21 +280,17 @@ struct CompactExerciseInfoCard: View {
                 )
                 .frame(maxWidth: .infinity)
 
-            // 版本1.3: 训练计划和器械信息
+            // 版本1.3: 训练器械信息
             HStack(spacing: 8) {
                 Image(systemName: "info.circle.fill")
                     .font(.system(size: 12))
                     .foregroundColor(.blue)
 
-                Text("\(exercise.category.rawValue) • \(exercise.equipment.rawValue)")
+                Text("\(exercise.equipment.rawValue)")
                     .font(.system(size: 12, weight: .medium))
                     .foregroundColor(.blue)
 
                 Spacer()
-
-                Text("难度: \(exercise.difficulty.rawValue)")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.orange)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
@@ -424,7 +428,7 @@ struct CompactExerciseInfoCard: View {
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.gray)
 
-                Text("训练计时: \(formattedTime)")
+                Text("训练总计时: \(formattedTotalTime)")
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.gray)
 
