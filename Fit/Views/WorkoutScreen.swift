@@ -254,7 +254,7 @@ struct CompactWorkoutHeader: View {
 }
 
 
-// MARK: - Compact Exercise Info Card
+// MARK: - Compact Exercise Info Card (版本1.3增强)
 struct CompactExerciseInfoCard: View {
     let exercise: Exercise
     let currentSet: Int
@@ -267,6 +267,22 @@ struct CompactExerciseInfoCard: View {
         let minutes = elapsedTime / 60
         let seconds = elapsedTime % 60
         return String(format: "%d:%02d", minutes, seconds)
+    }
+
+    // 版本1.3: 从workoutViewModel获取当前练习的所有组数信息
+    @EnvironmentObject var workoutViewModel: WorkoutViewModel
+
+    private var allExerciseSets: [ExerciseSet] {
+        workoutViewModel.workoutPlan.exercises.filter { $0.exercise.name == exercise.name }
+    }
+
+    private var nextSetInfo: String? {
+        guard currentSet < totalSets else { return nil }
+        if currentSet < allExerciseSets.count {
+            let nextSet = allExerciseSets[currentSet]
+            return "下一组: \(nextSet.targetReps)次 × \(Int(nextSet.targetWeight))kg"
+        }
+        return nil
     }
 
     var body: some View {
@@ -283,8 +299,27 @@ struct CompactExerciseInfoCard: View {
                 )
                 .frame(maxWidth: .infinity)
 
+            // 版本1.3: 训练计划和器械信息
+            HStack(spacing: 8) {
+                Image(systemName: "info.circle.fill")
+                    .font(.system(size: 12))
+                    .foregroundColor(.blue)
 
-            // 组数、次数和重量模块 - 基于Figma设计的优化布局，移除编辑按钮
+                Text("\(exercise.category.rawValue) • \(exercise.equipment.rawValue)")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.blue)
+
+                Spacer()
+
+                Text("难度: \(exercise.difficulty.rawValue)")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.orange)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(Color.blue.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
+
+            // 组数、次数和重量模块 - 增强版本
             VStack(spacing: 12) {
                 // 当前组数模块 - 蓝色背景
                 HStack {
@@ -322,6 +357,12 @@ struct CompactExerciseInfoCard: View {
                         )
                 )
 
+                // 版本1.3: 本轮训练进度
+                ProgressView(value: Double(currentSet) / Double(totalSets))
+                    .progressViewStyle(LinearProgressViewStyle(tint: .blue))
+                    .scaleEffect(x: 1, y: 2, anchor: .center)
+                .padding(.horizontal, 16)
+
                 // 次数和重量模块 - 水平排列，基于Figma设计
                 HStack(spacing: 12) {
                     // 次数模块 - 绿色主题
@@ -332,7 +373,7 @@ struct CompactExerciseInfoCard: View {
                                 .foregroundColor(.green)
                         }
 
-                        Text("次数")
+                        Text("目标次数")
                             .font(.system(size: 12, weight: .medium))
                             .foregroundColor(.gray)
 
@@ -359,7 +400,7 @@ struct CompactExerciseInfoCard: View {
                                 .foregroundColor(.purple)
                         }
 
-                        Text("重量 (kg)")
+                        Text("目标重量 (kg)")
                             .font(.system(size: 12, weight: .medium))
                             .foregroundColor(.gray)
 
@@ -384,9 +425,41 @@ struct CompactExerciseInfoCard: View {
                             )
                     )
                 }
+
+                // 版本1.3: 下一组提示
+                if let nextInfo = nextSetInfo {
+                    HStack {
+                        Image(systemName: "arrow.right.circle.fill")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.cyan)
+
+                        Text(nextInfo)
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.cyan)
+
+                        Spacer()
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(Color.cyan.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
+                }
             }
 
-          }
+            // 版本1.3: 训练计时
+            HStack {
+                Image(systemName: "clock")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.gray)
+
+                Text("训练计时: \(formattedTime)")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.gray)
+
+                Spacer()
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+        }
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 14)

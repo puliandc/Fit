@@ -1,5 +1,5 @@
 //created by Jason Lu on 09:45:00 10/13/2025
-// FIT应用外部训练计划服务 - 版本1.0核心服务重构
+// FIT应用外部训练计划服务 - 版本1.3完整训练计划解析实现
 
 import Foundation
 import SwiftUI
@@ -21,23 +21,23 @@ class ExternalTrainingPlanService: ObservableObject {
 
     // 服务初始化
     init() {
-        print("🚀 版本1.0: ExternalTrainingPlanService核心服务重构开始")
+        print("🚀 版本1.3: ExternalTrainingPlanService完整训练计划解析服务初始化")
         print("📁 建立外部文件处理架构")
         print("🔒 文件验证器已集成")
-        print("📖 JSON解析器已集成")
-        print("🏗️ 版本1.0目标: 建立架构基础，不改变现有MockData数据源")
+        print("📖 JSON解析器已集成 - 支持完整训练数据解析")
+        print("🏗️ 版本1.3目标: 实现完整训练计划显示功能")
 
         // 标记架构准备就绪
         architectureReady = true
 
-        print("✅ 版本1.0: 核心服务架构建立完成")
+        print("✅ 版本1.3: 完整训练计划解析服务初始化完成")
     }
 
-    // 版本1.2: 文件处理基础架构（实现实际JSON解析）
+    // 版本1.3: 完整训练计划文件处理
     func loadWorkoutPlan(from url: URL) async {
-        print("🔄 版本1.2: 启动外部训练计划处理流程")
+        print("🔄 版本1.3: 启动完整训练计划处理流程")
         print("📍 文件路径: \(url.lastPathComponent)")
-        print("🏗️ 版本1.2: 实际JSON解析阶段")
+        print("🏗️ 版本1.3: 完整训练计划解析阶段")
 
         do {
             isLoading = true
@@ -53,32 +53,53 @@ class ExternalTrainingPlanService: ObservableObject {
             let data = try Data(contentsOf: url, options: [.mappedIfSafe])
             print("📊 文件大小: \(data.count) 字节")
 
-            // 3. 版本1.2: 实际JSON解析
-            print("🔍 步骤3: 版本1.2 JSON解析")
+            // 3. 版本1.3: 完整JSON解析
+            print("🔍 步骤3: 版本1.3 完整训练计划解析")
             print("📖 开始解析JSON文件: \(url.lastPathComponent)")
 
             let workoutPlan = try jsonParser.parseWorkoutPlan(from: data)
 
             // 4. 设置解析结果
-            print("🎯 JSON解析成功，设置训练计划")
+            print("🎯 完整训练计划解析成功，设置训练计划")
             currentWorkoutPlan = workoutPlan
 
-            print("✅ 版本1.2: 训练计划加载完成")
+            print("✅ 版本1.3: 完整训练计划加载完成")
             print("📝 计划名称: \(workoutPlan.name)")
-            print("📝 练习数量: \(workoutPlan.exercises.count)")
+            print("📝 训练组数: \(workoutPlan.exercises.count)")
+            print("📝 预估时长: \(workoutPlan.duration)分钟")
+            print("📝 预估热量: \(workoutPlan.estimatedCalories)卡路里")
+
+            // 版本1.3: 显示解析出的练习项目详情
+            print("📋 练习项目详情:")
+            var currentExerciseName: String? = nil
+            var exerciseGroupCount = 0
+
+            for (index, exerciseSet) in workoutPlan.exercises.enumerated() {
+                let exerciseName = exerciseSet.exercise.name
+
+                if exerciseName != currentExerciseName {
+                    currentExerciseName = exerciseName
+                    exerciseGroupCount = 1
+                    print("  🏋️ 练习 \(exerciseName)")
+                } else {
+                    exerciseGroupCount += 1
+                }
+
+                print("    📊 第\(exerciseGroupCount)组: \(exerciseSet.targetReps)次 × \(exerciseSet.targetWeight)kg，休息\(exerciseSet.restTime)秒")
+            }
 
         } catch {
             errorMessage = "JSON解析失败 - \(error.localizedDescription)"
-            print("❌ JSON解析过程中出现错误: \(error.localizedDescription)")
+            print("❌ 完整训练计划解析过程中出现错误: \(error.localizedDescription)")
 
-            // 版本1.2: 提供更详细的错误信息
+            // 版本1.3: 提供更详细的错误信息
             if let parseError = error as? JSONParseError {
                 print("🚨 解析错误类型: \(parseError.localizedDescription)")
             }
         }
 
         isLoading = false
-        print("✅ 版本1.2: JSON解析流程完成")
+        print("✅ 版本1.3: 完整训练计划解析流程完成")
     }
 
     // 版本1.0: 模拟架构处理流程
