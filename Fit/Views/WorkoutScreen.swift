@@ -280,22 +280,7 @@ struct CompactExerciseInfoCard: View {
                 )
                 .frame(maxWidth: .infinity)
 
-            // 版本1.3: 训练器械信息
-            HStack(spacing: 8) {
-                Image(systemName: "info.circle.fill")
-                    .font(.system(size: 12))
-                    .foregroundColor(.blue)
-
-                Text("\(exercise.equipment.rawValue)")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.blue)
-
-                Spacer()
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(Color.blue.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
-
+  
             // 组数、次数和重量模块 - 增强版本
             VStack(spacing: 12) {
                 // 当前组数模块 - 蓝色背景
