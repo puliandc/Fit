@@ -11,40 +11,13 @@ import SwiftUI
 
 struct WorkoutScreen: View {
     @EnvironmentObject var navigationManager: NavigationManager
-    @StateObject private var workoutViewModel: WorkoutViewModel
+    @EnvironmentObject var workoutViewModel: WorkoutViewModel
     @State private var showContent: Bool = false
 
+    // 保持init方法用于接收workoutPlan参数，但不创建WorkoutViewModel
     init(workoutPlan: WorkoutPlan) {
-        // 安全验证
-        guard !workoutPlan.exercises.isEmpty else {
-            let safeWorkoutPlan = WorkoutPlan(
-                name: "默认训练计划",
-                description: "默认训练计划，请联系开发者",
-                category: .fullBody,
-                difficulty: .beginner,
-                duration: 30,
-                exercises: [
-                    ExerciseSet(
-                        exercise: Exercise(
-                            name: "默认练习",
-                            category: .strength,
-                            muscleGroups: [.chest],
-                            equipment: .none,
-                            difficulty: .beginner,
-                            instructions: ["请联系开发者"],
-                            imageName: "default"
-                        ),
-                        targetReps: 1,
-                        targetWeight: 0
-                    )
-                ],
-                estimatedCalories: 100
-            )
-            _workoutViewModel = StateObject(wrappedValue: WorkoutViewModel(workoutPlan: safeWorkoutPlan))
-            return
-        }
-
-        _workoutViewModel = StateObject(wrappedValue: WorkoutViewModel(workoutPlan: workoutPlan))
+        // 这个init方法现在只用于确保workoutPlan的有效性
+        // WorkoutViewModel现在由环境提供
     }
 
     var body: some View {
@@ -933,5 +906,6 @@ struct CompactWorkoutCompleteDialog: View {
 #Preview {
     WorkoutScreen(workoutPlan: MockDataProvider.previewWorkout)
         .environmentObject(NavigationManager.preview)
+        .environmentObject(WorkoutViewModel(workoutPlan: MockDataProvider.previewWorkout))
         .preferredColorScheme(.dark)
 }
