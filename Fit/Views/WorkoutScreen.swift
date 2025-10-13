@@ -102,8 +102,12 @@ struct WorkoutScreen: View {
                             navigationManager.dismissDialog()
                         },
                         onQuitAll: {
-                            navigationManager.popToRoot()
+                            workoutViewModel.skipAllRemainingExercises()
                             navigationManager.dismissDialog()
+                            // 延迟触发训练完成对话框，确保状态更新完成
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                navigationManager.completeWorkout()
+                            }
                         },
                         onCancel: {
                             navigationManager.dismissDialog()

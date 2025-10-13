@@ -98,11 +98,19 @@ struct ContentView: View {
                     EmptyView()
 
                 case .workoutComplete:
-                    WorkoutCompleteDialog(
-                        onDismiss: {
-                            navigationManager.popToRoot()
+                    Group {
+                        if let workoutViewModel = navigationManager.currentWorkoutViewModel {
+                            WorkoutCompleteDialog(
+                                onDismiss: {
+                                    navigationManager.dismissDialog()
+                                    navigationManager.popToRoot()
+                                },
+                                workoutViewModel: workoutViewModel
+                            )
+                        } else {
+                            EmptyView()
                         }
-                    )
+                    }
                     .transition(.asymmetric(
                         insertion: .scale.combined(with: .opacity),
                         removal: .opacity
