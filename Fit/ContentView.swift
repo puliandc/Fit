@@ -21,12 +21,20 @@ struct ContentView: View {
                     ))
 
             case .workout(let workoutPlan):
-                WorkoutScreen(workoutPlan: workoutPlan)
-                    .environmentObject(WorkoutViewModel(workoutPlan: workoutPlan))
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .trailing),
-                        removal: .move(edge: .leading)
-                    ))
+                if let workoutViewModel = navigationManager.currentWorkoutViewModel {
+                    WorkoutScreen(workoutPlan: workoutPlan)
+                        .environmentObject(workoutViewModel)
+                        .transition(.asymmetric(
+                            insertion: .move(edge: .trailing),
+                            removal: .move(edge: .leading)
+                        ))
+                } else {
+                    // Fallback if no WorkoutViewModel exists
+                    Text("训练数据加载中...")
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color.black)
+                }
 
             case .settings:
                 SettingsScreen()
