@@ -115,6 +115,28 @@ struct WorkoutScreen: View {
                         removal: .opacity
                     ))
 
+                case .editSet(let exercise, let setIndex, let workoutViewModel):
+                    // Background overlay
+                    Color.black.opacity(0.4)
+                        .ignoresSafeArea()
+                        .onTapGesture {
+                            navigationManager.dismissDialog()
+                        }
+
+                    // Edit Set Dialog - 动作完成对话框
+                    EditSetDialog(
+                        exercise: exercise,
+                        setIndex: setIndex,
+                        onDismiss: {
+                            navigationManager.dismissDialog()
+                        },
+                        workoutViewModel: workoutViewModel
+                    )
+                    .transition(.asymmetric(
+                        insertion: .scale.combined(with: .opacity),
+                        removal: .opacity
+                    ))
+
                 default:
                     EmptyView()
                 }
@@ -125,6 +147,8 @@ struct WorkoutScreen: View {
             // 安全检查
             guard !workoutViewModel.workoutPlan.exercises.isEmpty else { return }
 
+            // 简化计时方案：重置计时器（处理应用恢复）
+            workoutViewModel.resetTimerIfNeeded()
             workoutViewModel.startExercise()
 
             withAnimation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.2)) {

@@ -21,9 +21,8 @@ class WorkoutViewModel: ObservableObject {
     private var exerciseTimer: Timer?
     private var restTimer: Timer?
 
-    // 版本1.3: 总训练时间跟踪
+    // 简化计时方案：只记录开始时间
     private var workoutStartTime: Date?
-    private var totalRestTime: Int = 0
 
     init(workoutPlan: WorkoutPlan) {
         print("🐛 DEBUG: WorkoutViewModel initializing...")
@@ -103,20 +102,10 @@ class WorkoutViewModel: ObservableObject {
         return currentExerciseIndex >= workoutPlan.exercises.count
     }
 
-    // 版本1.3: 计算整个训练计划的总时长
+    // 简化计时方案：实时计算训练总时长
     var totalWorkoutTime: Int {
         guard let startTime = workoutStartTime else { return 0 }
-        let elapsed = Int(Date().timeIntervalSince(startTime))
-
-        // 计算总时间：当前经过的时间 + 已完成的休息时间
-        var totalTime = elapsed
-
-        // 如果正在休息，需要减去当前休息的剩余时间（因为我们已经包含了这段时间）
-        if isResting {
-            totalTime -= timeLeft
-        }
-
-        return totalTime
+        return Int(Date().timeIntervalSince(startTime))
     }
 
     // MARK: - Exercise Management
@@ -127,10 +116,10 @@ class WorkoutViewModel: ObservableObject {
             return
         }
 
-        // 版本1.3: 初始化训练开始时间（仅在第一次开始时）
+        // 简化计时方案：记录训练开始时间（仅在第一次开始时）
         if workoutStartTime == nil {
             workoutStartTime = Date()
-            print("🐛 DEBUG: 训练开始时间已记录")
+            print("🐛 DEBUG: 训练开始时间已记录: \(workoutStartTime!)")
         }
 
         print("🐛 DEBUG: Starting exercise: \(currentExercise.name)")
@@ -313,6 +302,21 @@ class WorkoutViewModel: ObservableObject {
         restTimer?.invalidate()
         isResting = false
         startExercise()
+    }
+
+    // 简化计时方案：处理应用恢复时的计时同步
+    func resetTimerIfNeeded() {
+        guard let startTime = workoutStartTime else { return }
+
+        // 计算应该经过的时间
+        let elapsedTime = Int(Date().timeIntervalSince(startTime))
+
+        // 更新动作计时器显示
+        if isExerciseActive {
+            exerciseElapsedTime = elapsedTime
+        }
+
+        print("🐛 DEBUG: 计时器已重置 - 总时长: \(elapsedTime)秒")
     }
 
     // MARK: - Timer Management

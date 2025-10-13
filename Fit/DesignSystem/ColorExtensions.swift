@@ -29,6 +29,7 @@ extension Color {
     // MARK: - Text Colors - 文本层级
     static let appText = Color(hex: "#FAFAFA") // Zinc-50
     static let appTextSecondary = Color(hex: "#A1A1AA") // Zinc-400
+    static let appTextTertiary = Color(hex: "#71717A") // Zinc-500
     static let appTextMuted = Color(hex: "#71717A") // Zinc-500
     static let appTextDisabled = Color(hex: "#52525B") // Zinc-600
 
