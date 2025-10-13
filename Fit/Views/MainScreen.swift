@@ -959,9 +959,21 @@ struct CompleteWorkoutPlanCard: View {
     @State private var showAllExercises: Bool = false
 
     private var exerciseGroups: [(String, [ExerciseSet])] {
-        // 按练习名称分组
-        let grouped = Dictionary(grouping: workoutPlan.exercises) { $0.exercise.name }
-        return grouped.sorted { $0.key < $1.key }
+        // 保持原始顺序进行分组，避免字典重排序
+        var seenNames = Set<String>()
+        var groupedItems: [(String, [ExerciseSet])] = []
+
+        for exerciseSet in workoutPlan.exercises {
+            let exerciseName = exerciseSet.exercise.name
+
+            if !seenNames.contains(exerciseName) {
+                seenNames.insert(exerciseName)
+                let exercisesForName = workoutPlan.exercises.filter { $0.exercise.name == exerciseName }
+                groupedItems.append((exerciseName, exercisesForName))
+            }
+        }
+
+        return groupedItems
     }
 
     var body: some View {
@@ -1029,22 +1041,6 @@ struct CompleteWorkoutPlanCard: View {
                     )
                 }
                 .padding(.horizontal, 4)
-
-                // 预估热量
-                HStack {
-                    Image(systemName: "flame.fill")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.red)
-
-                    Text("预估消耗: \(workoutPlan.estimatedCalories) 卡路里")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.red)
-
-                    Spacer()
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-                .background(Color.red.opacity(0.1), in: RoundedRectangle(cornerRadius: 10))
             }
 
             // 练习项目列表
@@ -1052,7 +1048,7 @@ struct CompleteWorkoutPlanCard: View {
                 HStack {
                     Text("练习项目")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.primary)
+                        .foregroundColor(.appText)
 
                     Spacer()
 
@@ -1108,7 +1104,7 @@ struct CompleteWorkoutPlanCard: View {
                             HStack {
                                 Text("还有 \(exerciseGroups.count - 3) 个练习项目...")
                                     .font(.system(size: 12, weight: .medium))
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(.appTextSecondary)
                                 Spacer()
                             }
                             .padding(.horizontal, 16)
@@ -1160,7 +1156,7 @@ struct StatItem: View {
 
             Text(label)
                 .font(.system(size: 11, weight: .medium))
-                .foregroundColor(.secondary)
+                .foregroundColor(.appTextSecondary)
         }
         .frame(maxWidth: .infinity)
         .scaleEffect(isVisible ? 1.0 : 0.8)
@@ -1190,13 +1186,13 @@ struct ExerciseGroupRow: View {
 
                 Text(exerciseName)
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.primary)
+                    .foregroundColor(.appText)
 
                 Spacer()
 
                 Text("\(exerciseSets.count)组")
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.appTextSecondary)
             }
 
             // 组数详情（仅在展开时显示）
@@ -1207,11 +1203,11 @@ struct ExerciseGroupRow: View {
                         HStack {
                             Text("第\(index + 1)组:")
                                 .font(.system(size: 12))
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.appTextSecondary)
 
                             Text("\(exerciseSet.targetReps)次 × \(Int(exerciseSet.targetWeight))kg")
                                 .font(.system(size: 12, weight: .medium))
-                                .foregroundColor(.primary)
+                                .foregroundColor(.appText)
 
                             Spacer()
 
