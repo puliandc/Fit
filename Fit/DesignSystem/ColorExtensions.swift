@@ -41,7 +41,6 @@ extension Color {
 
     // MARK: - Status Colors - 状态色彩
     static let success = Color(hex: "#22C55E") // Green-500
-    static let successLight = Color(hex: "#4ADE80") // Green-400
     static let warning = Color(hex: "#F59E0B") // Amber-500
     static let error = Color(hex: "#EF4444") // Red-500
     static let info = Color(hex: "#3B82F6") // Blue-500
@@ -53,9 +52,6 @@ extension Color {
     static let accentGradientStart = Color(hex: "#F97316") // Orange
     static let accentGradientEnd = Color(hex: "#EC4899") // Pink
 
-    static let successGradientStart = Color(hex: "#22C55E") // Green
-    static let successGradientEnd = Color(hex: "#14B8A6") // Teal
-
     // MARK: - Feature Colors - 功能特色色彩
     static let workoutColor = Color(hex: "#F97316") // Orange
     static let restColor = Color(hex: "#3B82F6") // Blue
@@ -64,7 +60,6 @@ extension Color {
     // MARK: - Animation Colors - 动画色彩
     static let pulseColor = Color(hex: "#A855F7") // Purple
     static let highlightColor = Color(hex: "#FCD34D") // Yellow
-    static let shimmerColor = Color.white.opacity(0.3)
 }
 
 // MARK: - Color Initializer
@@ -111,13 +106,7 @@ extension LinearGradient {
         endPoint: .bottomTrailing
     )
 
-    // 成功渐变 - 用于完成状态
-    static let successGradient = LinearGradient(
-        colors: [.successGradientStart, .successGradientEnd],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
-
+    
     // 训练渐变 - 运动相关
     static let workoutGradient = LinearGradient(
         colors: [.workoutColor, .accentGradientEnd],

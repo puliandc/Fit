@@ -70,7 +70,7 @@ extension View {
         self
             .overlay(
                 LinearGradient(
-                    colors: [.clear, .shimmerColor, .clear],
+                    colors: [.clear, Color.white.opacity(0.3), .clear],
                     startPoint: .leading,
                     endPoint: .trailing
                 )
