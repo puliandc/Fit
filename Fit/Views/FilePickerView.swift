@@ -142,7 +142,7 @@ enum FileValidationResult {
 
 // MARK: - Preview
 #Preview {
-    @State var isPresented = false
+    @Previewable @State var isPresented = false
 
     return VStack {
         Button("选择文件") {

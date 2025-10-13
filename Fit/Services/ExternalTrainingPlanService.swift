@@ -74,7 +74,7 @@ class ExternalTrainingPlanService: ObservableObject {
             var currentExerciseName: String? = nil
             var exerciseGroupCount = 0
 
-            for (index, exerciseSet) in workoutPlan.exercises.enumerated() {
+            for (_, exerciseSet) in workoutPlan.exercises.enumerated() {
                 let exerciseName = exerciseSet.exercise.name
 
                 if exerciseName != currentExerciseName {

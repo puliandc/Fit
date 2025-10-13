@@ -27,6 +27,9 @@ struct EditSetDialog: View {
                         .foregroundColor(.secondary)
                 }
                 .buttonStyle(PlainButtonStyle())
+                .accessibilityLabel("关闭对话框")
+                .accessibilityHint("点击这里关闭对话框而不保存更改")
+                .accessibilityAddTraits(.isButton)
 
                 Spacer()
 
@@ -41,7 +44,7 @@ struct EditSetDialog: View {
 
             // Content
             VStack(spacing: 16) {
-                Text("调整这组训练的参数")
+                Text("请输入实际完成次数和重量")
                     .font(.system(size: 14, weight: .regular))
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -124,7 +127,15 @@ struct EditSetDialog: View {
             .padding(.horizontal, 20)
             .padding(.bottom, 20)
         }
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color(red: 1.0, green: 1.0, blue: 1.0, opacity: 0.95))
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(.ultraThinMaterial)
+                        .opacity(0.3)
+                )
+        )
         .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
         .frame(maxWidth: 320)
         .onAppear {
@@ -133,9 +144,10 @@ struct EditSetDialog: View {
     }
 
     private func loadCurrentValues() {
-        // Load current values from the exercise or use defaults
-        reps = "8"
-        weight = "60"
+        // 从训练计划中获取当前练习的目标次数和目标重量
+        let currentExerciseSet = workoutViewModel.currentExerciseSet
+        reps = String(currentExerciseSet.targetReps)
+        weight = currentExerciseSet.targetWeight > 0 ? String(currentExerciseSet.targetWeight) : "自重"
     }
 
     private func saveChanges() {
@@ -258,7 +270,15 @@ struct CompletionDialog: View {
             .padding(.horizontal, 20)
             .padding(.bottom, 20)
         }
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color(red: 1.0, green: 1.0, blue: 1.0, opacity: 0.95))
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(.ultraThinMaterial)
+                        .opacity(0.3)
+                )
+        )
         .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
         .frame(maxWidth: 320)
         .onAppear {
@@ -324,7 +344,15 @@ struct QuitDialog: View {
             .padding(.horizontal, 20)
             .padding(.bottom, 20)
         }
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color(red: 1.0, green: 1.0, blue: 1.0, opacity: 0.95))
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(.ultraThinMaterial)
+                        .opacity(0.3)
+                )
+        )
         .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
         .frame(maxWidth: 300)
     }
@@ -392,7 +420,15 @@ struct EnhancedQuitDialog: View {
             .padding(.horizontal, 20)
             .padding(.bottom, 20)
         }
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color(red: 1.0, green: 1.0, blue: 1.0, opacity: 0.95))
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(.ultraThinMaterial)
+                        .opacity(0.3)
+                )
+        )
         .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
         .frame(maxWidth: 360)
     }
@@ -512,7 +548,15 @@ struct WorkoutCompleteDialog: View {
             .padding(.horizontal, 20)
             .padding(.bottom, 20)
         }
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color(red: 1.0, green: 1.0, blue: 1.0, opacity: 0.95))
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(.ultraThinMaterial)
+                        .opacity(0.3)
+                )
+        )
         .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
         .frame(maxWidth: 320)
     }
@@ -546,7 +590,14 @@ struct SecondaryButtonStyle: ButtonStyle {
             .foregroundColor(.primary)
             .frame(height: 56)
             .frame(maxWidth: .infinity)
-            .background(Color.gray.opacity(0.2), in: RoundedRectangle(cornerRadius: 16))
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color.gray.opacity(0.15))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(Color.gray.opacity(0.4), lineWidth: 1.5)
+                    )
+            )
             .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
             .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
     }
