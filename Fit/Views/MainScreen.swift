@@ -58,7 +58,9 @@ struct MainScreen: View {
                             title: "读取健身计划",
                             subtitle: "从 iOS 备忘录读取您的健身训练计划",
                             hasContent: hasWorkoutPlan,
-                            contentText: "计划读取成功",
+                            contentText: hasWorkoutPlan ?
+                                (externalTrainingService.currentWorkoutPlan?.name ?? "计划读取成功") :
+                                "计划读取成功",
                             isLoading: isReadingPlan,
                             buttonText: hasWorkoutPlan ? "重新读取" : "读取计划",
                             buttonAction: {
@@ -76,14 +78,16 @@ struct MainScreen: View {
                             title: "开始训练",
                             subtitle: hasWorkoutPlan ? "您的健身计划已准备就绪，开始今天的训练吧！" : "请先读取健身计划以开始训练",
                             hasContent: hasWorkoutPlan,
-                            contentText: "准备就绪",
+                            contentText: hasWorkoutPlan ?
+                                (externalTrainingService.currentWorkoutPlan?.name ?? "准备就绪") :
+                                "准备就绪",
                             isLoading: false,
                             buttonText: "开始训练",
                             buttonAction: {
                                 if hasWorkoutPlan {
-                                    if let workoutPlan = MockDataProvider.shared.sampleWorkoutPlans.first {
-                                        navigationManager.startWorkout(workoutPlan)
-                                    }
+                                    // 版本1.2: 优先使用解析的训练计划，fallback到MockData
+                                    let workoutPlan = externalTrainingService.currentWorkoutPlan ?? MockDataProvider.shared.sampleWorkoutPlans.first!
+                                    navigationManager.startWorkout(workoutPlan)
                                 }
                             },
                             cardColor: .appAccent,
@@ -180,6 +184,16 @@ struct MainScreen: View {
                 Text(error)
             }
         }
+        // 版本1.2: JSON解析错误提示
+        .alert("JSON解析错误", isPresented: .constant(externalTrainingService.errorMessage != nil)) {
+            Button("确定") {
+                externalTrainingService.clearError()
+            }
+        } message: {
+            if let error = externalTrainingService.errorMessage {
+                Text(error)
+            }
+        }
     }
 
     private func startAnimations() {
@@ -209,7 +223,7 @@ struct MainScreen: View {
         showFilePicker = true
     }
 
-    // 版本1.1: 处理文件选择成功
+    // 版本1.2: 处理文件选择成功
     private func handleFileSelection(_ url: URL) {
         print("👆 用户选择了文件: \(url.lastPathComponent)")
         print("📄 文件路径确认: \(url.path)")
@@ -217,15 +231,21 @@ struct MainScreen: View {
         selectedFileURL = url
         isReadingPlan = true
 
-        // 版本1.1: 使用外部服务处理选中的文件
+        // 版本1.2: 使用外部服务处理选中的文件，进行实际JSON解析
         Task {
             await externalTrainingService.loadWorkoutPlan(from: url)
 
-            // 版本1.1: 暂时仍然设置MockData成功状态（将在版本1.2中实际解析）
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                hasWorkoutPlan = true
+            // 版本1.2: 根据解析结果更新界面状态
+            DispatchQueue.main.async {
+                if externalTrainingService.currentWorkoutPlan != nil {
+                    hasWorkoutPlan = true
+                    print("✅ 版本1.2: JSON解析成功，训练计划已加载")
+                } else if let error = externalTrainingService.errorMessage {
+                    print("❌ 版本1.2: JSON解析失败: \(error)")
+                    // 错误已经在服务中处理，这里不需要额外处理
+                }
+
                 isReadingPlan = false
-                print("✅ 版本1.1: 文件选择完成，准备进行JSON解析（版本1.2）")
             }
         }
     }
@@ -754,17 +774,46 @@ struct DebugModeSection: View {
                         action: onSimulateSuccess
                     )
 
-                    // 版本1.0架构测试按钮
+                    // 版本1.2架构测试按钮
                     DebugActionButton(
                         icon: "gear.circle.fill",
-                        title: "版本1.0架构测试",
-                        subtitle: "测试ExternalTrainingPlanService架构",
+                        title: "版本1.2JSON解析测试",
+                        subtitle: "测试ExternalTrainingPlanService JSON解析功能",
                         color: .warning,
                         action: {
-                            print("🐛 DEBUG: 版本1.0架构测试开始")
+                            print("🐛 DEBUG: 版本1.2 JSON解析测试开始")
                             Task {
-                                let testURL = URL(fileURLWithPath: "/test/test.json")
+                                // 尝试读取test.json文件
+                                let testPath = "/Users/lujiaxian/APP/Fit/test.json"
+                                let testURL = URL(fileURLWithPath: testPath)
                                 await externalTrainingService.loadWorkoutPlan(from: testURL)
+                            }
+                        }
+                    )
+
+                    // 显示当前训练计划信息按钮
+                    DebugActionButton(
+                        icon: "info.circle.fill",
+                        title: "显示当前训练计划信息",
+                        subtitle: "查看解析出的训练计划详细信息",
+                        color: .appPrimary,
+                        action: {
+                            print("🐛 DEBUG: 显示当前训练计划信息")
+                            if let workoutPlan = externalTrainingService.currentWorkoutPlan {
+                                print("📋 训练计划名称: \(workoutPlan.name)")
+                                print("📋 训练计划描述: \(workoutPlan.description)")
+                                print("📋 练习数量: \(workoutPlan.exercises.count)")
+                                print("📋 预估时长: \(workoutPlan.duration) 分钟")
+                                print("📋 预估热量: \(workoutPlan.estimatedCalories) 卡路里")
+
+                                for (index, exerciseSet) in workoutPlan.exercises.enumerated() {
+                                    print("  📝 练习 \(index + 1): \(exerciseSet.exercise.name)")
+                                    print("    目标次数: \(exerciseSet.targetReps)")
+                                    print("    目标重量: \(exerciseSet.targetWeight) kg")
+                                    print("    休息时间: \(exerciseSet.restTime) 秒")
+                                }
+                            } else {
+                                print("📋 当前没有加载的训练计划")
                             }
                         }
                     )
