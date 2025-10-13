@@ -33,46 +33,52 @@ class ExternalTrainingPlanService: ObservableObject {
         print("✅ 版本1.0: 核心服务架构建立完成")
     }
 
-    // 版本1.0: 文件处理基础架构（不改变MockData，仅建立处理流程）
+    // 版本1.2: 文件处理基础架构（实现实际JSON解析）
     func loadWorkoutPlan(from url: URL) async {
-        print("🔄 版本1.0: 启动外部训练计划处理流程")
+        print("🔄 版本1.2: 启动外部训练计划处理流程")
         print("📍 文件路径: \(url.lastPathComponent)")
-        print("🏗️ 版本1.0: 架构验证阶段")
+        print("🏗️ 版本1.2: 实际JSON解析阶段")
 
         do {
             isLoading = true
             errorMessage = nil
 
-            // 1. 文件安全验证架构测试
-            print("🔍 步骤1: 文件安全验证架构")
+            // 1. 文件安全验证
+            print("🔍 步骤1: 文件安全验证")
             let validationResult = fileValidator.validateFile(url)
             print("📊 验证结果: \(validationResult.description)")
 
-            // 2. 文件读取架构测试
-            print("📖 步骤2: 文件读取架构")
+            // 2. 文件读取
+            print("📖 步骤2: 读取文件内容")
             let data = try Data(contentsOf: url, options: [.mappedIfSafe])
             print("📊 文件大小: \(data.count) 字节")
 
-            // 3. JSON格式验证架构测试
-            print("🔍 步骤3: JSON格式验证架构")
-            let isValidJSON = jsonParser.basicJSONValidation(data)
-            print("📊 JSON格式验证: \(isValidJSON ? "通过" : "失败")")
+            // 3. 版本1.2: 实际JSON解析
+            print("🔍 步骤3: 版本1.2 JSON解析")
+            print("📖 开始解析JSON文件: \(url.lastPathComponent)")
 
-            // 版本1.0: 不进行实际数据解析，仅验证架构完整性
-            print("🏗️ 版本1.0: 架构验证完成")
-            print("📝 注意: 实际数据解析将在版本1.2中实现")
-            print("🔄 当前仍使用MockData数据源")
+            let workoutPlan = try jsonParser.parseWorkoutPlan(from: data)
 
-            // 模拟架构处理完成
-            await simulateArchitectureProcessing()
+            // 4. 设置解析结果
+            print("🎯 JSON解析成功，设置训练计划")
+            currentWorkoutPlan = workoutPlan
+
+            print("✅ 版本1.2: 训练计划加载完成")
+            print("📝 计划名称: \(workoutPlan.name)")
+            print("📝 练习数量: \(workoutPlan.exercises.count)")
 
         } catch {
-            errorMessage = "版本1.0架构测试失败 - \(error.localizedDescription)"
-            print("❌ 架构验证过程中出现错误: \(error.localizedDescription)")
+            errorMessage = "JSON解析失败 - \(error.localizedDescription)"
+            print("❌ JSON解析过程中出现错误: \(error.localizedDescription)")
+
+            // 版本1.2: 提供更详细的错误信息
+            if let parseError = error as? JSONParseError {
+                print("🚨 解析错误类型: \(parseError.localizedDescription)")
+            }
         }
 
         isLoading = false
-        print("✅ 版本1.0: 架构验证流程完成")
+        print("✅ 版本1.2: JSON解析流程完成")
     }
 
     // 版本1.0: 模拟架构处理流程
