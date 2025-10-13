@@ -189,8 +189,6 @@ class JSONWorkoutParser {
             total + set.restTime // 休息时间
         }
 
-        let estimatedCalories = exerciseSets.count * 35 // 每组大约35卡路里
-
         let workoutPlan = WorkoutPlan(
             name: name,
             description: "从外部JSON文件导入的完整训练计划 - 包含\(exerciseSets.count)个训练组",
@@ -198,12 +196,12 @@ class JSONWorkoutParser {
             difficulty: .intermediate,
             duration: Int(totalEstimatedTime / 60), // 转换为分钟
             exercises: exerciseSets,
-            estimatedCalories: estimatedCalories,
+            estimatedCalories: 0, // 移除臆测的卡路里数据
             createdBy: "外部JSON文件"
         )
 
         print("✅ 完整WorkoutPlan创建完成: \(workoutPlan.name)")
-        print("📊 总时长: \(workoutPlan.duration)分钟，预估热量: \(workoutPlan.estimatedCalories)卡路里")
+        print("📊 总时长: \(workoutPlan.duration)分钟")
         return workoutPlan
     }
 }
