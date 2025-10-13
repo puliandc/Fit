@@ -309,11 +309,27 @@ struct CompactExerciseInfoCard: View {
     }
 
     private var nextSetInfo: String? {
-        guard currentSet < totalSets else { return nil }
-        if currentSet < allExerciseSets.count {
-            let nextSet = allExerciseSets[currentSet]
-            return "下一组: \(nextSet.targetReps)次 × \(Int(nextSet.targetWeight))kg"
+        // 获取当前训练计划中的所有练习
+        let allExercises = workoutViewModel.workoutPlan.exercises
+        let currentExerciseIndex = allExercises.firstIndex(where: { $0.exercise.name == exercise.name }) ?? 0
+
+        // 如果当前不是最后一组的最后一组，显示同一练习的下一组
+        if currentSet < totalSets {
+            if currentSet < allExerciseSets.count {
+                let nextSet = allExerciseSets[currentSet]
+                let weightText = nextSet.targetWeight > 0 ? String(format: "%.1f", nextSet.targetWeight) : "自重"
+                return "下一组: \(exercise.name) \(nextSet.targetReps)次 × \(weightText)kg"
+            }
         }
+
+        // 如果是当前练习的最后一组，显示下一个练习的第一组
+        if currentSet >= totalSets && currentExerciseIndex < allExercises.count - 1 {
+            let nextExercise = allExercises[currentExerciseIndex + 1].exercise
+            let nextExerciseFirstSet = allExercises[currentExerciseIndex + 1]
+            let weightText = nextExerciseFirstSet.targetWeight > 0 ? String(format: "%.1f", nextExerciseFirstSet.targetWeight) : "自重"
+            return "下一组: \(nextExercise.name) \(nextExerciseFirstSet.targetReps)次 × \(weightText)kg"
+        }
+
         return nil
     }
 
@@ -418,7 +434,7 @@ struct CompactExerciseInfoCard: View {
                             .foregroundColor(.gray)
 
                         if targetWeight > 0 {
-                            Text("\(Int(targetWeight))")
+                            Text(String(format: "%.1f", targetWeight))
                                 .font(.system(size: 20, weight: .bold))
                                 .foregroundColor(.purple)
                         } else {
@@ -584,7 +600,7 @@ struct CompactTimerView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            // 标题区域
+            // 标题区域 - 固定高度
             HStack {
                 if isResting {
                     Image(systemName: "bed.double.fill")
@@ -606,13 +622,15 @@ struct CompactTimerView: View {
 
                 Spacer()
             }
+            .frame(height: 24) // 固定标题区域高度
 
-            // 时间显示
+            // 时间显示 - 固定高度
             Text(formattedTime)
                 .font(.system(size: 28, weight: .bold))
                 .foregroundColor(isResting ? .blue : .green)
+                .frame(height: 36) // 固定时间显示区域高度
 
-            // 按钮 - 动态颜色和标题
+            // 按钮 - 动态颜色和标题，固定高度
             Button(action: {
                 if isResting {
                     print("🔚 DEBUG: User clicked skip rest - timeLeft: \(timeLeft)")
@@ -636,6 +654,7 @@ struct CompactTimerView: View {
             .accessibilityHint(isResting ? "点击这里可以跳过剩余的休息时间，直接开始下一个动作" : "点击这里记录当前动作的完成并打开参数编辑对话框")
             .accessibilityAddTraits(.isButton)
         }
+        .frame(minHeight: 140) // 设置整体最小高度，确保UI稳定
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 16)
