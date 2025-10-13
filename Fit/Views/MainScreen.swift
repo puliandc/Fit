@@ -17,6 +17,9 @@ struct MainScreen: View {
     @State private var isAnimating: Bool = false
     @State private var showContent: Bool = false
 
+    // 版本1.0: 外部训练计划服务集成
+    @StateObject private var externalTrainingService = ExternalTrainingPlanService()
+
     // 调试模式状态变量 - 仅在开发构建中可用
     #if DEBUG
     @State private var isDebugModeEnabled: Bool = false
@@ -88,6 +91,7 @@ struct MainScreen: View {
                     if isDebugModeEnabled {
                         DebugModeSection(
                             showOptions: $showDebugOptions,
+                            externalTrainingService: externalTrainingService,
                             onSimulateSuccess: {
                                 print("🐛 DEBUG: Simulate success button clicked")
                                 hasWorkoutPlan = true
@@ -173,10 +177,23 @@ struct MainScreen: View {
     private func readWorkoutPlan() {
         isReadingPlan = true
 
-        // 模拟读取过程
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-            hasWorkoutPlan = true
-            isReadingPlan = false
+        print("🔄 版本1.0: 启动训练计划读取流程")
+        print("🏗️ 使用ExternalTrainingPlanService架构")
+        print("📝 注意: 版本1.0保持MockData数据源不变")
+
+        // 版本1.0: 使用外部服务架构，但仍返回MockData
+        Task {
+            // 模拟文件处理流程（版本1.0架构验证）
+            // 使用模拟的文件URL进行架构测试
+            let mockFileURL = URL(fileURLWithPath: "/mock/path/test.json")
+            await externalTrainingService.loadWorkoutPlan(from: mockFileURL)
+
+            // 版本1.0: 完成后仍然使用MockData
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                hasWorkoutPlan = true
+                isReadingPlan = false
+                print("✅ 版本1.0: 架构验证完成，继续使用MockData数据源")
+            }
         }
     }
 }
@@ -652,6 +669,7 @@ struct DebugModeToggle: View {
 // MARK: - Debug Mode Section
 struct DebugModeSection: View {
     @Binding var showOptions: Bool
+    let externalTrainingService: ExternalTrainingPlanService
     let onSimulateSuccess: () -> Void
     let onDirectWorkout: () -> Void
 
@@ -694,6 +712,21 @@ struct DebugModeSection: View {
                         subtitle: "设置训练计划读取成功状态",
                         color: .success,
                         action: onSimulateSuccess
+                    )
+
+                    // 版本1.0架构测试按钮
+                    DebugActionButton(
+                        icon: "gear.circle.fill",
+                        title: "版本1.0架构测试",
+                        subtitle: "测试ExternalTrainingPlanService架构",
+                        color: .warning,
+                        action: {
+                            print("🐛 DEBUG: 版本1.0架构测试开始")
+                            Task {
+                                let testURL = URL(fileURLWithPath: "/test/test.json")
+                                await externalTrainingService.loadWorkoutPlan(from: testURL)
+                            }
+                        }
                     )
 
                     // 直接进入训练按钮
