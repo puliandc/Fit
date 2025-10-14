@@ -847,6 +847,24 @@ struct DebugModeSection: View {
                         color: .workoutColor,
                         action: onDirectWorkout
                     )
+
+                    // 测试训练日志功能按钮
+                    DebugActionButton(
+                        icon: "doc.text.fill",
+                        title: "测试训练日志功能",
+                        subtitle: "创建示例训练日志并验证文件系统访问性",
+                        color: .appPrimary,
+                        action: {
+                            print("🧪 开始测试训练日志功能...")
+                            WorkoutLogTestHelper.testFileSystemAccess()
+
+                            // 同时验证文件App访问性
+                            let success = WorkoutLogTestHelper.verifyFileAppAccess()
+                            if success {
+                                print("✅ 示例日志已创建，请在文件App中查看")
+                            }
+                        }
+                    )
                 }
                 .transition(.asymmetric(
                     insertion: .scale.combined(with: .opacity),
