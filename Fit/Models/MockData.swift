@@ -225,13 +225,13 @@ enum Difficulty: String, Codable, CaseIterable {
     var color: Color {
         switch self {
         case .beginner:
-            return .green
+            return .success
         case .intermediate:
-            return .yellow
+            return .warning
         case .advanced:
-            return .orange
+            return .warning
         case .expert:
-            return .red
+            return .error
         }
     }
 }
