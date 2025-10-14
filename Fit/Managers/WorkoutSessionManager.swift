@@ -47,12 +47,19 @@ class WorkoutSessionManager: ObservableObject {
                 print("❌ Workout completed but log saving failed")
             }
 
-            // 清理当前会话
-            currentWorkoutViewModel = nil
+            // 注意：不要在这里立即清理currentWorkoutViewModel
+            // 让ContentView先显示完成弹窗，弹窗关闭后再清理
+            print("🐛 DEBUG: Workout completed, keeping currentWorkoutViewModel for dialog display")
             return logSaved
         }
 
         return false
+    }
+
+    // 新增：在弹窗显示完成后清理会话的方法
+    func cleanupAfterWorkoutComplete() {
+        print("🧹 DEBUG: Cleaning up currentWorkoutViewModel after dialog display")
+        currentWorkoutViewModel = nil
     }
 
     func quitWorkout() {

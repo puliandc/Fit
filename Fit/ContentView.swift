@@ -78,7 +78,7 @@ struct ContentView: View {
                 }
 
                 switch dialog {
-                case .editSet(let exercise, let setIndex, let workoutViewModel):
+                case .editSet(_, _, let workoutViewModel):
                     UniversalDialog(
                         type: .input(
                             title: "动作完成",
@@ -135,6 +135,8 @@ struct ContentView: View {
                                 ),
                                 onDismiss: {
                                     dialogManager.dismissDialog()
+                                    // 在弹窗关闭后才清理WorkoutViewModel
+                                    workoutSessionManager.cleanupAfterWorkoutComplete()
                                     navigationManager.popToRoot()
                                 }
                             )

@@ -9,6 +9,11 @@
 import SwiftUI
 import Combine
 
+// MARK: - Workout Completion Notification
+extension Notification.Name {
+    static let workoutCompleted = Notification.Name("workoutCompleted")
+}
+
 class WorkoutViewModel: ObservableObject {
     @Published var currentExerciseIndex: Int = 0
     @Published var currentSet: Int = 1
@@ -193,8 +198,9 @@ class WorkoutViewModel: ObservableObject {
             // 确保进度更新能触发UI刷新 - 主动发送对象变化通知
             DispatchQueue.main.async {
                 self.objectWillChange.send()
+                // 发送训练完成通知
+                NotificationCenter.default.post(name: .workoutCompleted, object: self)
             }
-            // 训练完成对话框将由WorkoutScreen中的进度监听器处理
         }
     }
 
@@ -388,6 +394,14 @@ class WorkoutViewModel: ObservableObject {
 
         // 更新进度 - 触发UI刷新
         objectWillChange.send()
+
+        // 检查是否所有练习都已跳过（训练完成）
+        if completedSets.count == workoutPlan.exercises.count {
+            DispatchQueue.main.async {
+                // 发送训练完成通知
+                NotificationCenter.default.post(name: .workoutCompleted, object: self)
+            }
+        }
     }
 
     // 简化计时方案：处理应用恢复时的计时同步

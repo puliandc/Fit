@@ -108,7 +108,7 @@ struct WorkoutScreen: View {
                             dialogManager.dismissDialog()
                             // 延迟触发训练完成对话框，确保状态更新完成
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                workoutSessionManager.completeWorkout()
+                                _ = workoutSessionManager.completeWorkout()
                                 dialogManager.presentDialog(.workoutComplete)
                             }
                         },
@@ -187,12 +187,20 @@ struct WorkoutScreen: View {
         .onDisappear {
             workoutViewModel.pauseExercise()
         }
+        .onReceive(NotificationCenter.default.publisher(for: .workoutCompleted)) { _ in
+            // 监听训练完成通知
+            print("🎉 DEBUG: Workout completed notification received!")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                _ = workoutSessionManager.completeWorkout()
+                dialogManager.presentDialog(.workoutComplete)
+            }
+        }
         .onChange(of: workoutViewModel.progress) {
-            // 监听进度变化，当达到100%时触发训练完成对话框
+            // 保留原有的进度监听作为备用机制
             if workoutViewModel.progress >= 1.0 {
                 print("🎉 DEBUG: Workout completed! Progress reached 100%")
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    workoutSessionManager.completeWorkout()
+                    _ = workoutSessionManager.completeWorkout()
                     dialogManager.presentDialog(.workoutComplete)
                 }
             }
