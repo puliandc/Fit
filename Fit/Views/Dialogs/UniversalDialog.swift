@@ -64,7 +64,7 @@ struct UniversalDialog: View {
     private var dialogIcon: String? {
         switch type {
         case .input: return nil
-        case .confirmation(let icon, _, _, _): return icon
+        case .confirmation(_, _, let icon, _, _): return icon
         case .options: return "flag.checkered"
         case .completion: return "checkmark.circle.fill"
         }
@@ -73,7 +73,7 @@ struct UniversalDialog: View {
     private var dialogIconColor: Color {
         switch type {
         case .input: return .clear
-        case .confirmation(_, _, _, let color): return color
+        case .confirmation(_, _, _, let color, _): return color
         case .options: return .appPrimary
         case .completion: return .success
         }
@@ -124,7 +124,7 @@ struct UniversalDialog: View {
             switch type {
             case .input(_, let subtitle, _):
                 inputContent(subtitle: subtitle)
-            case .confirmation(_, let message, _, _):
+            case .confirmation(_, let message, _, _, _):
                 confirmationContent(message: message)
             case .options(_, let message, let options):
                 optionsContent(message: message, options: options)
@@ -199,7 +199,7 @@ struct UniversalDialog: View {
                 .foregroundColor(.appTextTertiary)
                 .multilineTextAlignment(.center)
 
-            if case .confirmation(_, let warningMessage, _, _) = type {
+            if case .confirmation(_, let warningMessage, _, _, _) = type {
                 Text(warningMessage)
                     .font(.system(size: 12, weight: .regular))
                     .foregroundColor(.error)
@@ -214,7 +214,7 @@ struct UniversalDialog: View {
                 .buttonStyle(SecondaryButtonStyle())
 
                 Button("放弃训练") {
-                    if case .confirmation(_, _, _, let onConfirm) = type {
+                    if case .confirmation(_, _, _, _, let onConfirm) = type {
                         onConfirm()
                     }
                 }
@@ -335,7 +335,7 @@ struct UniversalDialog: View {
     private var dialogTitle: String {
         switch type {
         case .input(let title, _, _): return title
-        case .confirmation(let title, _, _, _): return title
+        case .confirmation(let title, _, _, _, _): return title
         case .options(let title, _, _): return title
         case .completion(let title, _, _): return title
         }
