@@ -10,6 +10,7 @@ import SwiftUI
 
 struct MainScreen: View {
     @EnvironmentObject var navigationManager: NavigationManager
+    @EnvironmentObject var workoutSessionManager: WorkoutSessionManager
     @State private var hasWorkoutPlan: Bool = false
     @State private var isReadingPlan: Bool = false
     @State private var animationOffset: CGSize = .zero
@@ -65,7 +66,10 @@ struct MainScreen: View {
                                 buttonAction: {
                                     // 版本1.2: 优先使用解析的训练计划，fallback到MockData
                                     let workoutPlan = externalTrainingService.currentWorkoutPlan ?? MockDataProvider.shared.sampleWorkoutPlans.first!
-                                    navigationManager.startWorkout(workoutPlan)
+
+                                    // 使用新的WorkoutSessionManager启动训练
+                                    workoutSessionManager.startWorkout(workoutPlan)
+                                    navigationManager.navigateToWorkout(plan: workoutPlan)
                                 },
                                 cardColor: .appAccent,
                                 delay: 0.2
@@ -128,7 +132,8 @@ struct MainScreen: View {
                                 }
 
                                 print("🐛 DEBUG: Starting workout with safe validation...")
-                                navigationManager.startWorkout(workoutPlan)
+                                workoutSessionManager.startWorkout(workoutPlan)
+                                navigationManager.navigateToWorkout(plan: workoutPlan)
                                 print("🐛 DEBUG: Workout start command sent")
                             }
                         )

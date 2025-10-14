@@ -9,6 +9,8 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var navigationManager: NavigationManager
+    @EnvironmentObject var dialogManager: DialogManager
+    @EnvironmentObject var workoutSessionManager: WorkoutSessionManager
 
     var body: some View {
         ZStack {
@@ -21,7 +23,7 @@ struct ContentView: View {
                     ))
 
             case .workout(let workoutPlan):
-                if let workoutViewModel = navigationManager.currentWorkoutViewModel {
+                if let workoutViewModel = workoutSessionManager.currentWorkoutViewModel {
                     WorkoutScreen(workoutPlan: workoutPlan)
                         .environmentObject(workoutViewModel)
                         .transition(.asymmetric(
@@ -52,7 +54,7 @@ struct ContentView: View {
             }
 
             // Dialog Overlay
-            if let dialog = navigationManager.presentedDialog {
+            if let dialog = dialogManager.presentedDialog {
                 // Only show background overlay for non-workout dialogs
                 // Workout dialogs (quit, editSet, etc.) are handled by WorkoutScreen's CompactDialogOverlay
                 switch dialog {
@@ -64,19 +66,27 @@ struct ContentView: View {
                     Color.appBackground.opacity(0.4)
                         .ignoresSafeArea()
                         .onTapGesture {
-                            navigationManager.dismissDialog()
+                            dialogManager.dismissDialog()
                         }
                 }
 
                 switch dialog {
                 case .editSet(let exercise, let setIndex, let workoutViewModel):
-                    EditSetDialog(
-                        exercise: exercise,
-                        setIndex: setIndex,
+                    UniversalDialog(
+                        type: .input(
+                            title: "动作完成",
+                            subtitle: "请输入实际完成次数和重量",
+                            onConfirm: { reps, weight, notes in
+                                guard let actualReps = Int(reps),
+                                      let actualWeight = Double(weight) else {
+                                    return
+                                }
+                                workoutViewModel.completeExerciseWith(actualReps: actualReps, actualWeight: actualWeight, notes: notes)
+                            }
+                        ),
                         onDismiss: {
-                            navigationManager.dismissDialog()
-                        },
-                        workoutViewModel: workoutViewModel
+                            dialogManager.dismissDialog()
+                        }
                     )
                     .transition(.asymmetric(
                         insertion: .scale.combined(with: .opacity),
@@ -84,9 +94,16 @@ struct ContentView: View {
                     ))
 
                 case .completion:
-                    CompletionDialog(onDismiss: {
-                        navigationManager.dismissDialog()
-                    })
+                    UniversalDialog(
+                        type: .input(
+                            title: "完成记录",
+                            subtitle: "请输入您实际完成的次数和重量",
+                            onConfirm: { _, _, _ in }
+                        ),
+                        onDismiss: {
+                            dialogManager.dismissDialog()
+                        }
+                    )
                     .transition(.asymmetric(
                         insertion: .scale.combined(with: .opacity),
                         removal: .opacity
@@ -99,13 +116,20 @@ struct ContentView: View {
 
                 case .workoutComplete:
                     Group {
-                        if let workoutViewModel = navigationManager.currentWorkoutViewModel {
-                            WorkoutCompleteDialog(
+                        if let workoutViewModel = workoutSessionManager.currentWorkoutViewModel {
+                            UniversalDialog(
+                                type: .completion(
+                                    title: "训练完成!",
+                                    message: "恭喜您完成了今天的训练！",
+                                    stats: [
+                                        ("总时长:", formatTime(workoutViewModel.totalWorkoutTime)),
+                                        ("完成组数:", "\(workoutViewModel.completedSets.count) 组")
+                                    ]
+                                ),
                                 onDismiss: {
-                                    navigationManager.dismissDialog()
+                                    dialogManager.dismissDialog()
                                     navigationManager.popToRoot()
-                                },
-                                workoutViewModel: workoutViewModel
+                                }
                             )
                         } else {
                             EmptyView()
@@ -116,10 +140,17 @@ struct ContentView: View {
                         removal: .opacity
                     ))
                 }
+
+                // Helper function to format time
+                func formatTime(_ seconds: Int) -> String {
+                    let minutes = seconds / 60
+                    let secs = seconds % 60
+                    return String(format: "%d:%02d", minutes, secs)
+                }
             }
         }
         .animation(.easeInOut(duration: 0.3), value: navigationManager.currentScreen)
-        .animation(.easeInOut(duration: 0.3), value: navigationManager.presentedDialog)
+        .animation(.easeInOut(duration: 0.3), value: dialogManager.presentedDialog)
         .onAppear {
             // ContentView loaded successfully
         }

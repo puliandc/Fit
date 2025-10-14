@@ -198,12 +198,7 @@ class WorkoutViewModel: ObservableObject {
         }
     }
 
-    // DEPRECATED: 过度设计的统计方法，可以简化
-    private func getTargetSetsForCurrentExercise() -> Int {
-        let currentExerciseId = currentExercise.id
-        return workoutPlan.exercises.filter { $0.exercise.id == currentExerciseId }.count
-    }
-
+  
     // 获取当前练习的默认次数和重量
     func getDefaultParametersForCurrentExercise() -> (reps: Int, weight: Double) {
         let targetReps = currentExerciseSet.targetReps
@@ -211,19 +206,7 @@ class WorkoutViewModel: ObservableObject {
         return (targetReps, targetWeight)
     }
 
-    // DEPRECATED: 复杂的统计方法，考虑简化
-    func getCompletedSetsCount(for exercise: Exercise) -> Int {
-        let exerciseSetIds = workoutPlan.exercises.filter { $0.exercise.id == exercise.id }.map { $0.id }
-        return completedSets.filter { exerciseSetIds.contains($0.exerciseSetId) }.count
-    }
-
-    // DEPRECATED: 复杂的统计方法，考虑简化
-    func getRemainingSetsCount(for exercise: Exercise) -> Int {
-        let totalSets = workoutPlan.exercises.filter { $0.exercise.id == exercise.id }.count
-        let completedSets = getCompletedSetsCount(for: exercise)
-        return max(0, totalSets - completedSets)
-    }
-
+    
     func startRest() {
         // 确保在主线程上更新UI状态
         DispatchQueue.main.async {
