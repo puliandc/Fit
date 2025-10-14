@@ -427,7 +427,7 @@ struct HeaderSection: View {
                 // Logo图标
                 Image(systemName: "dumbbell.fill")
                     .font(.system(size: 36, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(.appText)
                     .scaleEffect(showContent ? 1.0 : 0.8)
                     .opacity(showContent ? 1.0 : 0)
                     .animation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.3), value: showContent)
@@ -491,7 +491,7 @@ struct FeatureCard: View {
 
                     Image(systemName: icon)
                         .font(.system(size: 24, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(.appText)
                 }
 
                 // 标题和副标题
@@ -1012,7 +1012,7 @@ struct CompleteWorkoutPlanCard: View {
 
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 24, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(.appText)
                 }
 
                 // 标题和信息
@@ -1079,11 +1079,11 @@ struct CompleteWorkoutPlanCard: View {
                         HStack(spacing: 4) {
                             Text(showAllExercises ? "收起" : "展开")
                                 .font(.system(size: 12, weight: .medium))
-                                .foregroundColor(.blue)
+                                .foregroundColor(.appPrimary)
 
                             Image(systemName: showAllExercises ? "chevron.up" : "chevron.down")
                                 .font(.system(size: 12, weight: .medium))
-                                .foregroundColor(.blue)
+                                .foregroundColor(.appPrimary)
                         }
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -1200,7 +1200,7 @@ struct ExerciseGroupRow: View {
             HStack {
                 Image(systemName: "figure.strengthtraining.traditional")
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.blue)
+                    .foregroundColor(.appPrimary)
 
                 Text(exerciseName)
                     .font(.system(size: 14, weight: .medium))
@@ -1231,7 +1231,7 @@ struct ExerciseGroupRow: View {
 
                             Text("休息\(exerciseSet.restTime)秒")
                                 .font(.system(size: 12))
-                                .foregroundColor(.orange)
+                                .foregroundColor(.warning)
                         }
                         .padding(.leading, 24)
                     }
