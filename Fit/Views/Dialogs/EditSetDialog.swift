@@ -151,7 +151,7 @@ struct EditSetDialog: View {
     }
 
     private func saveChanges() {
-        print("💾 DEBUG: EditSetDialog saveChanges called - reps: \(reps), weight: \(weight)")
+        print("💾 DEBUG: EditSetDialog saveChanges called - reps: \(reps), weight: \(weight), notes: \(notes)")
 
         guard let actualReps = Int(reps),
               let actualWeight = Double(weight) else {
@@ -159,11 +159,11 @@ struct EditSetDialog: View {
             return
         }
 
-        print("💾 DEBUG: EditSetDialog saving with validated parameters - reps: \(actualReps), weight: \(actualWeight)")
+        print("💾 DEBUG: EditSetDialog saving with validated parameters - reps: \(actualReps), weight: \(actualWeight), notes: \(notes)")
         print("🐛 DEBUG: Thread: \(Thread.isMainThread ? "Main" : "Background")")
 
         // 使用WorkoutViewModel的增强方法保存参数并完成练习
-        workoutViewModel.completeExerciseWith(actualReps: actualReps, actualWeight: actualWeight)
+        workoutViewModel.completeExerciseWith(actualReps: actualReps, actualWeight: actualWeight, notes: notes)
 
         print("💾 DEBUG: EditSetDialog called completeExerciseWith, preparing to dismiss dialog")
 

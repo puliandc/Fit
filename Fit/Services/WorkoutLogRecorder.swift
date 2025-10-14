@@ -147,16 +147,12 @@ class WorkoutLogRecorder {
 
     // 记录跳过的动作的所有组
     func recordSkippedExercise(exercise: Exercise, exerciseSets: [ExerciseSet]) {
-        guard let firstSetIndex = exerciseSets.firstIndex(where: { $0.exercise.id == exercise.id }) else {
-            return
-        }
+        // 找到所有属于这个练习的组
+        let exerciseSpecificSets = exerciseSets.filter { $0.exercise.id == exercise.id }
 
-        // 从当前组开始，记录所有后续组为跳过
-        for i in firstSetIndex..<exerciseSets.count {
-            let exerciseSet = exerciseSets[i]
-            if exerciseSet.exercise.id == exercise.id {
-                recordSkippedSet(exerciseSet: exerciseSet)
-            }
+        // 记录所有这些组为跳过
+        for exerciseSet in exerciseSpecificSets {
+            recordSkippedSet(exerciseSet: exerciseSet)
         }
     }
 }

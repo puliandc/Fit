@@ -73,19 +73,16 @@ struct WorkoutLog: Codable {
 class EnhancedWorkoutLogFileManager {
     private let fileManager = FileManager.default
 
-    // 获取Documents目录下的WorkoutLogs文件夹
+    // 获取Fit应用根目录（直接在Fit根目录下存储日志）
     var workoutLogsDirectoryURL: URL {
         let documentsPath = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
-        let workoutLogsFolder = documentsPath.appendingPathComponent("WorkoutLogs")
 
-        // 创建文件夹（如果不存在）
-        do {
-            try fileManager.createDirectory(at: workoutLogsFolder, withIntermediateDirectories: true)
-        } catch {
-            print("Failed to create WorkoutLogs directory: \(error)")
-        }
+        // Fit应用的根目录就是Documents目录
+        let fitRootFolder = documentsPath
 
-        return workoutLogsFolder
+        print("📁 Fit根目录: \(fitRootFolder.path)")
+
+        return fitRootFolder
     }
 
     // 生成更友好的文件名
@@ -145,7 +142,7 @@ class EnhancedWorkoutLogFileManager {
     // 清理旧日志文件（可选功能）
     func organizeLogFiles() {
         let logFiles = getAllLogFiles()
-        let calendar = Calendar.current
+        _ = Calendar.current // 标记为已使用
 
         // 按月份分组
         var monthlyGroups: [String: [URL]] = [:]

@@ -57,7 +57,7 @@ class WorkoutLogTestHelper {
 
                 // 读取文件内容验证
                 if let data = try? Data(contentsOf: fileURL),
-                   let jsonString = String(data: data, encoding: .utf8) {
+                   let _ = String(data: data, encoding: .utf8) {
                     print("    📄 文件大小: \(data.count) bytes")
                     print("    ✅ 文件可读性: 正常")
                 } else {

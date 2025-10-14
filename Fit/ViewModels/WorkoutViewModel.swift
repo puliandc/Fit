@@ -24,6 +24,10 @@ class WorkoutViewModel: ObservableObject {
     // 简化计时方案：只记录开始时间
     private var workoutStartTime: Date?
 
+    // MARK: - 预建立表格数据结构
+    @Published var workoutSession: PrebuiltWorkoutSession
+    private let sessionPrebuilder = PrebuiltWorkoutSessionPrebuilder()
+
     // MARK: - Training Log Integration
     private let workoutLogRecorder = WorkoutLogRecorder()
 
@@ -34,6 +38,18 @@ class WorkoutViewModel: ObservableObject {
         print("🐛 DEBUG: Exercise details: \(workoutPlan.exercises.map { $0.exercise.name })")
 
         self.workoutPlan = workoutPlan
+
+        // 🏗️ 使用预建立表格方案
+        print("🏗️ DEBUG: 开始预建立训练会话数据结构...")
+        self.workoutSession = sessionPrebuilder.buildSession(from: workoutPlan)
+
+        // 验证预建立的数据结构
+        let isValid = sessionPrebuilder.validateSession(workoutSession)
+        if !isValid {
+            print("❌ ERROR: 预建立的训练会话数据结构验证失败")
+        }
+
+        print("🏗️ DEBUG: 预建立完成 - 总练习数: \(workoutSession.exerciseSessions.count), 总组数: \(workoutSession.totalSets)")
 
         print("🐛 DEBUG: WorkoutViewModel initialization complete")
 
@@ -94,14 +110,26 @@ class WorkoutViewModel: ObservableObject {
     }
 
     var progress: Double {
-        // 根据workout.md要求：进度条比例 = 整个计划已完成组数/整个计划总组数 * 100% 取整
-        let totalSets = workoutPlan.exercises.count
-        let completedSetsCount = completedSets.count
+        // 🏗️ 使用预建立数据结构计算进度：已完成组数/总组数
+        let totalSets = workoutSession.totalSets
+        let completedSetsCount = workoutSession.completedSets
         let progressValue = totalSets > 0 ? Double(completedSetsCount) / Double(totalSets) : 0.0
 
         // 防止进度超过100%
         let clampedProgress = min(progressValue, 1.0)
+        print("🏗️ DEBUG: 进度计算 - 已完成: \(completedSetsCount)/\(totalSets) = \(Int(clampedProgress * 100))%")
         return clampedProgress
+    }
+
+    // 🏗️ 新增：获取当前 WorkoutSet
+    var currentWorkoutSet: WorkoutSet? {
+        return workoutSession.getCurrentSet()
+    }
+
+    // 🏗️ 新增：获取当前练习的会话信息
+    var currentExerciseSession: ExerciseSession? {
+        guard let currentSet = currentWorkoutSet else { return nil }
+        return workoutSession.exerciseSessions.first { $0.sets.contains(where: { $0.id == currentSet.id }) }
     }
 
     var isWorkoutComplete: Bool {
@@ -160,28 +188,29 @@ class WorkoutViewModel: ObservableObject {
     }
 
     // 新增：完成指定参数的练习
-    func completeExerciseWith(actualReps: Int, actualWeight: Double) {
-        print("🐛 DEBUG: 完成练习 - 次数: \(actualReps), 重量: \(actualWeight)kg")
+    func completeExerciseWith(actualReps: Int, actualWeight: Double, notes: String = "") {
+        print("🐛 DEBUG: 完成练习 - 次数: \(actualReps), 重量: \(actualWeight)kg, 备注: \(notes)")
 
-        // 防护：检查训练是否已经完成
-        let completedSetsCount = completedSets.count
-        let totalSets = workoutPlan.exercises.count
-        if completedSetsCount >= totalSets {
-            print("⚠️ WARNING: 训练已完成！忽略额外的完成操作。")
+        // 🏗️ 使用预建立数据结构检查完成状态
+        guard let currentWorkoutSet = currentWorkoutSet else {
+            print("❌ ERROR: 没有找到当前需要完成的组")
             return
         }
 
         pauseExercise()
+
+        // 🏗️ 在预建立数据结构中标记完成
+        workoutSession.markSetCompleted(currentWorkoutSet, actualWeight: actualWeight, actualReps: actualReps, notes: notes)
 
         // 记录训练日志
         workoutLogRecorder.recordCompletedSet(
             exerciseSet: currentExerciseSet,
             actualReps: actualReps,
             actualWeight: actualWeight,
-            notes: ""
+            notes: notes
         )
 
-        // Record completed set with user-specified parameters
+        // Record completed set with user-specified parameters (保持向后兼容)
         let completedSet = CompletedSet(
             exerciseSetId: currentExerciseSet.id,
             actualReps: actualReps,
@@ -190,9 +219,11 @@ class WorkoutViewModel: ObservableObject {
         )
         completedSets.append(completedSet)
 
-        // 打印进度更新
-        let newProgress = completedSets.count > 0 ? (Double(completedSets.count) / Double(totalSets) * 100) : 0
-        print("🐛 DEBUG: 进度更新 - 已完成组数: \(completedSets.count)/\(totalSets) = \(Int(newProgress))%")
+        // 🏗️ 打印进度更新 - 使用新的数据结构
+        let totalSets = workoutSession.totalSets
+        let completedSetsCount = workoutSession.completedSets
+        let newProgress = completedSetsCount > 0 ? (Double(completedSetsCount) / Double(totalSets) * 100) : 0
+        print("🏗️ DEBUG: 进度更新 - 已完成组数: \(completedSetsCount)/\(totalSets) = \(Int(newProgress))%")
 
         // 更新当前组数显示
         updateCurrentSetDisplay()
@@ -201,8 +232,8 @@ class WorkoutViewModel: ObservableObject {
         objectWillChange.send()
 
         // 检查是否还有更多的组需要完成
-        let remainingSetsInWorkout = totalSets - completedSets.count
-        print("🐛 DEBUG: 剩余组数: \(remainingSetsInWorkout), 总组数: \(totalSets), 已完成: \(completedSets.count)")
+        let remainingSetsInWorkout = totalSets - completedSetsCount
+        print("🏗️ DEBUG: 剩余组数: \(remainingSetsInWorkout), 总组数: \(totalSets), 已完成: \(completedSetsCount)")
 
         if remainingSetsInWorkout > 0 {
             // 进入休息状态，然后继续下一组/下一个动作
@@ -210,7 +241,7 @@ class WorkoutViewModel: ObservableObject {
             startRest()
         } else {
             // 训练完成
-            print("🐛 DEBUG: 训练完成！触发进度更新")
+            print("🏗️ DEBUG: 训练完成！触发进度更新")
             pauseExercise()
 
             // 确保进度更新能触发UI刷新 - 主动发送对象变化通知
@@ -280,6 +311,13 @@ class WorkoutViewModel: ObservableObject {
 
     // 新增：更新当前组数显示
     private func updateCurrentSetDisplay() {
+        // 安全检查：确保索引有效
+        guard currentExerciseIndex < workoutPlan.exercises.count else {
+            print("🚨 ERROR: updateCurrentSetDisplay - currentExerciseIndex (\(currentExerciseIndex)) out of bounds")
+            print("🐛 DEBUG: updateCurrentSetDisplay - workoutPlan.exercises.count: \(workoutPlan.exercises.count)")
+            return
+        }
+
         let currentExerciseId = currentExercise.id
         let exerciseSetsForThisExercise = workoutPlan.exercises.filter { $0.exercise.id == currentExerciseId }
         let totalSetsForThisExercise = exerciseSetsForThisExercise.count
@@ -292,6 +330,16 @@ class WorkoutViewModel: ObservableObject {
         currentSet = currentSetNumber + 1
 
         print("🐛 DEBUG: 更新组数显示 - 练习: \(currentExercise.name), 当前组: \(currentSet)/\(totalSetsForThisExercise), ExerciseSet位置: \(currentSetNumber)")
+        print("🐛 DEBUG: 组数计算详情 - 当前ExerciseIndex: \(currentExerciseIndex), ExerciseSet ID: \(currentExerciseSet.id)")
+        print("🐛 DEBUG: 练习详细信息 - 动作名称: \(currentExercise.name), 目标重量: \(currentExerciseSet.targetWeight)kg, 目标次数: \(currentExerciseSet.targetReps)")
+
+        // 验证数据一致性
+        if totalSetsForThisExercise == 0 {
+            print("⚠️ WARNING: 没有找到当前练习的任何组数据 - 练习ID: \(currentExerciseId)")
+        }
+
+        // 新增：验证数据读取的正确性
+        print("🔍 DEBUG: 数据验证 - 当前ExerciseSet: \(currentExerciseSet.exercise.name), 目标重量: \(currentExerciseSet.targetWeight), 目标次数: \(currentExerciseSet.targetReps)")
     }
 
     // 新增：跳过当前动作的所有组，移动到下一个不同的动作
@@ -305,16 +353,21 @@ class WorkoutViewModel: ObservableObject {
         let currentExerciseId = currentExercise.id
         print("🐛 DEBUG: Current exercise ID: \(currentExerciseId)")
 
-        // 记录跳过的动作到日志
-        let currentExerciseSets = workoutPlan.exercises.filter { $0.exercise.id == currentExerciseId }
-        workoutLogRecorder.recordSkippedExercise(exercise: currentExercise, exerciseSets: currentExerciseSets)
+        // 🏗️ 使用预建立数据结构跳过当前练习的所有剩余组
+        workoutSession.skipRemainingSetsInExercise(currentExercise)
+        print("🏗️ DEBUG: 已在预建立数据结构中标记跳过当前练习的所有剩余组")
 
-        // 为当前练习的所有组添加跳过记录，以更新完成度
+        // 修复：获取当前组在相同练习中的位置，只跳过当前组及之后的组
+        let currentExerciseSets = workoutPlan.exercises.filter { $0.exercise.id == currentExerciseId }
         let currentSetPosition = currentExerciseSets.firstIndex(where: { $0.id == currentExerciseSet.id }) ?? 0
 
-        // 为当前组及后续所有相同练习的组添加跳过记录
+        print("🐛 DEBUG: 当前组在练习中的位置: \(currentSetPosition)，总组数: \(currentExerciseSets.count)")
+
+        // 记录跳过的动作到日志（只记录当前组及之后的组）
         for i in currentSetPosition..<currentExerciseSets.count {
             let exerciseSetToSkip = currentExerciseSets[i]
+            workoutLogRecorder.recordSkippedSet(exerciseSet: exerciseSetToSkip)
+
             let skippedSet = CompletedSet(
                 exerciseSetId: exerciseSetToSkip.id,
                 actualReps: 0,  // 跳过的组记为0次
@@ -325,10 +378,11 @@ class WorkoutViewModel: ObservableObject {
             print("🐛 DEBUG: 添加跳过记录 - 练习: \(exerciseSetToSkip.exercise.name), 组ID: \(exerciseSetToSkip.id)")
         }
 
-        // 打印进度更新
-        let totalSets = workoutPlan.exercises.count
-        let newProgress = completedSets.count > 0 ? (Double(completedSets.count) / Double(totalSets) * 100) : 0
-        print("🐛 DEBUG: 跳过动作后进度更新 - 已完成组数: \(completedSets.count)/\(totalSets) = \(Int(newProgress))%")
+        // 🏗️ 打印进度更新 - 使用新的数据结构
+        let totalSets = workoutSession.totalSets
+        let completedSetsCount = workoutSession.completedSets
+        let newProgress = completedSetsCount > 0 ? (Double(completedSetsCount) / Double(totalSets) * 100) : 0
+        print("🏗️ DEBUG: 跳过动作后进度更新 - 已完成组数: \(completedSetsCount)/\(totalSets) = \(Int(newProgress))%")
 
         // 更新当前组数显示
         updateCurrentSetDisplay()
@@ -349,16 +403,37 @@ class WorkoutViewModel: ObservableObject {
         }
 
         if nextExerciseIndex < workoutPlan.exercises.count {
+            let nextExercise = workoutPlan.exercises[nextExerciseIndex]
+            print("🐛 DEBUG: 准备跳转到下一个动作 - \(nextExercise.exercise.name)")
+            print("🐛 DEBUG: 下一个动作的详细信息 - 目标重量: \(nextExercise.targetWeight)kg, 目标次数: \(nextExercise.targetReps), 休息时间: \(nextExercise.restTime)秒")
+
             // 移动到下一个不同的练习
             currentExerciseIndex = nextExerciseIndex
             exerciseElapsedTime = 0
             print("🐛 DEBUG: Skipped entire exercise \(currentExercise.name). New index: \(currentExerciseIndex)")
 
-            // 更新组数显示
-            updateCurrentSetDisplay()
+            // 确保在主线程上更新UI状态
+            DispatchQueue.main.async {
+                // 发送UI更新通知
+                self.objectWillChange.send()
 
-            // 自动开始新练习
-            startExercise()
+                // 立即更新组数显示，确保数据正确
+                self.updateCurrentSetDisplay()
+
+                // 🏗️ 使用预建立数据结构验证跳转后的数据
+                if let currentWorkoutSet = self.currentWorkoutSet {
+                    print("🏗️ DEBUG: 跳转后预建立数据验证 - 新动作: \(currentWorkoutSet.exerciseName), 目标重量: \(currentWorkoutSet.targetWeight)kg, 目标次数: \(currentWorkoutSet.targetReps)")
+                }
+
+                // 再次验证数据读取
+                print("🔍 DEBUG: 跳转后数据验证 - 新动作: \(self.currentExercise.name), 目标重量: \(self.currentExerciseSet.targetWeight)kg, 目标次数: \(self.currentExerciseSet.targetReps)")
+
+                // 修复：延迟自动开始新练习，确保UI完全更新，但要正确设置新的动作名称
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    print("🔍 DEBUG: 延迟启动前最终验证 - 动作: \(self.currentExercise.name), 组: \(self.currentSet)")
+                    self.startExercise()
+                }
+            }
         } else {
             print("🐛 DEBUG: No more different exercises to skip to, completing workout")
             // 没有更多不同练习，完成训练
@@ -417,6 +492,10 @@ class WorkoutViewModel: ObservableObject {
             // 从当前位置开始，为所有剩余的练习组添加跳过记录
             for i in currentPosition..<totalSets {
                 let exerciseSetToSkip = workoutPlan.exercises[i]
+
+                // 记录跳过的练习到训练日志
+                workoutLogRecorder.recordSkippedSet(exerciseSet: exerciseSetToSkip)
+
                 let skippedSet = CompletedSet(
                     exerciseSetId: exerciseSetToSkip.id,
                     actualReps: 0,  // 跳过的组记为0次
