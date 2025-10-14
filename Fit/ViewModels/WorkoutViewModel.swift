@@ -489,9 +489,21 @@ class WorkoutViewModel: ObservableObject {
 
         // 找到当前ExerciseSet在计划中的位置
         if let currentPosition = workoutPlan.exercises.firstIndex(where: { $0.id == currentExerciseSet.id }) {
+            var lastExerciseName: String = ""
+
             // 从当前位置开始，为所有剩余的练习组添加跳过记录
             for i in currentPosition..<totalSets {
                 let exerciseSetToSkip = workoutPlan.exercises[i]
+                let exerciseName = exerciseSetToSkip.exercise.name
+
+                // 修复：检查是否是新的动作，如果是则通知WorkoutLogRecorder更新动作名称
+                if exerciseName != lastExerciseName {
+                    print("🐛 DEBUG: 跳过新动作: \(exerciseName)，更新日志记录器的动作名称")
+                    // 创建一个临时的Exercise对象来传递给startExercise
+                    let tempExercise = exerciseSetToSkip.exercise
+                    workoutLogRecorder.startExercise(exercise: tempExercise)
+                    lastExerciseName = exerciseName
+                }
 
                 // 记录跳过的练习到训练日志
                 workoutLogRecorder.recordSkippedSet(exerciseSet: exerciseSetToSkip)
