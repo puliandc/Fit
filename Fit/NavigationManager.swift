@@ -91,6 +91,17 @@ class NavigationManager: ObservableObject {
     }
 
     func completeWorkout() {
+        // 保存训练日志
+        if let viewModel = currentWorkoutViewModel {
+            let logSaved = viewModel.finishWorkoutAndSaveLog()
+
+            if logSaved {
+                print("✅ Workout completed and log saved successfully")
+            } else {
+                print("❌ Workout completed but log saving failed")
+            }
+        }
+
         presentDialog(.workoutComplete)
     }
 

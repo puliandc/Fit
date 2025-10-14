@@ -24,6 +24,9 @@ class WorkoutViewModel: ObservableObject {
     // 简化计时方案：只记录开始时间
     private var workoutStartTime: Date?
 
+    // MARK: - Training Log Integration
+    private let workoutLogRecorder = WorkoutLogRecorder()
+
     init(workoutPlan: WorkoutPlan) {
         print("🐛 DEBUG: WorkoutViewModel initializing...")
         print("🐛 DEBUG: Workout plan: \(workoutPlan.name)")
@@ -36,6 +39,9 @@ class WorkoutViewModel: ObservableObject {
 
         // 初始化当前组数显示
         updateCurrentSetDisplay()
+
+        // 初始化训练日志记录器
+        workoutLogRecorder.startWorkout(workoutPlan: workoutPlan)
     }
 
     // MARK: - Computed Properties
@@ -127,6 +133,9 @@ class WorkoutViewModel: ObservableObject {
         isExerciseActive = true
         isResting = false
 
+        // 开始记录当前动作
+        workoutLogRecorder.startExercise(exercise: currentExercise)
+
         startExerciseTimer()
     }
 
@@ -163,6 +172,14 @@ class WorkoutViewModel: ObservableObject {
         }
 
         pauseExercise()
+
+        // 记录训练日志
+        workoutLogRecorder.recordCompletedSet(
+            exerciseSet: currentExerciseSet,
+            actualReps: actualReps,
+            actualWeight: actualWeight,
+            notes: ""
+        )
 
         // Record completed set with user-specified parameters
         let completedSet = CompletedSet(
@@ -288,8 +305,11 @@ class WorkoutViewModel: ObservableObject {
         let currentExerciseId = currentExercise.id
         print("🐛 DEBUG: Current exercise ID: \(currentExerciseId)")
 
-        // 为当前练习的所有组添加跳过记录，以更新完成度
+        // 记录跳过的动作到日志
         let currentExerciseSets = workoutPlan.exercises.filter { $0.exercise.id == currentExerciseId }
+        workoutLogRecorder.recordSkippedExercise(exercise: currentExercise, exerciseSets: currentExerciseSets)
+
+        // 为当前练习的所有组添加跳过记录，以更新完成度
         let currentSetPosition = currentExerciseSets.firstIndex(where: { $0.id == currentExerciseSet.id }) ?? 0
 
         // 为当前组及后续所有相同练习的组添加跳过记录
@@ -482,6 +502,13 @@ class WorkoutViewModel: ObservableObject {
             self.restTimer?.fireDate = Date().addingTimeInterval(1.0)
             runLoop.add(self.restTimer!, forMode: .common)
         }
+    }
+
+    // MARK: - Training Log Integration
+    // 添加训练完成方法
+    func finishWorkoutAndSaveLog() -> Bool {
+        pauseExercise()
+        return workoutLogRecorder.finishWorkout(workoutPlan: workoutPlan)
     }
 
     // MARK: - Cleanup
