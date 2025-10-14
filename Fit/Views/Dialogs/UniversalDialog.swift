@@ -110,7 +110,7 @@ struct UniversalDialog: View {
             }
 
             Text(dialogTitle)
-                .font(.system(size: dialogTitleFont.size, weight: .semibold))
+                .font(.system(size: dialogTitleFont, weight: .semibold))
                 .foregroundColor(.appPrimary)
                 .multilineTextAlignment(.center)
         }
@@ -199,7 +199,7 @@ struct UniversalDialog: View {
                 .foregroundColor(.appTextTertiary)
                 .multilineTextAlignment(.center)
 
-            if case .confirmation(_, let warningMessage, _, _, _) = type {
+            if case .confirmation(_, let warningMessage, _, _) = type {
                 Text(warningMessage)
                     .font(.system(size: 12, weight: .regular))
                     .foregroundColor(.error)
@@ -214,7 +214,7 @@ struct UniversalDialog: View {
                 .buttonStyle(SecondaryButtonStyle())
 
                 Button("放弃训练") {
-                    if case .confirmation(_, _, _, _, let onConfirm) = type {
+                    if case .confirmation(_, _, _, let onConfirm) = type {
                         onConfirm()
                     }
                 }
@@ -341,10 +341,10 @@ struct UniversalDialog: View {
         }
     }
 
-    private var dialogTitleFont: (size: CGFloat) {
+    private var dialogTitleFont: CGFloat {
         switch type {
-        case .completion: return (size: 20) // Completion dialog has larger title
-        default: return (size: 18)
+        case .completion: return 20 // Completion dialog has larger title
+        default: return 18
         }
     }
 
