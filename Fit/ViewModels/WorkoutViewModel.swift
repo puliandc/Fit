@@ -185,6 +185,7 @@ class WorkoutViewModel: ObservableObject {
 
         // 检查是否还有更多的组需要完成
         let remainingSetsInWorkout = totalSets - completedSets.count
+        print("🐛 DEBUG: 剩余组数: \(remainingSetsInWorkout), 总组数: \(totalSets), 已完成: \(completedSets.count)")
 
         if remainingSetsInWorkout > 0 {
             // 进入休息状态，然后继续下一组/下一个动作
@@ -192,8 +193,13 @@ class WorkoutViewModel: ObservableObject {
             startRest()
         } else {
             // 训练完成
-            print("🐛 DEBUG: 训练完成！")
+            print("🐛 DEBUG: 训练完成！触发进度更新")
             pauseExercise()
+
+            // 确保进度更新能触发UI刷新 - 主动发送对象变化通知
+            DispatchQueue.main.async {
+                self.objectWillChange.send()
+            }
             // 训练完成对话框将由WorkoutScreen中的进度监听器处理
         }
     }
