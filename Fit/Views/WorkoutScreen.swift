@@ -144,6 +144,28 @@ struct WorkoutScreen: View {
                         removal: .opacity
                     ))
 
+                case .workoutComplete:
+                    // Background overlay
+                    Color.appBackground.opacity(0.4)
+                        .ignoresSafeArea()
+                        .onTapGesture {
+                            dialogManager.dismissDialog()
+                        }
+
+                    // Workout Complete Dialog - 训练完成对话框
+                    WorkoutCompleteDialog(
+                        onDismiss: {
+                            dialogManager.dismissDialog()
+                            // 返回主界面
+                            navigationManager.popToRoot()
+                        },
+                        workoutViewModel: workoutViewModel
+                    )
+                    .transition(.asymmetric(
+                        insertion: .scale.combined(with: .opacity),
+                        removal: .opacity
+                    ))
+
                 default:
                     EmptyView()
                 }
