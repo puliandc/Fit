@@ -9,6 +9,7 @@
 import SwiftUI
 
 // MARK: - Edit Set Dialog (Legacy Wrapper)
+// DEPRECATED: This component should be replaced by direct UniversalDialog usage
 struct EditSetDialog: View {
     let exercise: Exercise
     let setIndex: Int
@@ -29,25 +30,18 @@ struct EditSetDialog: View {
     }
 
     private func saveChanges(reps: String, weight: String, notes: String) {
-        print("💾 DEBUG: EditSetDialog saveChanges called - reps: \(reps), weight: \(weight), notes: \(notes)")
-
         guard let actualReps = Int(reps),
               let actualWeight = Double(weight) else {
-            print("❌ ERROR: Invalid input parameters - reps: \(reps), weight: \(weight)")
             return
         }
 
-        print("💾 DEBUG: EditSetDialog saving with validated parameters - reps: \(actualReps), weight: \(actualWeight), notes: \(notes)")
-        print("🐛 DEBUG: Thread: \(Thread.isMainThread ? "Main" : "Background")")
-
         // 使用WorkoutViewModel的增强方法保存参数并完成练习
         workoutViewModel.completeExerciseWith(actualReps: actualReps, actualWeight: actualWeight, notes: notes)
-
-        print("💾 DEBUG: EditSetDialog called completeExerciseWith")
     }
 }
 
 // MARK: - Completion Dialog (Legacy Wrapper)
+// DEPRECATED: This component should be replaced by direct UniversalDialog usage
 struct CompletionDialog: View {
     let onDismiss: () -> Void
 
@@ -65,11 +59,12 @@ struct CompletionDialog: View {
     }
 
     private func saveCompletion(reps: String, weight: String) {
-        print("Saving completion - Reps: \(reps), Weight: \(weight)")
+        // 功能保留但标记为过时，建议直接使用UniversalDialog
     }
 }
 
 // MARK: - Quit Dialog (Legacy Wrapper)
+// DEPRECATED: This component should be replaced by direct UniversalDialog usage
 struct QuitDialog: View {
     let onConfirm: () -> Void
     let onCancel: () -> Void
@@ -89,6 +84,7 @@ struct QuitDialog: View {
 }
 
 // MARK: - Enhanced Quit Dialog (Legacy Wrapper)
+// DEPRECATED: This component should be replaced by direct UniversalDialog usage
 struct EnhancedQuitDialog: View {
     let onQuitCurrentExercise: () -> Void
     let onQuitAll: () -> Void
@@ -129,50 +125,11 @@ struct EnhancedQuitDialog: View {
     }
 }
 
-// MARK: - Quit Option Card
-struct QuitOptionCard: View {
-    let icon: String
-    let title: String
-    let description: String
-    let color: Color
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 12) {
-                Image(systemName: icon)
-                    .font(.system(size: 20, weight: .medium))
-                    .foregroundColor(color)
-                    .frame(width: 24, height: 24)
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(title)
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.appPrimary)
-                        .multilineTextAlignment(.leading)
-
-                    Text(description)
-                        .font(.system(size: 12, weight: .regular))
-                        .foregroundColor(.appTextTertiary)
-                        .multilineTextAlignment(.leading)
-                        .lineLimit(2)
-                }
-
-                Spacer()
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(color.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(color.opacity(0.3), lineWidth: 1)
-            )
-        }
-        .buttonStyle(PlainButtonStyle())
-    }
-}
+// REMOVED: QuitOptionCard was redundant with UniversalDialog.optionCard
+// Use UniversalDialog with .options type instead
 
 // MARK: - Workout Complete Dialog (Legacy Wrapper)
+// DEPRECATED: This component should be replaced by direct UniversalDialog usage
 struct WorkoutCompleteDialog: View {
     let onDismiss: () -> Void
     let workoutViewModel: WorkoutViewModel
