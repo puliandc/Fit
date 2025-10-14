@@ -11,13 +11,19 @@ import Combine
 class NavigationManager: ObservableObject {
     @Published var currentScreen: AppScreen = .main
     @Published var navigationStack: [AppScreen] = []  // iOS 15.0 compatible navigation stack
+
+    // DEPRECATED: NavigationManager不应该管理对话框状态 (已移至DialogManager)
+    // TODO: 在下一版本中移除这些属性，使用DialogManager替代
     @Published var presentedDialog: DialogType?
 
-    // 版本1.3: WorkoutViewModel管理
+    // DEPRECATED: NavigationManager不应该管理训练状态 (已移至WorkoutSessionManager)
+    // TODO: 在下一版本中移除这些属性，使用WorkoutSessionManager替代
     @Published var currentWorkoutViewModel: WorkoutViewModel?
 
     init() {
         print("🎯 NavigationManager initialized with currentScreen: \(currentScreen)")
+        print("⚠️ WARNING: NavigationManager contains deprecated functionality")
+        print("⚠️ Plan to refactor: DialogManager + WorkoutSessionManager separation")
     }
 
     // MARK: - Navigation Methods (iOS 15.0+ Compatible)
@@ -46,21 +52,24 @@ class NavigationManager: ObservableObject {
         currentScreen = .main
     }
 
-    // MARK: - Dialog Methods
+    // MARK: - Dialog Methods (DEPRECATED - 将移至DialogManager)
     func presentDialog(_ dialog: DialogType) {
+        print("⚠️ DEPRECATED: Use DialogManager.presentDialog() instead")
         withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
             presentedDialog = dialog
         }
     }
 
     func dismissDialog() {
+        print("⚠️ DEPRECATED: Use DialogManager.dismissDialog() instead")
         withAnimation(.easeInOut(duration: 0.2)) {
             presentedDialog = nil
         }
     }
 
-    // MARK: - Workout Navigation (iOS 15.0+ Compatible)
+    // MARK: - Workout Navigation (DEPRECATED - 将移至WorkoutSessionManager)
     func startWorkout(_ plan: WorkoutPlan) {
+        print("⚠️ DEPRECATED: Use WorkoutSessionManager.startWorkout() instead")
         print("🐛 DEBUG: NavigationManager.startWorkout called")
         print("🐛 DEBUG: Workout plan: \(plan.name)")
         print("🐛 DEBUG: Exercise count: \(plan.exercises.count)")
@@ -83,14 +92,17 @@ class NavigationManager: ObservableObject {
     }
 
     func pauseWorkout() {
+        print("⚠️ DEPRECATED: Use WorkoutSessionManager.pauseWorkout() instead")
         // Handle workout pause logic
     }
 
     func resumeWorkout() {
+        print("⚠️ DEPRECATED: Use WorkoutSessionManager.resumeWorkout() instead")
         // Handle workout resume logic
     }
 
     func completeWorkout() {
+        print("⚠️ DEPRECATED: Use WorkoutSessionManager.completeWorkout() instead")
         // 保存训练日志
         if let viewModel = currentWorkoutViewModel {
             let logSaved = viewModel.finishWorkoutAndSaveLog()
@@ -106,15 +118,25 @@ class NavigationManager: ObservableObject {
     }
 
     func quitWorkout() {
+        print("⚠️ DEPRECATED: Use WorkoutSessionManager.quitWorkout() instead")
         presentDialog(.quitWorkout)
     }
 
     func quitCurrentExercise() {
+        print("⚠️ DEPRECATED: Use WorkoutSessionManager.quitCurrentExercise() instead")
         presentDialog(.quitCurrentExercise)
     }
 
     func quitRemainingExercises() {
+        print("⚠️ DEPRECATED: Use WorkoutSessionManager.quitRemainingExercises() instead")
         presentDialog(.quitRemainingExercises)
+    }
+
+    // MARK: - Simple Navigation Methods (推荐使用的纯导航功能)
+    func navigateToWorkout(plan: WorkoutPlan) {
+        // 纯导航功能，不管理训练状态
+        navigate(to: .workout(plan))
+        print("🎯 Navigating to workout screen for plan: \(plan.name)")
     }
 
     // MARK: - iOS 15.0+ Compatibility Methods
@@ -130,6 +152,7 @@ class NavigationManager: ObservableObject {
         navigationStack.removeAll()
         currentScreen = .main
         dismissDialog()
+        print("🎯 Reset navigation to main screen")
     }
 }
 
@@ -167,7 +190,8 @@ enum AppScreen: Hashable, Codable {
     }
 }
 
-// MARK: - Dialog Type Enum
+// MARK: - Dialog Type Enum (DEPRECATED - 已移至DialogManager.swift)
+// TODO: 在下一版本中删除此枚举，使用DialogManager.swift中的定义
 enum DialogType: Identifiable, Equatable {
     case editSet(Exercise, Int, WorkoutViewModel)
     case completion
