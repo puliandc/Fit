@@ -380,7 +380,7 @@ struct MeshGradientBackground: View {
                             width: 2,
                             height: 2
                         )),
-                        with: .color(.white)
+                        with: .color(.appSurfaceLight)
                     )
                 }
             }
@@ -659,7 +659,7 @@ struct ModernButton: View {
     private var buttonTextColor: Color {
         switch style {
         case .primary:
-            return .white
+            return .appText
         case .secondary:
             return isDisabled ? .appTextDisabled : .appText
         case .disabled:
@@ -1039,7 +1039,7 @@ struct CompleteWorkoutPlanCard: View {
                         icon: "dumbbell.fill",
                         value: "\(exerciseGroups.count)",
                         label: "练习项目",
-                        color: .blue
+                        color: .appPrimary
                     )
 
                     // 总组数
@@ -1047,7 +1047,7 @@ struct CompleteWorkoutPlanCard: View {
                         icon: "number.circle.fill",
                         value: "\(workoutPlan.exercises.count)",
                         label: "总组数",
-                        color: .green
+                        color: .success
                     )
 
                     // 预估时长
@@ -1055,7 +1055,7 @@ struct CompleteWorkoutPlanCard: View {
                         icon: "clock.fill",
                         value: "\(workoutPlan.duration)分钟",
                         label: "预估时长",
-                        color: .orange
+                        color: .warning
                     )
                 }
                 .padding(.horizontal, 4)

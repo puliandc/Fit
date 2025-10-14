@@ -386,13 +386,13 @@ struct CompactExerciseInfoCard: View {
                         )
                         .overlay(
                             RoundedRectangle(cornerRadius: 14)
-                                .stroke(Color.blue.opacity(0.3), lineWidth: 1)
+                                .stroke(Color.appPrimary.opacity(0.3), lineWidth: 1)
                         )
                 )
 
                 // 版本1.3: 本轮训练进度
                 ProgressView(value: Double(currentSet) / Double(totalSets))
-                    .progressViewStyle(LinearProgressViewStyle(tint: .blue))
+                    .progressViewStyle(LinearProgressViewStyle(tint: .appPrimary))
                     .scaleEffect(x: 1, y: 2, anchor: .center)
                 .padding(.horizontal, 16)
 
@@ -631,7 +631,7 @@ struct CompactTimerView: View {
             // 时间显示 - 固定高度
             Text(formattedTime)
                 .font(.system(size: 28, weight: .bold))
-                .foregroundColor(isResting ? .blue : .green)
+                .foregroundColor(isResting ? .appPrimary : .success)
                 .frame(height: 36) // 固定时间显示区域高度
 
             // 按钮 - 动态颜色和标题，固定高度
