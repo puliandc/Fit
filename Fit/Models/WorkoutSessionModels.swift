@@ -133,13 +133,11 @@ enum SetStatus: String, CaseIterable {
 }
 
 // MARK: - Prebuilt Workout Session Prebuilder
-// 负责根据 WorkoutPlan 预建立完整的训练会话数据结构
+// DEPRECATED: This class is overly complex and should be simplified
+// Consider using direct WorkoutSession creation instead
 class PrebuiltWorkoutSessionPrebuilder {
 
     func buildSession(from workoutPlan: WorkoutPlan) -> PrebuiltWorkoutSession {
-        print("🏗️ DEBUG: 开始预建立训练会话数据结构...")
-        print("🏗️ DEBUG: 训练计划: \(workoutPlan.name), 练习数量: \(workoutPlan.exercises.count)")
-
         var session = PrebuiltWorkoutSession(workoutPlan: workoutPlan)
 
         // 按练习分组，为每个练习创建 ExerciseSession
@@ -149,11 +147,9 @@ class PrebuiltWorkoutSessionPrebuilder {
             guard let firstSet = exerciseSets.first else { continue }
             let exercise = firstSet.exercise
 
-            print("🏗️ DEBUG: 创建练习会话 - \(exercise.name), 组数: \(exerciseSets.count)")
-
             let exerciseSession = ExerciseSession(
                 exercise: exercise,
-                exerciseSets: exerciseSets.sorted { $0.id < $1.id } // 确保顺序正确
+                exerciseSets: exerciseSets.sorted { $0.id < $1.id }
             )
 
             session.exerciseSessions.append(exerciseSession)
@@ -167,33 +163,26 @@ class PrebuiltWorkoutSessionPrebuilder {
             return index1 < index2
         }
 
-        print("🏗️ DEBUG: 训练会话预建立完成 - 总练习数: \(session.exerciseSessions.count), 总组数: \(session.totalSets)")
-
         return session
     }
 
     func validateSession(_ session: PrebuiltWorkoutSession) -> Bool {
-        // 验证会话数据的完整性
         guard !session.exerciseSessions.isEmpty else {
-            print("❌ ERROR: 训练会话没有练习数据")
             return false
         }
 
         for exerciseSession in session.exerciseSessions {
             if exerciseSession.sets.isEmpty {
-                print("❌ ERROR: 练习 \(exerciseSession.exercise.name) 没有组数据")
                 return false
             }
 
             for (index, set) in exerciseSession.sets.enumerated() {
                 if set.setOrder != index + 1 {
-                    print("❌ ERROR: 组顺序不正确 - 期望: \(index + 1), 实际: \(set.setOrder)")
                     return false
                 }
             }
         }
 
-        print("✅ DEBUG: 训练会话数据验证通过")
         return true
     }
 }
@@ -218,8 +207,6 @@ extension PrebuiltWorkoutSession {
                 exerciseSessions[index].sets[setIndex].notes = notes
                 exerciseSessions[index].sets[setIndex].isCompleted = true
                 exerciseSessions[index].sets[setIndex].completedAt = Date()
-
-                print("✅ DEBUG: 标记组完成 - \(set.exerciseName) 组\(set.setOrder)")
             }
         }
     }
@@ -235,8 +222,6 @@ extension PrebuiltWorkoutSession {
                     exerciseSession.sets[setIndex].notes = "跳过"
                     exerciseSession.sets[setIndex].isCompleted = true
                     exerciseSession.sets[setIndex].completedAt = Date()
-
-                    print("⏭️ DEBUG: 标记组跳过 - \(exerciseSession.sets[setIndex].exerciseName) 组\(exerciseSession.sets[setIndex].setOrder)")
                 }
             }
 

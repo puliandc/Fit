@@ -80,8 +80,6 @@ class EnhancedWorkoutLogFileManager {
         // Fit应用的根目录就是Documents目录
         let fitRootFolder = documentsPath
 
-        print("📁 Fit根目录: \(fitRootFolder.path)")
-
         return fitRootFolder
     }
 
@@ -110,10 +108,8 @@ class EnhancedWorkoutLogFileManager {
 
         do {
             try jsonString.write(to: fileURL, atomically: true, encoding: .utf8)
-            print("✅ Workout log saved to: \(fileURL.path)")
             return true
         } catch {
-            print("❌ Failed to save workout log: \(error)")
             return false
         }
     }
@@ -134,7 +130,6 @@ class EnhancedWorkoutLogFileManager {
                 return date1 > date2
             }
         } catch {
-            print("Failed to get log files: \(error)")
             return []
         }
     }
@@ -159,7 +154,6 @@ class EnhancedWorkoutLogFileManager {
 
         // 可以在这里创建月份子文件夹并移动文件
         // 目前保持简单，所有文件都在WorkoutLogs根目录
-        print("📁 Log files organized by month: \(monthlyGroups.keys.sorted())")
     }
 }
 
