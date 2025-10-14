@@ -31,9 +31,9 @@ struct ContentView: View {
                 } else {
                     // Fallback if no WorkoutViewModel exists
                     Text("训练数据加载中...")
-                        .foregroundColor(.white)
+                        .foregroundColor(.appText)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color.black)
+                        .background(Color.appBackground)
                 }
 
             case .settings:
@@ -61,7 +61,7 @@ struct ContentView: View {
                     EmptyView()
                 default:
                     // 其他对话框显示背景遮罩
-                    Color.black.opacity(0.4)
+                    Color.appBackground.opacity(0.4)
                         .ignoresSafeArea()
                         .onTapGesture {
                             navigationManager.dismissDialog()
@@ -134,7 +134,7 @@ struct SettingsScreen: View {
             Text("设置")
                 .font(.largeTitle)
                 .fontWeight(.bold)
-                .foregroundColor(.white)
+                .foregroundColor(.appText)
                 .padding(.top, 40)
 
             Button("返回主页") {
@@ -145,7 +145,7 @@ struct SettingsScreen: View {
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.black)
+        .background(Color.appBackground)
     }
 }
 
@@ -157,7 +157,7 @@ struct HistoryScreen: View {
             Text("历史记录")
                 .font(.largeTitle)
                 .fontWeight(.bold)
-                .foregroundColor(.white)
+                .foregroundColor(.appText)
                 .padding(.top, 40)
 
             Button("返回主页") {
@@ -168,7 +168,7 @@ struct HistoryScreen: View {
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.black)
+        .background(Color.appBackground)
     }
 }
 
@@ -176,10 +176,10 @@ struct HistoryScreen: View {
 struct SettingsButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .foregroundColor(.white)
+            .foregroundColor(.appText)
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
-            .background(Color.blue)
+            .background(Color.appPrimary)
             .cornerRadius(10)
             .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
             .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
