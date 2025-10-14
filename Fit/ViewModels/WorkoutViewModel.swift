@@ -258,7 +258,6 @@ class WorkoutViewModel: ObservableObject {
 
         let currentExerciseId = currentExercise.id
         let exerciseSetsForThisExercise = workoutPlan.exercises.filter { $0.exercise.id == currentExerciseId }
-        let totalSetsForThisExercise = exerciseSetsForThisExercise.count
 
         // 计算当前是第几组（基于当前ExerciseSet在所有相同练习中的位置）
         let currentExerciseSet = currentExerciseSet
