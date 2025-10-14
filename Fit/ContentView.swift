@@ -12,6 +12,13 @@ struct ContentView: View {
     @EnvironmentObject var dialogManager: DialogManager
     @EnvironmentObject var workoutSessionManager: WorkoutSessionManager
 
+    // Helper function to format time
+    private func formatTime(_ seconds: Int) -> String {
+        let minutes = seconds / 60
+        let secs = seconds % 60
+        return String(format: "%d:%02d", minutes, secs)
+    }
+
     var body: some View {
         ZStack {
             switch navigationManager.currentScreen {
@@ -139,13 +146,6 @@ struct ContentView: View {
                         insertion: .scale.combined(with: .opacity),
                         removal: .opacity
                     ))
-                }
-
-                // Helper function to format time
-                func formatTime(_ seconds: Int) -> String {
-                    let minutes = seconds / 60
-                    let secs = seconds % 60
-                    return String(format: "%d:%02d", minutes, secs)
                 }
             }
         }

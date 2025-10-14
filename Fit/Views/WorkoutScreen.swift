@@ -11,6 +11,8 @@ import SwiftUI
 
 struct WorkoutScreen: View {
     @EnvironmentObject var navigationManager: NavigationManager
+    @EnvironmentObject var dialogManager: DialogManager
+    @EnvironmentObject var workoutSessionManager: WorkoutSessionManager
     @EnvironmentObject var workoutViewModel: WorkoutViewModel
     @State private var showContent: Bool = false
 
@@ -32,7 +34,7 @@ struct WorkoutScreen: View {
                     workoutPlan: workoutViewModel.workoutPlan,
                     progress: workoutViewModel.progress,
                     onBack: {
-                        navigationManager.quitWorkout()
+                        dialogManager.presentDialog(.quitWorkout)
                     }
                 )
 
@@ -46,7 +48,7 @@ struct WorkoutScreen: View {
                     isExerciseActive: workoutViewModel.isExerciseActive,
                     onCompleteAction: {
                         // 动作时间模式下点击"动作完成"
-                        navigationManager.presentDialog(.editSet(workoutViewModel.currentExercise, workoutViewModel.currentSet, workoutViewModel))
+                        dialogManager.presentDialog(.editSet(workoutViewModel.currentExercise, workoutViewModel.currentSet, workoutViewModel))
                     },
                     onSkipRest: {
                         // 休息时间模式下点击"跳过休息"
@@ -63,7 +65,7 @@ struct WorkoutScreen: View {
                     CompactExerciseInfoCard(
                         exercise: workoutViewModel.currentExercise,
                         currentSet: workoutViewModel.currentSet,
-                        totalSets: workoutViewModel.getCompletedSetsCount(for: workoutViewModel.currentExercise) + workoutViewModel.getRemainingSetsCount(for: workoutViewModel.currentExercise),
+                        totalSets: workoutViewModel.currentExerciseSet.targetReps,
                         targetReps: workoutViewModel.currentExerciseSet.targetReps,
                         targetWeight: workoutViewModel.currentExerciseSet.targetWeight,
                         elapsedTime: workoutViewModel.exerciseElapsedTime
@@ -77,7 +79,7 @@ struct WorkoutScreen: View {
                 // 底部固定按钮区域 - 只保留放弃按钮并居中
                 CompactQuitButton(
                     onQuit: {
-                        navigationManager.quitWorkout()
+                        dialogManager.presentDialog(.quitWorkout)
                     }
                 )
                 .padding(.horizontal, 16)
@@ -85,32 +87,33 @@ struct WorkoutScreen: View {
             }
 
             // Dialog Overlay for workout-related dialogs
-            if let dialog = navigationManager.presentedDialog {
+            if let dialog = dialogManager.presentedDialog {
                 switch dialog {
                 case .quitWorkout, .quitCurrentExercise, .quitRemainingExercises:
                     // Background overlay
                     Color.appBackground.opacity(0.4)
                         .ignoresSafeArea()
                         .onTapGesture {
-                            navigationManager.dismissDialog()
+                            dialogManager.dismissDialog()
                         }
 
                     // Enhanced Quit Dialog
                     EnhancedQuitDialog(
                         onQuitCurrentExercise: {
                             workoutViewModel.skipCurrentExerciseCompletely()
-                            navigationManager.dismissDialog()
+                            dialogManager.dismissDialog()
                         },
                         onQuitAll: {
                             workoutViewModel.skipAllRemainingExercises()
-                            navigationManager.dismissDialog()
+                            dialogManager.dismissDialog()
                             // 延迟触发训练完成对话框，确保状态更新完成
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                navigationManager.completeWorkout()
+                                workoutSessionManager.completeWorkout()
+                                dialogManager.presentDialog(.workoutComplete)
                             }
                         },
                         onCancel: {
-                            navigationManager.dismissDialog()
+                            dialogManager.dismissDialog()
                         },
                         currentExerciseName: workoutViewModel.currentExercise.name
                     )
@@ -124,7 +127,7 @@ struct WorkoutScreen: View {
                     Color.appBackground.opacity(0.4)
                         .ignoresSafeArea()
                         .onTapGesture {
-                            navigationManager.dismissDialog()
+                            dialogManager.dismissDialog()
                         }
 
                     // Edit Set Dialog - 动作完成对话框
@@ -132,7 +135,7 @@ struct WorkoutScreen: View {
                         exercise: exercise,
                         setIndex: setIndex,
                         onDismiss: {
-                            navigationManager.dismissDialog()
+                            dialogManager.dismissDialog()
                         },
                         workoutViewModel: workoutViewModel
                     )
@@ -146,7 +149,7 @@ struct WorkoutScreen: View {
                 }
             }
           }
-        .animation(.easeInOut(duration: 0.3), value: navigationManager.presentedDialog)
+        .animation(.easeInOut(duration: 0.3), value: dialogManager.presentedDialog)
         .onAppear {
             // 安全检查
             guard !workoutViewModel.workoutPlan.exercises.isEmpty else { return }
@@ -167,7 +170,8 @@ struct WorkoutScreen: View {
             if workoutViewModel.progress >= 1.0 {
                 print("🎉 DEBUG: Workout completed! Progress reached 100%")
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    navigationManager.completeWorkout()
+                    workoutSessionManager.completeWorkout()
+                    dialogManager.presentDialog(.workoutComplete)
                 }
             }
         }
