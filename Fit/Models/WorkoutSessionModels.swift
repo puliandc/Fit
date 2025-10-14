@@ -138,12 +138,12 @@ enum SetStatus: String, CaseIterable {
 class PrebuiltWorkoutSessionPrebuilder {
 
     func buildSession(from workoutPlan: WorkoutPlan) -> PrebuiltWorkoutSession {
-        var session = PrebuiltWorkoutSession(workoutPlan: workoutPlan)
+        let session = PrebuiltWorkoutSession(workoutPlan: workoutPlan)
 
         // 按练习分组，为每个练习创建 ExerciseSession
         let groupedExercises = Dictionary(grouping: workoutPlan.exercises) { $0.exercise.id }
 
-        for (exerciseId, exerciseSets) in groupedExercises {
+        for (_, exerciseSets) in groupedExercises {
             guard let firstSet = exerciseSets.first else { continue }
             let exercise = firstSet.exercise
 
@@ -213,20 +213,17 @@ extension PrebuiltWorkoutSession {
 
     func skipRemainingSetsInExercise(_ exercise: Exercise) {
         if let exerciseSessionIndex = exerciseSessions.firstIndex(where: { $0.exercise.id == exercise.id }) {
-            var exerciseSession = exerciseSessions[exerciseSessionIndex]
+            let exerciseSession = exerciseSessions[exerciseSessionIndex]
 
             for setIndex in exerciseSession.sets.indices {
                 if !exerciseSession.sets[setIndex].isCompleted {
-                    exerciseSession.sets[setIndex].actualWeight = 0
-                    exerciseSession.sets[setIndex].actualReps = 0
-                    exerciseSession.sets[setIndex].notes = "跳过"
-                    exerciseSession.sets[setIndex].isCompleted = true
-                    exerciseSession.sets[setIndex].completedAt = Date()
+                    exerciseSessions[exerciseSessionIndex].sets[setIndex].actualWeight = 0
+                    exerciseSessions[exerciseSessionIndex].sets[setIndex].actualReps = 0
+                    exerciseSessions[exerciseSessionIndex].sets[setIndex].notes = "跳过"
+                    exerciseSessions[exerciseSessionIndex].sets[setIndex].isCompleted = true
+                    exerciseSessions[exerciseSessionIndex].sets[setIndex].completedAt = Date()
                 }
             }
-
-            // 更新数组中的元素
-            exerciseSessions[exerciseSessionIndex] = exerciseSession
         }
     }
 }

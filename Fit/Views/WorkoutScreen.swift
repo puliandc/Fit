@@ -198,7 +198,7 @@ struct CompactWorkoutBackground: View {
                 .blur(radius: 100)
 
             Circle()
-                .fill(Color.accent.opacity(0.08))
+                .fill(Color.appAccent.opacity(0.08))
                 .frame(width: 320, height: 320)
                 .offset(x: -74, y: 407)
                 .blur(radius: 80)
