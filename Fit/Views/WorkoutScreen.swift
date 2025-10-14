@@ -89,7 +89,7 @@ struct WorkoutScreen: View {
                 switch dialog {
                 case .quitWorkout, .quitCurrentExercise, .quitRemainingExercises:
                     // Background overlay
-                    Color.black.opacity(0.4)
+                    Color.appBackground.opacity(0.4)
                         .ignoresSafeArea()
                         .onTapGesture {
                             navigationManager.dismissDialog()
@@ -121,7 +121,7 @@ struct WorkoutScreen: View {
 
                 case .editSet(let exercise, let setIndex, let workoutViewModel):
                     // Background overlay
-                    Color.black.opacity(0.4)
+                    Color.appBackground.opacity(0.4)
                         .ignoresSafeArea()
                         .onTapGesture {
                             navigationManager.dismissDialog()
@@ -192,13 +192,13 @@ struct CompactWorkoutBackground: View {
 
             // 模糊光斑效果
             Circle()
-                .fill(Color.orange.opacity(0.1))
+                .fill(Color.warning.opacity(0.1))
                 .frame(width: 384, height: 384)
                 .offset(x: 180, y: 132)
                 .blur(radius: 100)
 
             Circle()
-                .fill(Color.pink.opacity(0.08))
+                .fill(Color.accent.opacity(0.08))
                 .frame(width: 320, height: 320)
                 .offset(x: -74, y: 407)
                 .blur(radius: 80)
@@ -219,12 +219,12 @@ struct CompactWorkoutHeader: View {
                 // 返回按钮
                 Button(action: onBack) {
                     RoundedRectangle(cornerRadius: 14)
-                        .fill(Color.white.opacity(0.7))
+                        .fill(Color.appSurfaceLight.opacity(0.7))
                         .frame(width: 36, height: 32)
                         .overlay(
                             Image(systemName: "chevron.left")
                                 .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(.black)
+                                .foregroundColor(.appText)
                         )
                 }
                 .buttonStyle(PlainButtonStyle())
@@ -235,7 +235,7 @@ struct CompactWorkoutHeader: View {
                         .font(.system(size: 16, weight: .medium))
                         .foregroundStyle(
                             LinearGradient(
-                                colors: [Color.orange, Color.pink],
+                                colors: [Color.warning, Color.appAccent],
                                 startPoint: .leading,
                                 endPoint: .trailing
                             )
@@ -243,7 +243,7 @@ struct CompactWorkoutHeader: View {
 
                     Text("\(Int(progress * 100))%")
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.orange)
+                        .foregroundColor(.warning)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -252,14 +252,14 @@ struct CompactWorkoutHeader: View {
                 ZStack(alignment: .leading) {
                     // 背景轨道
                     RoundedRectangle(cornerRadius: 4)
-                        .fill(Color.gray.opacity(0.3))
+                        .fill(Color.appTextMuted.opacity(0.3))
                         .frame(height: 8)
 
                     // 进度条
                     RoundedRectangle(cornerRadius: 4)
                         .fill(
                             LinearGradient(
-                                colors: [Color.orange, Color.pink],
+                                colors: [Color.warning, Color.appAccent],
                                 startPoint: .leading,
                                 endPoint: .trailing
                             )
@@ -275,8 +275,8 @@ struct CompactWorkoutHeader: View {
         .background(
             // 基于Figma设计的半透明背景
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white.opacity(0.7))
-                .shadow(color: .black.opacity(0.08), radius: 32, x: 0, y: 8)
+                .fill(Color.appSurfaceLight.opacity(0.7))
+                .shadow(color: .appBackground.opacity(0.08), radius: 32, x: 0, y: 8)
         )
     }
 }
@@ -344,7 +344,7 @@ struct CompactExerciseInfoCard: View {
                 .font(.system(size: 16, weight: .medium))
                 .foregroundStyle(
                     LinearGradient(
-                        colors: [Color.orange, Color.pink],
+                        colors: [Color.warning, Color.appAccent],
                         startPoint: .leading,
                         endPoint: .trailing
                     )
@@ -358,15 +358,15 @@ struct CompactExerciseInfoCard: View {
                 HStack {
                     Image(systemName: "number")
                         .font(.system(size: 20, weight: .medium))
-                        .foregroundColor(.blue)
+                        .foregroundColor(.appPrimary)
 
                     Text("当前组数：")
                         .font(.system(size: 14))
-                        .foregroundColor(.gray)
+                        .foregroundColor(.appTextSecondary)
 
                     Text("\(currentSet) / \(totalSets)")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.blue)
+                        .foregroundColor(.appPrimary)
 
                     Spacer()
                 }
@@ -403,25 +403,25 @@ struct CompactExerciseInfoCard: View {
                         HStack(spacing: 6) {
                             Image(systemName: "target")
                                 .font(.system(size: 18, weight: .medium))
-                                .foregroundColor(.green)
+                                .foregroundColor(.success)
                         }
 
                         Text("目标次数")
                             .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.gray)
+                            .foregroundColor(.appTextSecondary)
 
                         Text("\(targetReps)")
                             .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.green)
+                            .foregroundColor(.success)
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 17)
                     .background(
                         RoundedRectangle(cornerRadius: 14)
-                            .fill(Color.green.opacity(0.1))
+                            .fill(Color.success.opacity(0.1))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 14)
-                                    .stroke(Color.green.opacity(0.3), lineWidth: 1)
+                                    .stroke(Color.success.opacity(0.3), lineWidth: 1)
                             )
                     )
 
@@ -430,31 +430,31 @@ struct CompactExerciseInfoCard: View {
                         HStack(spacing: 6) {
                             Image(systemName: "scalemass.fill")
                                 .font(.system(size: 20, weight: .medium))
-                                .foregroundColor(.purple)
+                                .foregroundColor(.info)
                         }
 
                         Text("目标重量 (kg)")
                             .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.gray)
+                            .foregroundColor(.appTextSecondary)
 
                         if targetWeight > 0 {
                             Text(String(format: "%.1f", targetWeight))
                                 .font(.system(size: 20, weight: .bold))
-                                .foregroundColor(.purple)
+                                .foregroundColor(.info)
                         } else {
                             Text("自重")
                                 .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(.purple)
+                                .foregroundColor(.info)
                         }
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 17)
                     .background(
                         RoundedRectangle(cornerRadius: 14)
-                            .fill(Color.purple.opacity(0.1))
+                            .fill(Color.info.opacity(0.1))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 14)
-                                    .stroke(Color.purple.opacity(0.3), lineWidth: 1)
+                                    .stroke(Color.info.opacity(0.3), lineWidth: 1)
                             )
                     )
                 }
@@ -464,17 +464,17 @@ struct CompactExerciseInfoCard: View {
                     HStack {
                         Image(systemName: "arrow.right.circle.fill")
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.cyan)
+                            .foregroundColor(.info)
 
                         Text(nextInfo)
                             .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.cyan)
+                            .foregroundColor(.info)
 
                         Spacer()
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
-                    .background(Color.cyan.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
+                    .background(Color.info.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
                 }
             }
 
@@ -482,11 +482,11 @@ struct CompactExerciseInfoCard: View {
             HStack {
                 Image(systemName: "clock")
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.gray)
+                    .foregroundColor(.appTextSecondary)
 
                 Text("训练总计时: \(formattedTotalTime)")
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.gray)
+                    .foregroundColor(.appTextSecondary)
 
                 Spacer()
             }
@@ -496,8 +496,8 @@ struct CompactExerciseInfoCard: View {
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 14)
-                .fill(Color.white.opacity(0.7))
-                .shadow(color: .black.opacity(0.08), radius: 32, x: 0, y: 8)
+                .fill(Color.appSurfaceLight.opacity(0.7))
+                .shadow(color: .appBackground.opacity(0.08), radius: 32, x: 0, y: 8)
         )
     }
 }
@@ -511,18 +511,18 @@ struct CompactCompleteButton: View {
         Button(action: onComplete) {
             Text("动作完成")
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(.white)
+                .foregroundColor(.appText)
                 .frame(maxWidth: .infinity)
                 .frame(height: 48) // 减少高度
                 .background(
                     LinearGradient(
-                        colors: [Color.green, Color(red: 0, green: 0.6, blue: 0.4)],
+                        colors: [Color.success, Color.success],
                         startPoint: .leading,
                         endPoint: .trailing
                     )
                 )
                 .clipShape(RoundedRectangle(cornerRadius: 14)) // 稍微减小圆角
-                .shadow(color: .green.opacity(0.3), radius: 15, x: 0, y: 6) // 减小阴影
+                .shadow(color: .success.opacity(0.3), radius: 15, x: 0, y: 6) // 减小阴影
         }
         .disabled(isDisabled)
         .opacity(isDisabled ? 0.5 : 1.0)
@@ -537,16 +537,16 @@ struct CompactQuitButton: View {
         Button(action: onQuit) {
             Text("放弃动作")
                 .font(.system(size: 14, weight: .medium))
-                .foregroundColor(.red)
+                .foregroundColor(.error)
                 .frame(maxWidth: .infinity)
                 .frame(height: 48) // 与完成按钮保持一致高度
-                .background(Color.white.opacity(0.6)) // 稍微增加透明度
+                .background(Color.appSurfaceLight.opacity(0.6)) // 稍微增加透明度
                 .clipShape(RoundedRectangle(cornerRadius: 14)) // 与完成按钮保持一致圆角
                 .overlay(
                     RoundedRectangle(cornerRadius: 14)
-                        .stroke(Color.red.opacity(0.3), lineWidth: 1.5) // 增强边框可见性
+                        .stroke(Color.error.opacity(0.3), lineWidth: 1.5) // 增强边框可见性
                 )
-                .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 4) // 减小阴影
+                .shadow(color: .appBackground.opacity(0.1), radius: 10, x: 0, y: 4) // 减小阴影
         }
         .buttonStyle(PlainButtonStyle())
         .accessibilityLabel("放弃当前动作")
@@ -580,17 +580,17 @@ struct CompactTimerView: View {
 
     private var buttonColor: Color {
         if isResting {
-            return .gray
+            return .appTextSecondary
         } else {
-            return .green
+            return .success
         }
     }
 
     private var buttonTextColor: Color {
         if isResting {
-            return .white
+            return .appText
         } else {
-            return .white
+            return .appText
         }
     }
 
@@ -609,19 +609,19 @@ struct CompactTimerView: View {
                 if isResting {
                     Image(systemName: "bed.double.fill")
                         .font(.system(size: 18))
-                        .foregroundColor(.blue)
+                        .foregroundColor(.appPrimary)
 
                     Text("休息时间")
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.blue)
+                        .foregroundColor(.appPrimary)
                 } else {
                     Image(systemName: "figure.run")
                         .font(.system(size: 18))
-                        .foregroundColor(.green)
+                        .foregroundColor(.success)
 
                     Text("动作时间")
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.green)
+                        .foregroundColor(.success)
                 }
 
                 Spacer()
@@ -662,8 +662,8 @@ struct CompactTimerView: View {
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color.white.opacity(0.7))
-                .shadow(color: .black.opacity(0.08), radius: 20, x: 0, y: 8)
+                .fill(Color.appSurfaceLight.opacity(0.7))
+                .shadow(color: .appBackground.opacity(0.08), radius: 20, x: 0, y: 8)
         )
         .accessibilityElement(children: .contain)
         .accessibilityLabel(isResting ? "休息时间模块" : "动作时间模块")
