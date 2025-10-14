@@ -15,23 +15,31 @@ class WorkoutLogRecorder {
     private var logEntries: [WorkoutLogEntry] = []
     private var currentExerciseSetOrder = 1
     private var currentExerciseName: String = ""
+    private var lastExerciseName: String = ""
 
     // 开始训练记录
     func startWorkout(workoutPlan: WorkoutPlan) {
         workoutStartTime = Date()
         currentExerciseSetOrder = 1
         logEntries.removeAll()
+        lastExerciseName = ""
 
         print("📝 Workout logging started for: \(workoutPlan.name)")
     }
 
     // 开始新动作
     func startExercise(exercise: Exercise) {
+        // 检查是否是新的动作，如果是新动作则重置组序
+        if exercise.name != lastExerciseName {
+            currentExerciseSetOrder = 1
+            print("📝 New exercise detected: \(exercise.name), resetting set order to 1")
+        }
+
         currentExerciseName = exercise.name
         currentExerciseStartTime = Date()
-        currentExerciseSetOrder = 1
+        lastExerciseName = exercise.name
 
-        print("📝 Started logging exercise: \(exercise.name)")
+        print("📝 Started logging exercise: \(exercise.name), set order: \(currentExerciseSetOrder)")
     }
 
     // 记录完成的训练组
@@ -130,6 +138,7 @@ class WorkoutLogRecorder {
         logEntries.removeAll()
         currentExerciseSetOrder = 1
         currentExerciseName = ""
+        lastExerciseName = ""
     }
 
     // 格式化时长显示
