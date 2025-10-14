@@ -3,154 +3,32 @@
 //  Fit
 //
 //  Created by 陆家贤 on 9/10/2025.
+//  Updated: 2025-10-14 - Refactored to use UniversalDialog
 //
 
 import SwiftUI
 
+// MARK: - Edit Set Dialog (Legacy Wrapper)
 struct EditSetDialog: View {
     let exercise: Exercise
     let setIndex: Int
     let onDismiss: () -> Void
     let workoutViewModel: WorkoutViewModel
 
-    @State private var reps: String = ""
-    @State private var weight: String = ""
-    @State private var notes: String = ""
-
     var body: some View {
-        VStack(spacing: 0) {
-            // Header
-            HStack {
-                Button(action: onDismiss) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.secondary)
+        UniversalDialog(
+            type: .input(
+                title: "动作完成",
+                subtitle: "请输入实际完成次数和重量",
+                onConfirm: { reps, weight, notes in
+                    saveChanges(reps: reps, weight: weight, notes: notes)
                 }
-                .buttonStyle(PlainButtonStyle())
-                .accessibilityLabel("关闭对话框")
-                .accessibilityHint("点击这里关闭对话框而不保存更改")
-                .accessibilityAddTraits(.isButton)
-
-                Spacer()
-
-                Text("动作完成")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.appPrimary)
-
-                Spacer()
-            }
-            .padding(.horizontal, 20)
-            .padding(.top, 20)
-
-            // Content
-            VStack(spacing: 16) {
-                Text("请输入实际完成次数和重量")
-                    .font(.system(size: 14, weight: .regular))
-                    .foregroundColor(.appTextTertiary)
-                    .multilineTextAlignment(.center)
-
-                // Reps Input
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("完成次数")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.appTextTertiary)
-
-                    TextField("0", text: $reps)
-                        .keyboardType(.numberPad)
-                        .textFieldStyle(PlainTextFieldStyle())
-                        .font(.system(size: 16, weight: .medium, design: .monospaced))
-                        .foregroundColor(.appTextTertiary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 12)
-                        .background(Color.green.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.green.opacity(0.3), lineWidth: 1)
-                        )
-                }
-
-                // Weight Input
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("重量 (kg)")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.appTextTertiary)
-
-                    TextField("0.0", text: $weight)
-                        .keyboardType(.decimalPad)
-                        .textFieldStyle(PlainTextFieldStyle())
-                        .font(.system(size: 16, weight: .medium, design: .monospaced))
-                        .foregroundColor(.appTextTertiary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 12)
-                        .background(Color.purple.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.purple.opacity(0.3), lineWidth: 1)
-                        )
-                }
-
-                // Notes Input
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("备注 (可选)")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.appTextTertiary)
-
-                    TextField("添加备注...", text: $notes)
-                        .textFieldStyle(PlainTextFieldStyle())
-                        .font(.system(size: 14, weight: .regular))
-                        .foregroundColor(.appTextTertiary)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 12)
-                        .background(Color.gray.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                        )
-                }
-
-                // Buttons
-                HStack(spacing: 12) {
-                    Button("取消") {
-                        onDismiss()
-                    }
-                    .buttonStyle(SecondaryButtonStyle())
-
-                    Button("保存") {
-                        saveChanges()
-                        onDismiss()
-                    }
-                    .buttonStyle(PrimaryButtonStyle())
-                }
-            }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 20)
-        }
-        .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(Color(red: 1.0, green: 1.0, blue: 1.0, opacity: 0.95))
-                .background(
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(.ultraThinMaterial)
-                        .opacity(0.3)
-                )
+            ),
+            onDismiss: onDismiss
         )
-        .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
-        .frame(maxWidth: 320)
-        .onAppear {
-            loadCurrentValues()
-        }
     }
 
-    private func loadCurrentValues() {
-        // 从训练计划中获取当前练习的目标次数和目标重量
-        let currentExerciseSet = workoutViewModel.currentExerciseSet
-        reps = String(currentExerciseSet.targetReps)
-        weight = currentExerciseSet.targetWeight > 0 ? String(currentExerciseSet.targetWeight) : "自重"
-    }
-
-    private func saveChanges() {
+    private func saveChanges(reps: String, weight: String, notes: String) {
         print("💾 DEBUG: EditSetDialog saveChanges called - reps: \(reps), weight: \(weight), notes: \(notes)")
 
         guard let actualReps = Int(reps),
@@ -165,200 +43,52 @@ struct EditSetDialog: View {
         // 使用WorkoutViewModel的增强方法保存参数并完成练习
         workoutViewModel.completeExerciseWith(actualReps: actualReps, actualWeight: actualWeight, notes: notes)
 
-        print("💾 DEBUG: EditSetDialog called completeExerciseWith, preparing to dismiss dialog")
-
-        // 延迟关闭对话框，确保状态更新完成
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            print("🔚 DEBUG: EditSetDialog dismissed after delay")
-            onDismiss()
-        }
+        print("💾 DEBUG: EditSetDialog called completeExerciseWith")
     }
 }
 
-// MARK: - Completion Dialog
+// MARK: - Completion Dialog (Legacy Wrapper)
 struct CompletionDialog: View {
     let onDismiss: () -> Void
 
-    @State private var reps: String = ""
-    @State private var weight: String = ""
-
     var body: some View {
-        VStack(spacing: 0) {
-            // Header
-            HStack {
-                Button(action: onDismiss) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.secondary)
+        UniversalDialog(
+            type: .input(
+                title: "完成记录",
+                subtitle: "请输入您实际完成的次数和重量",
+                onConfirm: { reps, weight, _ in
+                    saveCompletion(reps: reps, weight: weight)
                 }
-                .buttonStyle(PlainButtonStyle())
-
-                Spacer()
-
-                Text("完成记录")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.appPrimary)
-
-                Spacer()
-            }
-            .padding(.horizontal, 20)
-            .padding(.top, 20)
-
-            // Content
-            VStack(spacing: 16) {
-                Text("请输入您实际完成的次数和重量")
-                    .font(.system(size: 14, weight: .regular))
-                    .foregroundColor(.appTextTertiary)
-                    .multilineTextAlignment(.center)
-
-                // Reps Input
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("完成次数")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.primary)
-
-                    TextField("0", text: $reps)
-                        .keyboardType(.numberPad)
-                        .textFieldStyle(PlainTextFieldStyle())
-                        .font(.system(size: 16, weight: .medium, design: .monospaced))
-                        .foregroundColor(.primary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 12)
-                        .background(Color.green.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.green.opacity(0.3), lineWidth: 1)
-                        )
-                }
-
-                // Weight Input
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("完成重量 (kg)")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.primary)
-
-                    TextField("0.0", text: $weight)
-                        .keyboardType(.decimalPad)
-                        .textFieldStyle(PlainTextFieldStyle())
-                        .font(.system(size: 16, weight: .medium, design: .monospaced))
-                        .foregroundColor(.primary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 12)
-                        .background(Color.purple.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.purple.opacity(0.3), lineWidth: 1)
-                        )
-                }
-
-                // Buttons
-                HStack(spacing: 12) {
-                    Button("取消") {
-                        onDismiss()
-                    }
-                    .buttonStyle(SecondaryButtonStyle())
-
-                    Button("确认") {
-                        saveCompletion()
-                        onDismiss()
-                    }
-                    .buttonStyle(PrimaryButtonStyle())
-                }
-            }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 20)
-        }
-        .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(Color(red: 1.0, green: 1.0, blue: 1.0, opacity: 0.95))
-                .background(
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(.ultraThinMaterial)
-                        .opacity(0.3)
-                )
+            ),
+            onDismiss: onDismiss
         )
-        .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
-        .frame(maxWidth: 320)
-        .onAppear {
-            loadDefaults()
-        }
     }
 
-    private func loadDefaults() {
-        reps = "8"
-        weight = "60"
-    }
-
-    private func saveCompletion() {
+    private func saveCompletion(reps: String, weight: String) {
         print("Saving completion - Reps: \(reps), Weight: \(weight)")
     }
 }
 
-// MARK: - Quit Dialog
+// MARK: - Quit Dialog (Legacy Wrapper)
 struct QuitDialog: View {
     let onConfirm: () -> Void
     let onCancel: () -> Void
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Header
-            VStack(spacing: 8) {
-                Image(systemName: "exclamationmark.triangle")
-                    .font(.system(size: 32, weight: .medium))
-                    .foregroundColor(.orange)
-
-                Text("放弃训练")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.appPrimary)
-            }
-            .padding(.top, 20)
-            .padding(.bottom, 16)
-
-            // Content
-            VStack(spacing: 16) {
-                Text("确定要放弃当前训练吗？")
-                    .font(.system(size: 14, weight: .regular))
-                    .foregroundColor(.appTextTertiary)
-                    .multilineTextAlignment(.center)
-
-                Text("您的进度将会丢失")
-                    .font(.system(size: 12, weight: .regular))
-                    .foregroundColor(.red)
-                    .multilineTextAlignment(.center)
-
-                // Buttons
-                HStack(spacing: 12) {
-                    Button("继续训练") {
-                        onCancel()
-                    }
-                    .buttonStyle(SecondaryButtonStyle())
-
-                    Button("放弃训练") {
-                        onConfirm()
-                    }
-                    .buttonStyle(DangerButtonStyle())
-                }
-            }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 20)
-        }
-        .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(Color(red: 1.0, green: 1.0, blue: 1.0, opacity: 0.95))
-                .background(
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(.ultraThinMaterial)
-                        .opacity(0.3)
-                )
+        UniversalDialog(
+            type: .confirmation(
+                title: "放弃训练",
+                message: "确定要放弃当前训练吗？\n\n您的进度将会丢失",
+                icon: "exclamationmark.triangle",
+                iconColor: .warning,
+                onConfirm: onConfirm
+            ),
+            onDismiss: onCancel
         )
-        .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
-        .frame(maxWidth: 300)
     }
 }
 
-// MARK: - Enhanced Quit Dialog
+// MARK: - Enhanced Quit Dialog (Legacy Wrapper)
 struct EnhancedQuitDialog: View {
     let onQuitCurrentExercise: () -> Void
     let onQuitAll: () -> Void
@@ -366,71 +96,36 @@ struct EnhancedQuitDialog: View {
     let currentExerciseName: String
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Header
-            VStack(spacing: 8) {
-                Image(systemName: "flag.checkered")
-                    .font(.system(size: 32, weight: .medium))
-                    .foregroundColor(.blue)
-
-                Text("放弃动作")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.appPrimary)
-            }
-            .padding(.top, 20)
-            .padding(.bottom, 16)
-
-            // Content
-            VStack(spacing: 16) {
-                Text("请选择如何结束训练")
-                    .font(.system(size: 14, weight: .regular))
-                    .foregroundColor(.appTextTertiary)
-                    .multilineTextAlignment(.center)
-
-                // Options - 三个按钮按用户要求
-                VStack(spacing: 12) {
-                    // Option 1: Skip current exercise
-                    QuitOptionCard(
-                        icon: "forward.end.fill",
+        UniversalDialog(
+            type: .options(
+                title: "放弃动作",
+                message: "请选择如何结束训练",
+                options: [
+                    DialogOption(
                         title: "跳过当前动作",
                         description: "跳过「\(currentExerciseName)」，继续下一个动作",
-                        color: .orange,
+                        icon: "forward.end.fill",
+                        color: .warning,
                         action: onQuitCurrentExercise
-                    )
-
-                    // Option 2: Quit all training
-                    QuitOptionCard(
-                        icon: "xmark.circle.fill",
+                    ),
+                    DialogOption(
                         title: "放弃全部训练",
                         description: "放弃所有训练，进度将丢失",
-                        color: .red,
+                        icon: "xmark.circle.fill",
+                        color: .error,
                         action: onQuitAll
-                    )
-
-                    // Option 3: Continue training (Cancel button)
-                    QuitOptionCard(
-                        icon: "play.circle.fill",
+                    ),
+                    DialogOption(
                         title: "继续训练",
                         description: "继续当前动作的训练",
-                        color: .green,
+                        icon: "play.circle.fill",
+                        color: .success,
                         action: onCancel
                     )
-                }
-            }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 20)
-        }
-        .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(Color(red: 1.0, green: 1.0, blue: 1.0, opacity: 0.95))
-                .background(
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(.ultraThinMaterial)
-                        .opacity(0.3)
-                )
+                ]
+            ),
+            onDismiss: onCancel
         )
-        .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
-        .frame(maxWidth: 360)
     }
 }
 
@@ -477,79 +172,23 @@ struct QuitOptionCard: View {
     }
 }
 
-// MARK: - Workout Complete Dialog
+// MARK: - Workout Complete Dialog (Legacy Wrapper)
 struct WorkoutCompleteDialog: View {
     let onDismiss: () -> Void
     let workoutViewModel: WorkoutViewModel
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Header
-            VStack(spacing: 8) {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 32, weight: .medium))
-                    .foregroundColor(.green)
-
-                Text("训练完成!")
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.appPrimary)
-            }
-            .padding(.top, 20)
-            .padding(.bottom, 16)
-
-            // Content
-            VStack(spacing: 16) {
-                Text("恭喜您完成了今天的训练！")
-                    .font(.system(size: 14, weight: .regular))
-                    .foregroundColor(.appTextTertiary)
-                    .multilineTextAlignment(.center)
-
-                // Stats
-                VStack(spacing: 8) {
-                    HStack {
-                        Text("总时长:")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.appTextTertiary)
-                        Spacer()
-                        Text(formatTime(workoutViewModel.totalWorkoutTime))
-                            .font(.system(size: 14, weight: .semibold, design: .monospaced))
-                            .foregroundColor(.appPrimary)
-                    }
-
-                    HStack {
-                        Text("完成组数:")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.appTextTertiary)
-                        Spacer()
-                        Text("\(workoutViewModel.completedSets.count) 组")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(.appPrimary)
-                    }
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-                .background(Color.gray.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
-
-                // Button
-                Button("完成") {
-                    onDismiss()
-                }
-                .buttonStyle(PrimaryButtonStyle())
-            }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 20)
-        }
-        .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(Color(red: 1.0, green: 1.0, blue: 1.0, opacity: 0.95))
-                .background(
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(.ultraThinMaterial)
-                        .opacity(0.3)
-                )
+        UniversalDialog(
+            type: .completion(
+                title: "训练完成!",
+                message: "恭喜您完成了今天的训练！",
+                stats: [
+                    ("总时长:", formatTime(workoutViewModel.totalWorkoutTime)),
+                    ("完成组数:", "\(workoutViewModel.completedSets.count) 组")
+                ]
+            ),
+            onDismiss: onDismiss
         )
-        .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
-        .frame(maxWidth: 320)
     }
 
     // Helper function to format time
@@ -560,62 +199,15 @@ struct WorkoutCompleteDialog: View {
     }
 }
 
-// MARK: - Button Styles
-struct PrimaryButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .font(.system(size: 16, weight: .medium))
-            .foregroundColor(.white)
-            .frame(height: 56)
-            .frame(maxWidth: .infinity)
-            .background(Color(hex: "#007AFF"))
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
-            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
-    }
-}
-
-struct SecondaryButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .font(.system(size: 16, weight: .semibold))
-            .foregroundColor(.appTextTertiary)
-            .frame(height: 56)
-            .frame(maxWidth: .infinity)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.gray.opacity(0.15))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(Color.gray.opacity(0.4), lineWidth: 1.5)
-                    )
-            )
-            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
-            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
-    }
-}
-
-struct DangerButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .font(.system(size: 16, weight: .semibold))
-            .foregroundColor(.white)
-            .frame(height: 56)
-            .frame(maxWidth: .infinity)
-            .background(Color.red)
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
-            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
-    }
-}
-
 // MARK: - Preview
 #Preview {
-    EditSetDialog(
-        exercise: MockDataProvider.previewExercise,
-        setIndex: 1,
-        onDismiss: {},
-        workoutViewModel: WorkoutViewModel.preview
+    UniversalDialog(
+        type: .input(
+            title: "动作完成",
+            subtitle: "请输入实际完成次数和重量",
+            onConfirm: { _, _, _ in }
+        ),
+        onDismiss: {}
     )
     .preferredColorScheme(.dark)
 }
