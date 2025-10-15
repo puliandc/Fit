@@ -104,7 +104,7 @@ build_simulator() {
         -project "$WORKSPACE_NAME" \
         -scheme "$SCHEME_NAME" \
         -configuration "$CONFIGURATION" \
-        -destination 'platform=iOS Simulator,name=iPhone 15 Pro,OS=17.0' \
+        -destination 'platform=iOS Simulator,name=iPhone 17' \
         -derivedDataPath DerivedData \
         CODE_SIGN_STYLE=Automatic \
         DEVELOPMENT_TEAM="$DEVELOPMENT_TEAM" \
@@ -244,7 +244,7 @@ run_tests() {
     if xcodebuild test \
         -project "$WORKSPACE_NAME" \
         -scheme "$SCHEME_NAME" \
-        -destination 'platform=iOS Simulator,name=iPhone 15 Pro,OS=17.0' \
+        -destination 'platform=iOS Simulator,name=iPhone 17' \
         -derivedDataPath DerivedData \
         CODE_SIGN_STYLE=Automatic \
         DEVELOPMENT_TEAM="$DEVELOPMENT_TEAM" \
@@ -262,7 +262,7 @@ run_tests() {
         if command -v xcodebuild &> /dev/null; then
             xcodebuild test-without-building \
                 -xctestrun DerivedData/Build/Products/*.xctestrun \
-                -destination 'platform=iOS Simulator,name=iPhone 15 Pro,OS=17.0' \
+                -destination 'platform=iOS Simulator,name=iPhone 17' \
                 -only-testing:Fit 2>&1 | grep -E "(Test Suite|Test Case)" || true
         fi
 
