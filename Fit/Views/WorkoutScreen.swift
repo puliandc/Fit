@@ -364,10 +364,10 @@ struct CompactExerciseInfoCard: View {
 
         // 如果当前不是最后一组的最后一组，显示同一练习的下一组
         if currentSet < totalSets {
-            if currentSet - 1 < allExerciseSets.count {
-                let nextSet = allExerciseSets[currentSet - 1] // 当前set是基于1的索引，所以减1
+            if currentSet < allExerciseSets.count {
+                let nextSet = allExerciseSets[currentSet] // 当前set是基于1的索引
                 let weightText = formatWeight(nextSet.targetWeight)
-                return "下一组: \(exercise.name) \(nextSet.targetReps)次 * \(weightText)"
+                return "下一组: \(exercise.name) \(nextSet.targetReps)次 * \(weightText)公斤"
             }
         }
 
@@ -376,7 +376,7 @@ struct CompactExerciseInfoCard: View {
             let nextExercise = allExercises[currentExerciseIndex + 1].exercise
             let nextExerciseFirstSet = allExercises[currentExerciseIndex + 1]
             let weightText = formatWeight(nextExerciseFirstSet.targetWeight)
-            return "下一组: \(nextExercise.name) \(nextExerciseFirstSet.targetReps)次 * \(weightText)"
+            return "下一组: \(nextExercise.name) \(nextExerciseFirstSet.targetReps)次 * \(weightText)公斤"
         }
 
         return nil
