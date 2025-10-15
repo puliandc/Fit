@@ -65,7 +65,7 @@ struct WorkoutScreen: View {
                     CompactExerciseInfoCard(
                         exercise: workoutViewModel.currentExercise,
                         currentSet: workoutViewModel.currentSet,
-                        totalSets: workoutViewModel.currentExerciseSet.targetReps,
+                        totalSets: workoutViewModel.getCurrentExerciseTotalSets(),
                         targetReps: workoutViewModel.currentExerciseSet.targetReps,
                         targetWeight: workoutViewModel.currentExerciseSet.targetWeight,
                         elapsedTime: workoutViewModel.exerciseElapsedTime
@@ -353,9 +353,9 @@ struct CompactExerciseInfoCard: View {
 
         // 如果当前不是最后一组的最后一组，显示同一练习的下一组
         if currentSet < totalSets {
-            if currentSet < allExerciseSets.count {
-                let nextSet = allExerciseSets[currentSet]
-                let weightText = nextSet.targetWeight > 0 ? String(format: "%.1f", nextSet.targetWeight) : "自重"
+            if currentSet - 1 < allExerciseSets.count && currentSet > 1 {
+                let nextSet = allExerciseSets[currentSet - 1] // 当前set是基于1的索引，所以减1
+                let weightText = nextSet.targetWeight > 0 ? String(format: "%.0f", nextSet.targetWeight) : "自重"
                 return "下一组: \(exercise.name) \(nextSet.targetReps)次 × \(weightText)kg"
             }
         }
@@ -364,7 +364,7 @@ struct CompactExerciseInfoCard: View {
         if currentSet >= totalSets && currentExerciseIndex < allExercises.count - 1 {
             let nextExercise = allExercises[currentExerciseIndex + 1].exercise
             let nextExerciseFirstSet = allExercises[currentExerciseIndex + 1]
-            let weightText = nextExerciseFirstSet.targetWeight > 0 ? String(format: "%.1f", nextExerciseFirstSet.targetWeight) : "自重"
+            let weightText = nextExerciseFirstSet.targetWeight > 0 ? String(format: "%.0f", nextExerciseFirstSet.targetWeight) : "自重"
             return "下一组: \(nextExercise.name) \(nextExerciseFirstSet.targetReps)次 × \(weightText)kg"
         }
 
@@ -472,7 +472,7 @@ struct CompactExerciseInfoCard: View {
                             .foregroundColor(.appTextSecondary)
 
                         if targetWeight > 0 {
-                            Text(String(format: "%.1f", targetWeight))
+                            Text(String(format: "%.0f", targetWeight))
                                 .font(.system(size: 20, weight: .bold))
                                 .foregroundColor(.info)
                         } else {

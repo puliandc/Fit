@@ -212,6 +212,12 @@ class WorkoutViewModel: ObservableObject {
         return (targetReps, targetWeight)
     }
 
+    // 获取当前练习的总组数
+    func getCurrentExerciseTotalSets() -> Int {
+        let currentExerciseId = currentExercise.id
+        return workoutPlan.exercises.filter { $0.exercise.id == currentExerciseId }.count
+    }
+
     
     func startRest() {
         // 确保在主线程上更新UI状态

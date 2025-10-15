@@ -17,10 +17,13 @@ struct EditSetDialog: View {
     let workoutViewModel: WorkoutViewModel
 
     var body: some View {
-        UniversalDialog(
+        let defaults = workoutViewModel.getDefaultParametersForCurrentExercise()
+        return UniversalDialog(
             type: .input(
                 title: "动作完成",
                 subtitle: "请输入实际完成次数和重量",
+                defaultReps: String(defaults.reps),
+                defaultWeight: defaults.weight > 0 ? String(defaults.weight) : "",
                 onConfirm: { reps, weight, notes in
                     saveChanges(reps: reps, weight: weight, notes: notes)
                 }
@@ -50,6 +53,8 @@ struct CompletionDialog: View {
             type: .input(
                 title: "完成记录",
                 subtitle: "请输入您实际完成的次数和重量",
+                defaultReps: "",
+                defaultWeight: "",
                 onConfirm: { reps, weight, _ in
                     saveCompletion(reps: reps, weight: weight)
                 }
@@ -162,6 +167,8 @@ struct WorkoutCompleteDialog: View {
         type: .input(
             title: "动作完成",
             subtitle: "请输入实际完成次数和重量",
+            defaultReps: "8",
+            defaultWeight: "60",
             onConfirm: { _, _, _ in }
         ),
         onDismiss: {}
