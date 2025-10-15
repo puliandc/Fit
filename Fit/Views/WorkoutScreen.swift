@@ -358,25 +358,41 @@ struct CompactExerciseInfoCard: View {
     }
 
     private var nextSetInfo: String? {
-        // 获取当前训练计划中的所有练习
+        // 使用ViewModel的当前状态，确保数据一致性
+        let currentExerciseIndex = workoutViewModel.currentExerciseIndex
+        let currentSet = workoutViewModel.currentSet
         let allExercises = workoutViewModel.workoutPlan.exercises
-        let currentExerciseIndex = allExercises.firstIndex(where: { $0.exercise.name == exercise.name }) ?? 0
 
-        // 如果当前不是最后一组的最后一组，显示同一练习的下一组
-        if currentSet < totalSets {
-            if currentSet < allExerciseSets.count {
-                let nextSet = allExerciseSets[currentSet] // 当前set是基于1的索引
-                let weightText = formatWeight(nextSet.targetWeight)
-                return "下一组: \(exercise.name) \(nextSet.targetReps)次 * \(weightText)公斤"
-            }
+        // 确保索引有效
+        guard currentExerciseIndex < allExercises.count else {
+            return nil
         }
 
-        // 如果是当前练习的最后一组，显示下一个练习的第一组
-        if currentSet >= totalSets && currentExerciseIndex < allExercises.count - 1 {
-            let nextExercise = allExercises[currentExerciseIndex + 1].exercise
-            let nextExerciseFirstSet = allExercises[currentExerciseIndex + 1]
-            let weightText = formatWeight(nextExerciseFirstSet.targetWeight)
-            return "下一组: \(nextExercise.name) \(nextExerciseFirstSet.targetReps)次 * \(weightText)公斤"
+        let currentExercise = allExercises[currentExerciseIndex].exercise
+        let exerciseSets = allExercises.filter { $0.exercise.id == currentExercise.id }
+
+        // 找到当前ExerciseSet在相同练习中的位置
+        guard let currentPositionInExercise = exerciseSets.firstIndex(where: { $0.id == allExercises[currentExerciseIndex].id }) else {
+            return nil
+        }
+
+        // 检查是否还有下一组（相同练习）
+        if currentPositionInExercise < exerciseSets.count - 1 {
+            let nextSet = exerciseSets[currentPositionInExercise + 1]
+            let weightText = formatWeight(nextSet.targetWeight)
+            return "下一组: \(currentExercise.name) \(nextSet.targetReps)次 * \(weightText)公斤"
+        }
+
+        // 检查是否还有下一个练习
+        // 找到下一个不同练习的第一个ExerciseSet
+        var nextIndex = currentExerciseIndex + 1
+        while nextIndex < allExercises.count {
+            let nextExerciseSet = allExercises[nextIndex]
+            if nextExerciseSet.exercise.id != currentExercise.id {
+                let weightText = formatWeight(nextExerciseSet.targetWeight)
+                return "下一组: \(nextExerciseSet.exercise.name) \(nextExerciseSet.targetReps)次 * \(weightText)公斤"
+            }
+            nextIndex += 1
         }
 
         return nil

@@ -220,27 +220,44 @@ class WorkoutViewModel: ObservableObject {
 
     
     func startRest() {
-        // 确保在主线程上更新UI状态
-        DispatchQueue.main.async {
+        // 确保在主线程上进行原子性状态更新
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+
+            // 保存当前状态用于计算
+            let shouldMoveToNext = self.currentExerciseIndex < self.workoutPlan.exercises.count - 1
+
+            // 原子性更新所有相关状态
             self.isResting = true
             self.isExerciseActive = false
             self.timeLeft = self.currentExerciseSet.restTime
 
-            // 更新当前练习索引到下一个动作
-            self.moveToNextExerciseOrSet()
+            // 只有在需要时才移动到下一个练习
+            if shouldMoveToNext {
+                self.moveToNextExerciseOrSet()
+            }
 
-            // 在主线程上启动休息计时器
+            // 启动休息计时器
             self.startRestTimer()
         }
     }
 
     // 新增：移动到下一个练习或组
     private func moveToNextExerciseOrSet() {
-        // 简化逻辑：每次完成一组后移动到下一个ExerciseSet
-        if currentExerciseIndex < workoutPlan.exercises.count - 1 {
-            currentExerciseIndex += 1
-            // 更新组数显示
-            updateCurrentSetDisplay()
+        // 确保在主线程上执行
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+
+            if self.currentExerciseIndex < self.workoutPlan.exercises.count - 1 {
+                // 更新索引
+                self.currentExerciseIndex += 1
+
+                // 立即更新组数显示
+                self.updateCurrentSetDisplay()
+
+                // 强制触发UI更新
+                self.objectWillChange.send()
+            }
         }
     }
 
