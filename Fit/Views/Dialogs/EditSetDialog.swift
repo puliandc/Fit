@@ -36,7 +36,7 @@ struct EditSetDialog: View {
     private func formatWeight(_ weight: Double) -> String {
         if weight == 0 {
             return "自重"
-        } else if weight.truncatingRemainder(dividingBy: 1) == 0 {
+        } else if abs(weight.truncatingRemainder(dividingBy: 1)) < 0.0001 {
             return String(format: "%.0f", weight)
         } else {
             return String(format: "%.1f", weight)
