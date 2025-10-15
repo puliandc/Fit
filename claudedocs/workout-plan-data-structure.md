@@ -1,113 +1,71 @@
-# Workout Plan Data Structure Specification
+# 训练计划JSON数据结构说明文档
 
 //created by Jason Lu on 09:17:00 10/12/2025
+//updated by Jason Lu on 15:30:00 10/15/2025 - 与代码实现保持一致
 
-## Overview
+## 📋 文档概述
 
-This document defines the complete data structure for workout plans in the iOS Fit app V0.2, supporting three set types (热身组, 正式组, 超级组) with comprehensive rest time management.
+### 文档目的
+本文档详细说明Fit应用训练计划JSON数据格式，基于`JSONWorkoutParser.swift`的实际实现编写，确保AI和开发者能够创建可被正确解析的JSON文件。
 
-## 1. Workout Plan Template Structure
+### 🚨 重要说明
+- **文档为代码服务**：本文档严格遵循`JSONWorkoutParser.swift`的实际解析逻辑
+- **基于验证过的范例**：以`test.json`文件为标准格式参考
+- **如实反映限制**：标注了当前版本支持的字段和功能
 
-### 1.1 Complete Workout Plan Example
+## 1. 训练计划JSON格式
 
-Based on the user's requirements, here's the complete data structure for a typical workout plan:
+### 1.1 完整JSON结构示例
+
+基于`JSONWorkoutParser.swift`和`test.json`的实际格式：
 
 ```json
 {
-  "id": "123e4567-e89b-12d3-a456-426614174000",
-  "name": "胸部训练计划",
-  "createdDate": "2025-01-15T10:00:00Z",
-  "exercises": [
+  "训练计划名称": "全身力量训练计划",
+  "练习项目": [
     {
-      "id": "456e7890-e89b-12d3-a456-426614174001",
-      "name": "卧推",
-      "exerciseRestTime": 60,
-      "sets": [
+      "练习名称": "杠铃卧推",
+      "组数设置": [
         {
-          "id": "789e0123-e89b-12d3-a456-426614174002",
-          "setType": "热身组",
-          "reps": 15,
-          "weight": 20.0,
-          "setRestTime": 60,
-          "displayOrder": 1
+          "组数类型": "正式组",
+          "目标次数": 5,
+          "目标重量": 45,
+          "休息时间": 90
         },
         {
-          "id": "890e1234-e89b-12d3-a456-426614174003",
-          "setType": "正式组",
-          "reps": 12,
-          "weight": 40.0,
-          "setRestTime": 90,
-          "displayOrder": 2
+          "组数类型": "正式组",
+          "目标次数": 5,
+          "目标重量": 45,
+          "休息时间": 90
         },
         {
-          "id": "901e2345-e89b-12d3-a456-426614174004",
-          "setType": "正式组",
-          "reps": 10,
-          "weight": 50.0,
-          "setRestTime": 90,
-          "displayOrder": 3
-        },
-        {
-          "id": "012e3456-e89b-12d3-a456-426614174005",
-          "setType": "正式组",
-          "reps": 8,
-          "weight": 60.0,
-          "setRestTime": 120,
-          "displayOrder": 4
+          "组数类型": "正式组",
+          "目标次数": 5,
+          "目标重量": 45,
+          "休息时间": 90
         }
       ]
     },
     {
-      "id": "234e4567-e89b-12d3-a456-426614174006",
-      "name": "哑铃飞鸟",
-      "exerciseRestTime": 60,
-      "sets": [
+      "练习名称": "杠铃深蹲",
+      "组数设置": [
         {
-          "id": "345e5678-e89b-12d3-a456-426614174007",
-          "setType": "正式组",
-          "reps": 12,
-          "weight": 15.0,
-          "setRestTime": 60,
-          "displayOrder": 1
+          "组数类型": "正式组",
+          "目标次数": 5,
+          "目标重量": 62.5,
+          "休息时间": 90
         },
         {
-          "id": "456e6789-e89b-12d3-a456-426614174008",
-          "setType": "正式组",
-          "reps": 12,
-          "weight": 15.0,
-          "setRestTime": 60,
-          "displayOrder": 2
+          "组数类型": "正式组",
+          "目标次数": 5,
+          "目标重量": 62.5,
+          "休息时间": 90
         },
         {
-          "id": "567e7890-e89b-12d3-a456-426614174009",
-          "setType": "超级组",
-          "reps": 10,
-          "weight": 20.0,
-          "setRestTime": 45,
-          "displayOrder": 3
-        }
-      ]
-    },
-    {
-      "id": "678e8901-e89b-12d3-a456-426614174010",
-      "name": "俯卧撑",
-      "exerciseRestTime": 30,
-      "sets": [
-        {
-          "id": "789e9012-e89b-12d3-a456-426614174011",
-          "setType": "正式组",
-          "reps": 20,
-          "weight": 0.0,
-          "setRestTime": 45,
-          "displayOrder": 1
-        },
-        {
-          "id": "890e0123-e89b-12d3-a456-426614174012",
-          "setType": "正式组",
-          "reps": 15,
-          "weight": 0.0,
-          "setRestTime": 45,
-          "displayOrder": 2
+          "组数类型": "正式组",
+          "目标次数": 5,
+          "目标重量": 62.5,
+          "休息时间": 90
         }
       ]
     }
@@ -115,430 +73,238 @@ Based on the user's requirements, here's the complete data structure for a typic
 }
 ```
 
-## 2. Data Model Implementation
+## 2. 字段详细说明
 
-### 2.1 Swift Models
+### 2.1 JSON字段处理状态
 
+| 字段名 | 类型 | 代码处理状态 | 数据来源 | 必填 | 说明 |
+|--------|------|-------------|----------|------|------|
+| **顶层字段** | | | | | |
+| "训练计划名称" | String | ✅ 实际解析 | 第34行 | ✅ | 训练计划的名称 |
+| "练习项目" | Array | ✅ 实际解析 | 第41行 | ✅ | 包含多个练习项目的数组 |
+| **练习项目字段** | | | | | |
+| "练习名称" | String | ✅ 实际解析 | 第100行 | ✅ | 具体动作的名称 |
+| "组数设置" | Array | ✅ 实际解析 | 第111行 | ✅ | 该练习的组数配置数组 |
+| **组数设置字段** | | | | | |
+| "目标次数" | Int | ✅ 实际解析 | 第165行 | ✅ | 该组的目标重复次数 |
+| "目标重量" | Double | ✅ 实际解析 | 第165行 | ✅ | 该组的目标重量(kg) |
+| "休息时间" | Int | ✅ 实际解析 | 第171行 | ✅ | 组间休息时间(秒)，默认90秒 |
+| "组数类型" | String | ❌ 被忽略 | - | ❌ | 沟通用字段，当前版本不处理 |
+
+### 2.2 数据转换规则
+
+#### 2.2.1 类型转换
+- **"目标重量"**: JSON中的数字会自动转换为Double类型
+- **"目标次数"**: JSON中的整数会转换为Int类型
+- **"休息时间"**: JSON中的整数会转换为Int类型，默认值为90秒
+
+#### 2.2.2 扁平化数据处理
+解析器采用扁平化处理方式：
+```
+JSON结构: 训练计划 → 练习项目 → 组数设置
+内存结构: WorkoutPlan → [ExerciseSet] (直接扁平化)
+```
+
+### 2.3 实际数据模型说明
+
+#### 2.3.1 WorkoutPlan结构 (代码实际创建)
 ```swift
-import Foundation
-
-// MARK: - Main Models
-struct WorkoutPlan: Identifiable, Codable, Equatable {
+struct WorkoutPlan: Identifiable, Codable, Hashable, Equatable {
     let id: UUID
-    var name: String
-    var createdDate: Date
-    var exercises: [Exercise]
-
-    static let example = WorkoutPlan(
-        id: UUID(),
-        name: "胸部训练计划",
-        createdDate: Date(),
-        exercises: [
-            Exercise.benchPressExample,
-            Exercise.dumbbellFlyExample,
-            Exercise.pushUpExample
-        ]
-    )
-}
-
-struct Exercise: Identifiable, Codable, Equatable {
-    let id: UUID
-    var name: String
-    var exerciseRestTime: Int // seconds
-    var sets: [ExerciseSet]
-
-    static let benchPressExample = Exercise(
-        id: UUID(),
-        name: "卧推",
-        exerciseRestTime: 60,
-        sets: [
-            ExerciseSet(id: UUID(), setType: .warmup, reps: 15, weight: 20.0, setRestTime: 60, displayOrder: 1),
-            ExerciseSet(id: UUID(), setType: .formal, reps: 12, weight: 40.0, setRestTime: 90, displayOrder: 2),
-            ExerciseSet(id: UUID(), setType: .formal, reps: 10, weight: 50.0, setRestTime: 90, displayOrder: 3),
-            ExerciseSet(id: UUID(), setType: .formal, reps: 8, weight: 60.0, setRestTime: 120, displayOrder: 4)
-        ]
-    )
-
-    static let dumbbellFlyExample = Exercise(
-        id: UUID(),
-        name: "哑铃飞鸟",
-        exerciseRestTime: 60,
-        sets: [
-            ExerciseSet(id: UUID(), setType: .formal, reps: 12, weight: 15.0, setRestTime: 60, displayOrder: 1),
-            ExerciseSet(id: UUID(), setType: .formal, reps: 12, weight: 15.0, setRestTime: 60, displayOrder: 2),
-            ExerciseSet(id: UUID(), setType: .superSet, reps: 10, weight: 20.0, setRestTime: 45, displayOrder: 3)
-        ]
-    )
-
-    static let pushUpExample = Exercise(
-        id: UUID(),
-        name: "俯卧撑",
-        exerciseRestTime: 30,
-        sets: [
-            ExerciseSet(id: UUID(), setType: .formal, reps: 20, weight: 0.0, setRestTime: 45, displayOrder: 1),
-            ExerciseSet(id: UUID(), setType: .formal, reps: 15, weight: 0.0, setRestTime: 45, displayOrder: 2)
-        ]
-    )
-}
-
-struct ExerciseSet: Identifiable, Codable, Equatable {
-    let id: UUID
-    var setType: SetType
-    var reps: Int
-    var weight: Float
-    var setRestTime: Int // seconds
-    var displayOrder: Int
-}
-
-// MARK: - Set Type Enum
-enum SetType: String, CaseIterable, Codable {
-    case warmup = "热身组"
-    case formal = "正式组"
-    case superSet = "超级组"
-
-    var displayName: String {
-        return self.rawValue
-    }
-
-    var color: String {
-        switch self {
-        case .warmup: return "blue"
-        case .formal: return "green"
-        case .superSet: return "orange"
-        }
-    }
-
-    var description: String {
-        switch self {
-        case .warmup: return "激活肌肉，准备训练"
-        case .formal: return "主要训练组，注重质量"
-        case .superSet: return "高强度训练，挑战极限"
-        }
-    }
-
-    var icon: String {
-        switch self {
-        case .warmup: return "flame.fill"
-        case .formal: return "star.fill"
-        case .superSet: return "bolt.fill"
-        }
-    }
-}
-
-// MARK: - Workout Session (For History)
-struct WorkoutSession: Identifiable, Codable {
-    let id: UUID
-    let workoutPlan: WorkoutPlan
-    let startDate: Date
-    var endDate: Date?
-    var completedSets: [CompletedSet]
-    var notes: String?
-
-    var duration: TimeInterval? {
-        guard let endDate = endDate else { return nil }
-        return endDate.timeIntervalSince(startDate)
-    }
-
-    var isCompleted: Bool {
-        return endDate != nil
-    }
-}
-
-struct CompletedSet: Identifiable, Codable {
-    let id: UUID
-    let exerciseSetId: UUID
-    let exerciseName: String
-    let setType: SetType
-    let plannedReps: Int
-    let plannedWeight: Float
-    let completedReps: Int
-    let completedWeight: Float
-    let actualRestTime: Int
-    let completionDate: Date
-
-    var isCompleted: Bool {
-        return completedReps > 0
-    }
+    let name: String                    // 来自"训练计划名称"
+    let duration: Int                    // 自动计算(分钟)
+    let exercises: [ExerciseSet]         // 扁平化的训练组数组
 }
 ```
 
-### 2.2 Core Data Models
-
+#### 2.3.2 ExerciseSet结构 (代码实际创建)
 ```swift
-import Foundation
-import CoreData
-
-// MARK: - WorkoutPlan Core Data Entity
-@objc(WorkoutPlanEntity)
-public class WorkoutPlanEntity: NSManagedObject {
-    @NSManaged public var id: UUID
-    @NSManaged public var name: String
-    @NSManaged public var createdDate: Date
-    @NSManaged public var exercises: NSOrderedSet?
-
-    func toWorkoutPlan() -> WorkoutPlan {
-        let exercises = (exercises?.array as? [ExerciseEntity])?.map { $0.toExercise() } ?? []
-        return WorkoutPlan(
-            id: id,
-            name: name,
-            createdDate: createdDate,
-            exercises: exercises
-        )
-    }
-
-    func fromWorkoutPlan(_ workoutPlan: WorkoutPlan) {
-        id = workoutPlan.id
-        name = workoutPlan.name
-        createdDate = workoutPlan.createdDate
-
-        let exerciseEntities = workoutPlan.exercises.map { exercise in
-            let entity = ExerciseEntity(context: self.managedObjectContext!)
-            entity.fromExercise(exercise)
-            entity.workoutPlan = self
-            return entity
-        }
-        exercises = NSOrderedSet(array: exerciseEntities)
-    }
-}
-
-// MARK: - Exercise Core Data Entity
-@objc(ExerciseEntity)
-public class ExerciseEntity: NSManagedObject {
-    @NSManaged public var id: UUID
-    @NSManaged public var name: String
-    @NSManaged public var exerciseRestTime: Int16
-    @NSManaged public var workoutPlan: WorkoutPlanEntity?
-    @NSManaged public var sets: NSOrderedSet?
-
-    func toExercise() -> Exercise {
-        let sets = (sets?.array as? [ExerciseSetEntity])?.map { $0.toExerciseSet() } ?? []
-        return Exercise(
-            id: id,
-            name: name,
-            exerciseRestTime: Int(exerciseRestTime),
-            sets: sets
-        )
-    }
-
-    func fromExercise(_ exercise: Exercise) {
-        id = exercise.id
-        name = exercise.name
-        exerciseRestTime = Int16(exercise.exerciseRestTime)
-
-        let setEntities = exercise.sets.map { set in
-            let entity = ExerciseSetEntity(context: self.managedObjectContext!)
-            entity.fromExerciseSet(set)
-            entity.exercise = self
-            return entity
-        }
-        sets = NSOrderedSet(array: setEntities)
-    }
-}
-
-// MARK: - ExerciseSet Core Data Entity
-@objc(ExerciseSetEntity)
-public class ExerciseSetEntity: NSManagedObject {
-    @NSManaged public var id: UUID
-    @NSManaged public var setType: String
-    @NSManaged public var reps: Int16
-    @NSManaged public var weight: Float
-    @NSManaged public var setRestTime: Int16
-    @NSManaged public var displayOrder: Int16
-    @NSManaged public var exercise: ExerciseEntity?
-
-    func toExerciseSet() -> ExerciseSet {
-        return ExerciseSet(
-            id: id,
-            setType: SetType(rawValue: setType) ?? .formal,
-            reps: Int(reps),
-            weight: weight,
-            setRestTime: Int(setRestTime),
-            displayOrder: Int(displayOrder)
-        )
-    }
-
-    func fromExerciseSet(_ set: ExerciseSet) {
-        id = set.id
-        setType = set.setType.rawValue
-        reps = Int16(set.reps)
-        weight = set.weight
-        setRestTime = Int16(set.setRestTime)
-        displayOrder = Int16(set.displayOrder)
-    }
+struct ExerciseSet: Identifiable, Codable, Hashable {
+    let id: UUID                         // 自动生成
+    let exercise: Exercise               // 智能推断创建
+    let targetReps: Int                  // 来自"目标次数"
+    let targetWeight: Double             // 来自"目标重量"
+    let restTime: Int                    // 来自"休息时间"(默认90)
 }
 ```
+## 3. 功能限制和默认值说明
 
-## 3. Validation Rules
+### 3.1 当前版本限制
 
-### 3.1 Workout Plan Validation
+#### ❌ **不支持的功能**
+- **训练组类型处理**: "组数类型"字段被完全忽略
+- **SetType枚举**: 不支持热身组、正式组、超级组的区分
+- **练习间休息时间**: 不支持"exerciseRestTime"概念
+- **显示顺序**: 不支持"displayOrder"排序
+- **UUID支持**: 不支持外部提供的ID
+
+#### ✅ **支持的功能**
+- **基础JSON解析**: 支持中文字段名解析
+- **数据类型转换**: 自动转换Int/Double类型
+- **默认值处理**: 自动应用默认休息时间(90秒)
+
+### 3.2 默认值规则
+
+| 属性 | 默认值 | 应用场景 |
+|------|--------|----------|
+| 休息时间 | 90秒 | 当JSON中未提供"休息时间"字段时 |
+
+### 3.3 错误处理机制
+
+解析器使用以下错误类型：
 ```swift
-extension WorkoutPlan {
-    func validate() -> [ValidationError] {
-        var errors: [ValidationError] = []
-
-        if name.isEmpty {
-            errors.append(ValidationError(field: "name", message: "训练计划名称不能为空"))
-        }
-
-        if exercises.isEmpty {
-            errors.append(ValidationError(field: "exercises", message: "至少需要添加一个训练动作"))
-        }
-
-        for (index, exercise) in exercises.enumerated() {
-            let exerciseErrors = exercise.validate()
-            for error in exerciseErrors {
-                errors.append(ValidationError(
-                    field: "exercises[\(index)].\(error.field)",
-                    message: error.message
-                ))
-            }
-        }
-
-        return errors
-    }
-}
-
-extension Exercise {
-    func validate() -> [ValidationError] {
-        var errors: [ValidationError] = []
-
-        if name.isEmpty {
-            errors.append(ValidationError(field: "name", message: "动作名称不能为空"))
-        }
-
-        if exerciseRestTime < 0 {
-            errors.append(ValidationError(field: "exerciseRestTime", message: "动作间休息时间不能为负数"))
-        }
-
-        if sets.isEmpty {
-            errors.append(ValidationError(field: "sets", message: "至少需要添加一个训练组"))
-        }
-
-        for (index, set) in sets.enumerated() {
-            let setErrors = set.validate()
-            for error in setErrors {
-                errors.append(ValidationError(
-                    field: "sets[\(index)].\(error.field)",
-                    message: error.message
-                ))
-            }
-        }
-
-        return errors
-    }
-}
-
-extension ExerciseSet {
-    func validate() -> [ValidationError] {
-        var errors: [ValidationError] = []
-
-        if reps <= 0 {
-            errors.append(ValidationError(field: "reps", message: "重复次数必须大于0"))
-        }
-
-        if weight < 0 {
-            errors.append(ValidationError(field: "weight", message: "重量不能为负数"))
-        }
-
-        if setRestTime < 0 {
-            errors.append(ValidationError(field: "setRestTime", message: "组间休息时间不能为负数"))
-        }
-
-        if displayOrder <= 0 {
-            errors.append(ValidationError(field: "displayOrder", message: "显示顺序必须大于0"))
-        }
-
-        return errors
-    }
-}
-
-struct ValidationError {
-    let field: String
-    let message: String
+enum JSONParseError: LocalizedError {
+    case invalidFormat      // JSON格式无效
+    case invalidStructure   // JSON数据结构不正确
+    case missingPlanName    // 缺少"训练计划名称"字段
+    case missingExercises   // 缺少"练习项目"字段
+    case missingExerciseName(Int)    // 第N个练习缺少"练习名称"
+    case missingSetConfig(String)    // 练习"XXX"缺少"组数设置"
 }
 ```
 
-## 4. Default Values and Templates
+## 4. 正确使用示例
 
-### 4.1 Default Rest Times by Set Type
-```swift
-struct DefaultRestTimes {
-    static let warmup: Int = 60      // 热身组默认休息60秒
-    static let formal: Int = 90      // 正式组默认休息90秒
-    static let superSet: Int = 45    // 超级组默认休息45秒
+### 4.1 基于test.json的完整示例
 
-    static func getDefaultRestTime(for setType: SetType) -> Int {
-        switch setType {
-        case .warmup: return warmup
-        case .formal: return formal
-        case .superSet: return superSet
+```json
+{
+  "训练计划名称": "全身力量训练计划",
+  "练习项目": [
+    {
+      "练习名称": "杠铃卧推",
+      "组数设置": [
+        {
+          "组数类型": "正式组",
+          "目标次数": 5,
+          "目标重量": 45,
+          "休息时间": 90
+        },
+        {
+          "组数类型": "正式组",
+          "目标次数": 5,
+          "目标重量": 45,
+          "休息时间": 90
+        },
+        {
+          "组数类型": "正式组",
+          "目标次数": 5,
+          "目标重量": 45,
+          "休息时间": 90
         }
-    }
-}
-```
-
-### 4.2 Workout Plan Templates
-```swift
-struct WorkoutPlanTemplates {
-    static let beginnerChest = WorkoutPlan(
-        id: UUID(),
-        name: "新手胸部训练",
-        createdDate: Date(),
-        exercises: [
-            Exercise(
-                id: UUID(),
-                name: "俯卧撑",
-                exerciseRestTime: 60,
-                sets: [
-                    ExerciseSet(id: UUID(), setType: .warmup, reps: 10, weight: 0, setRestTime: 30, displayOrder: 1),
-                    ExerciseSet(id: UUID(), setType: .formal, reps: 8, weight: 0, setRestTime: 45, displayOrder: 2),
-                    ExerciseSet(id: UUID(), setType: .formal, reps: 6, weight: 0, setRestTime: 45, displayOrder: 3)
-                ]
-            )
-        ]
-    )
-
-    static let intermediateChest = WorkoutPlan(
-        id: UUID(),
-        name: "中级胸部训练",
-        createdDate: Date(),
-        exercises: [
-            Exercise.benchPressExample,
-            Exercise.dumbbellFlyExample
-        ]
-    )
-
-    static let advancedChest = WorkoutPlan(
-        id: UUID(),
-        name: "高级胸部训练",
-        createdDate: Date(),
-        exercises: [
-            Exercise.benchPressExample,
-            Exercise.dumbbellFlyExample,
-            Exercise.pushUpExample
-        ]
-    )
-}
-```
-
-## 5. Data Migration
-
-### 5.1 Schema Versioning
-```swift
-struct WorkoutPlanSchema {
-    static let currentVersion: Int = 1
-
-    static func migrate(from oldVersion: Int, to newVersion: Int) {
-        // Handle future schema migrations
-        switch (oldVersion, newVersion) {
-        case (1, 2):
-            // Future migration logic
-            break
-        default:
-            break
+      ]
+    },
+    {
+      "练习名称": "杠铃深蹲",
+      "组数设置": [
+        {
+          "组数类型": "正式组",
+          "目标次数": 5,
+          "目标重量": 62.5,
+          "休息时间": 90
+        },
+        {
+          "组数类型": "正式组",
+          "目标次数": 5,
+          "目标重量": 62.5,
+          "休息时间": 90
+        },
+        {
+          "组数类型": "正式组",
+          "目标次数": 5,
+          "目标重量": 62.5,
+          "休息时间": 90
         }
+      ]
     }
+  ]
 }
 ```
 
-This comprehensive data structure provides a solid foundation for the workout management system, supporting all three set types with proper validation and default values.
+### 4.2 简化版示例(可选字段省略)
+
+```json
+{
+  "训练计划名称": "胸部训练",
+  "练习项目": [
+    {
+      "练习名称": "俯卧撑",
+      "组数设置": [
+        {
+          "组数类型": "正式组",
+          "目标次数": 10,
+          "目标重量": 0
+        },
+        {
+          "组数类型": "正式组",
+          "目标次数": 8,
+          "目标重量": 0
+        }
+      ]
+    }
+  ]
+}
+```
+
+### 4.3 AI集成指导
+
+#### ✅ **AI创建JSON时的注意事项**
+1. **必填字段**: 确保"训练计划名称"、"练习项目"、"练习名称"、"组数设置"、"目标次数"、"目标重量"都存在
+2. **数据类型**: "目标次数"为整数，"目标重量"为数字
+3. **字段命名**: 使用纯中文字段名，不要使用英文
+4. **结构层级**: 严格按照"训练计划→练习项目→组数设置"的嵌套结构
+
+#### ⚠️ **常见错误避免**
+```json
+// ❌ 错误：使用英文字段名
+{
+  "name": "训练计划",
+  "exercises": [...]
+}
+
+// ❌ 错误：缺少必要字段
+{
+  "训练计划名称": "训练",
+  "练习项目": [
+    {
+      "练习名称": "卧推"
+      // 缺少"组数设置"
+    }
+  ]
+}
+
+// ✅ 正确：使用中文格式和完整字段
+{
+  "训练计划名称": "训练计划",
+  "练习项目": [
+    {
+      "练习名称": "卧推",
+      "组数设置": [
+        {
+          "目标次数": 10,
+          "目标重量": 50
+        }
+      ]
+    }
+  ]
+}
+```
+
+## 5. 版本历史和更新说明
+
+### 版本1.3 (当前版本)
+- ✅ 支持完整的中文JSON格式解析
+- ✅ 支持智能推断运动属性
+- ✅ 支持扁平化数据处理
+- ❌ 不支持训练组类型处理
+- ❌ 不支持复杂的嵌套结构
+
+### 未来版本计划
+- 🔄 支持"组数类型"字段处理
+- 🔄 支持英文字段名兼容
+- 🔄 支持更复杂的训练计划结构
+- 🔄 支持训练计划模板系统
+
+---
+
+**注意**: 本文档严格遵循`JSONWorkoutParser.swift`的实际实现，确保AI和开发者能够创建可被正确解析的JSON文件。
