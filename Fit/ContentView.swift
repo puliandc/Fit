@@ -7,6 +7,19 @@
 
 import SwiftUI
 
+// MARK: - Weight Formatting Helper
+extension ContentView {
+    private func formatWeight(_ weight: Double) -> String {
+        if weight == 0 {
+            return "自重"
+        } else if abs(weight.truncatingRemainder(dividingBy: 1)) < 0.0001 {
+            return String(format: "%.0f", weight)
+        } else {
+            return String(format: "%.1f", weight)
+        }
+    }
+}
+
 struct ContentView: View {
     @EnvironmentObject var navigationManager: NavigationManager
     @EnvironmentObject var dialogManager: DialogManager
@@ -85,7 +98,7 @@ struct ContentView: View {
                             title: "动作完成",
                             subtitle: "请输入实际完成次数和重量",
                             defaultReps: String(defaults.reps),
-                            defaultWeight: defaults.weight > 0 ? String(defaults.weight) : "自重",
+                            defaultWeight: formatWeight(defaults.weight),
                             onConfirm: { reps, weight, notes in
                                 guard let actualReps = Int(reps) else {
                                     return
