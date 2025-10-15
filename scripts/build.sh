@@ -7,7 +7,7 @@ set -e
 PROJECT="Fit.xcodeproj"
 SCHEME="Fit"
 CONFIGURATION=${1:-Debug}
-DESTINATION=${2:-'platform=iOS Simulator,name=iPhone 15 Pro,OS=17.0'}
+DESTINATION=${2:-'platform=iOS Simulator,name=iPhone 17'}
 DERIVED_DATA_PATH="DerivedData"
 CLEAN_BUILD=${3:-false}
 VERBOSE=${4:-false}

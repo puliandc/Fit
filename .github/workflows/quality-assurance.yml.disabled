@@ -51,7 +51,7 @@ jobs:
         xcodebuild clean build \
           -project Fit.xcodeproj \
           -scheme Fit \
-          -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.0' \
+          -destination 'platform=iOS Simulator,name=iPhone 17' \
           CODE_SIGNING_ALLOWED=NO
 
   # 单元测试
@@ -88,7 +88,7 @@ jobs:
         xcodebuild test \
           -project Fit.xcodeproj \
           -scheme Fit \
-          -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.0' \
+          -destination 'platform=iOS Simulator,name=iPhone 17' \
           -enableCodeCoverage YES \
           PERFORMANCE_TESTS=1
 
@@ -137,7 +137,7 @@ jobs:
         xcodebuild test \
           -project Fit.xcodeproj \
           -scheme Fit \
-          -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.0' \
+          -destination 'platform=iOS Simulator,name=iPhone 17' \
           -enableCodeCoverage YES \
           INTEGRATION_TESTS=1
 
@@ -147,7 +147,7 @@ jobs:
         xcodebuild test \
           -project Fit.xcodeproj \
           -scheme Fit \
-          -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.0' \
+          -destination 'platform=iOS Simulator,name=iPhone 17' \
           -only-testing:FitTests/DebugModeTests/testMockDataProviderDataIntegrity
 
   # 性能测试
@@ -187,7 +187,7 @@ jobs:
         xcodebuild test \
           -project Fit.xcodeproj \
           -scheme Fit \
-          -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.0' \
+          -destination 'platform=iOS Simulator,name=iPhone 17' \
           PERFORMANCE_TESTS=1
 
     - name: 性能回归检查
@@ -197,7 +197,7 @@ jobs:
         xcodebuild test \
           -project Fit.xcodeproj \
           -scheme Fit \
-          -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.0' \
+          -destination 'platform=iOS Simulator,name=iPhone 17' \
           -only-testing:FitTests/PerformanceTests \
           -resultBundlePath PerformanceResults-main.xcresult || true
 
@@ -253,7 +253,7 @@ jobs:
         xcodebuild test \
           -project Fit.xcodeproj \
           -scheme Fit \
-          -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.0' \
+          -destination 'platform=iOS Simulator,name=iPhone 17' \
           UI_TESTS=1
 
     - name: 生成UI测试截图

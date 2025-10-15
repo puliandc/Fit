@@ -346,6 +346,17 @@ struct CompactExerciseInfoCard: View {
         workoutViewModel.workoutPlan.exercises.filter { $0.exercise.name == exercise.name }
     }
 
+    // 统一的重量格式化函数
+    private func formatWeight(_ weight: Double) -> String {
+        if weight == 0 {
+            return "自重"
+        } else if weight.truncatingRemainder(dividingBy: 1) == 0 {
+            return String(format: "%.0f", weight)
+        } else {
+            return String(format: "%.1f", weight)
+        }
+    }
+
     private var nextSetInfo: String? {
         // 获取当前训练计划中的所有练习
         let allExercises = workoutViewModel.workoutPlan.exercises
@@ -353,10 +364,10 @@ struct CompactExerciseInfoCard: View {
 
         // 如果当前不是最后一组的最后一组，显示同一练习的下一组
         if currentSet < totalSets {
-            if currentSet - 1 < allExerciseSets.count && currentSet > 1 {
+            if currentSet - 1 < allExerciseSets.count {
                 let nextSet = allExerciseSets[currentSet - 1] // 当前set是基于1的索引，所以减1
-                let weightText = nextSet.targetWeight > 0 ? String(format: "%.0f", nextSet.targetWeight) : "自重"
-                return "下一组: \(exercise.name) \(nextSet.targetReps)次 × \(weightText)kg"
+                let weightText = formatWeight(nextSet.targetWeight)
+                return "下一组: \(exercise.name) \(nextSet.targetReps)次 * \(weightText)"
             }
         }
 
@@ -364,8 +375,8 @@ struct CompactExerciseInfoCard: View {
         if currentSet >= totalSets && currentExerciseIndex < allExercises.count - 1 {
             let nextExercise = allExercises[currentExerciseIndex + 1].exercise
             let nextExerciseFirstSet = allExercises[currentExerciseIndex + 1]
-            let weightText = nextExerciseFirstSet.targetWeight > 0 ? String(format: "%.0f", nextExerciseFirstSet.targetWeight) : "自重"
-            return "下一组: \(nextExercise.name) \(nextExerciseFirstSet.targetReps)次 × \(weightText)kg"
+            let weightText = formatWeight(nextExerciseFirstSet.targetWeight)
+            return "下一组: \(nextExercise.name) \(nextExerciseFirstSet.targetReps)次 * \(weightText)"
         }
 
         return nil
@@ -471,15 +482,10 @@ struct CompactExerciseInfoCard: View {
                             .font(.system(size: 12, weight: .medium))
                             .foregroundColor(.appTextSecondary)
 
-                        if targetWeight > 0 {
-                            Text(String(format: "%.0f", targetWeight))
-                                .font(.system(size: 20, weight: .bold))
-                                .foregroundColor(.info)
-                        } else {
-                            Text("自重")
-                                .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(.info)
-                        }
+                        // 使用统一的重量格式化函数
+                        Text(formatWeight(targetWeight))
+                            .font(.system(size: targetWeight == 0 ? 16 : 20, weight: .bold))
+                            .foregroundColor(.info)
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 17)

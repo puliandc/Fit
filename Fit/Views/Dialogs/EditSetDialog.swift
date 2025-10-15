@@ -23,13 +23,24 @@ struct EditSetDialog: View {
                 title: "动作完成",
                 subtitle: "请输入实际完成次数和重量",
                 defaultReps: String(defaults.reps),
-                defaultWeight: defaults.weight > 0 ? String(defaults.weight) : "自重",
+                defaultWeight: formatWeight(defaults.weight),
                 onConfirm: { reps, weight, notes in
                     saveChanges(reps: reps, weight: weight, notes: notes)
                 }
             ),
             onDismiss: onDismiss
         )
+    }
+
+    // 统一的重量格式化函数
+    private func formatWeight(_ weight: Double) -> String {
+        if weight == 0 {
+            return "自重"
+        } else if weight.truncatingRemainder(dividingBy: 1) == 0 {
+            return String(format: "%.0f", weight)
+        } else {
+            return String(format: "%.1f", weight)
+        }
     }
 
     private func saveChanges(reps: String, weight: String, notes: String) {
