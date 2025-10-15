@@ -360,7 +360,7 @@ struct CompactExerciseInfoCard: View {
     private var nextSetInfo: String? {
         // 使用ViewModel的当前状态，确保数据一致性
         let currentExerciseIndex = workoutViewModel.currentExerciseIndex
-        let currentSet = workoutViewModel.currentSet
+        let _ = workoutViewModel.currentSet
         let allExercises = workoutViewModel.workoutPlan.exercises
 
         // 确保索引有效

@@ -28,6 +28,8 @@
 	<string>This app needs permission to update health data to track your fitness progress.</string>
 	<key>NSMotionUsageDescription</key>
 	<string>This app uses motion data to track your physical activities.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>TTS语音播报需要</string>
 
 	<!-- iOS 14+ File System Access Permissions -->
 	<key>NSDocumentsFolderUsageDescription</key>
