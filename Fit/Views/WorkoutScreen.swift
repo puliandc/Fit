@@ -425,7 +425,7 @@ struct CompactExerciseInfoCard: View {
                 )
 
                 // 版本1.3: 本轮训练进度
-                ProgressView(value: Double(currentSet) / Double(totalSets))
+                ProgressView(value: max(0, min(1, Double(currentSet) / Double(totalSets))))
                     .progressViewStyle(LinearProgressViewStyle(tint: .appPrimary))
                     .scaleEffect(x: 1, y: 2, anchor: .center)
                 .padding(.horizontal, 16)

@@ -45,6 +45,15 @@ struct DialogOption {
     let action: () -> Void
 }
 
+// MARK: - Focus Field Enumeration
+extension UniversalDialog {
+    enum Field: Hashable {
+        case reps
+        case weight
+        case notes
+    }
+}
+
 // MARK: - Universal Dialog
 struct UniversalDialog: View {
     let type: UniversalDialogType
@@ -53,6 +62,8 @@ struct UniversalDialog: View {
     @State private var reps: String = ""
     @State private var weight: String = ""
     @State private var notes: String = ""
+    @State private var isKeyboardVisible: Bool = false
+    @FocusState private var focusedField: Field?
 
     private var dialogWidth: CGFloat {
         switch type {
@@ -99,6 +110,16 @@ struct UniversalDialog: View {
         .frame(maxWidth: dialogWidth)
         .onAppear {
             loadDefaults()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
+            isKeyboardVisible = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+            isKeyboardVisible = false
+        }
+        .onTapGesture {
+            // 点击背景时关闭键盘
+            focusedField = nil
         }
     }
 
@@ -171,7 +192,8 @@ struct UniversalDialog: View {
                 text: $reps,
                 placeholder: "0",
                 keyboardType: .numberPad,
-                color: .success
+                color: .success,
+                field: .reps
             )
 
             // Weight Input
@@ -180,7 +202,8 @@ struct UniversalDialog: View {
                 text: $weight,
                 placeholder: "0.0",
                 keyboardType: .decimalPad,
-                color: .info
+                color: .info,
+                field: .weight
             )
 
             // Notes Input
@@ -189,7 +212,8 @@ struct UniversalDialog: View {
                 text: $notes,
                 placeholder: "添加备注...",
                 keyboardType: .default,
-                color: .appTextSecondary
+                color: .appTextSecondary,
+                field: .notes
             )
         }
     }
@@ -276,7 +300,7 @@ struct UniversalDialog: View {
 
     // MARK: - Helper Components
 
-    private func inputField(title: String, text: Binding<String>, placeholder: String, keyboardType: UIKeyboardType, color: Color) -> some View {
+    private func inputField(title: String, text: Binding<String>, placeholder: String, keyboardType: UIKeyboardType, color: Color, field: Field) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
                 .font(.system(size: 14, weight: .medium))
@@ -295,6 +319,23 @@ struct UniversalDialog: View {
                     RoundedRectangle(cornerRadius: 12)
                         .stroke(color.opacity(0.3), lineWidth: 1)
                 )
+                .disableAutocorrection(true)
+                .textInputAutocapitalization(.never)
+                .focused($focusedField, equals: field)
+                .onTapGesture {
+                    focusedField = field
+                }
+                .onSubmit {
+                    // 提交时移动到下一个输入框或关闭键盘
+                    switch field {
+                    case .reps:
+                        focusedField = .weight
+                    case .weight:
+                        focusedField = .notes
+                    case .notes:
+                        focusedField = nil
+                    }
+                }
         }
     }
 

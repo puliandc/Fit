@@ -79,15 +79,29 @@ struct ContentView: View {
 
                 switch dialog {
                 case .editSet(_, _, let workoutViewModel):
+                    let defaults = workoutViewModel.getDefaultParametersForCurrentExercise()
                     UniversalDialog(
                         type: .input(
                             title: "动作完成",
                             subtitle: "请输入实际完成次数和重量",
+                            defaultReps: String(defaults.reps),
+                            defaultWeight: defaults.weight > 0 ? String(defaults.weight) : "自重",
                             onConfirm: { reps, weight, notes in
-                                guard let actualReps = Int(reps),
-                                      let actualWeight = Double(weight) else {
+                                guard let actualReps = Int(reps) else {
                                     return
                                 }
+
+                                // 处理重量输入：如果是"自重"或空字符串，则设为0
+                                let actualWeight: Double
+                                if weight.lowercased() == "自重" || weight.isEmpty {
+                                    actualWeight = 0.0
+                                } else {
+                                    guard let weightValue = Double(weight) else {
+                                        return
+                                    }
+                                    actualWeight = weightValue
+                                }
+
                                 workoutViewModel.completeExerciseWith(actualReps: actualReps, actualWeight: actualWeight, notes: notes)
                             }
                         ),
@@ -105,6 +119,8 @@ struct ContentView: View {
                         type: .input(
                             title: "完成记录",
                             subtitle: "请输入您实际完成的次数和重量",
+                            defaultReps: "",
+                            defaultWeight: "",
                             onConfirm: { _, _, _ in }
                         ),
                         onDismiss: {
