@@ -200,7 +200,7 @@ struct UniversalDialog: View {
             inputField(
                 title: "重量 (kg)",
                 text: $weight,
-                placeholder: "0.0",
+                placeholder: "0",
                 keyboardType: .decimalPad,
                 color: .info,
                 field: .weight
