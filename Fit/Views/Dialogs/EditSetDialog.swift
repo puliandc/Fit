@@ -23,7 +23,7 @@ struct EditSetDialog: View {
                 title: "动作完成",
                 subtitle: "请输入实际完成次数和重量",
                 defaultReps: String(defaults.reps),
-                defaultWeight: defaults.weight > 0 ? String(defaults.weight) : "",
+                defaultWeight: defaults.weight > 0 ? String(defaults.weight) : "自重",
                 onConfirm: { reps, weight, notes in
                     saveChanges(reps: reps, weight: weight, notes: notes)
                 }
@@ -33,9 +33,19 @@ struct EditSetDialog: View {
     }
 
     private func saveChanges(reps: String, weight: String, notes: String) {
-        guard let actualReps = Int(reps),
-              let actualWeight = Double(weight) else {
+        guard let actualReps = Int(reps) else {
             return
+        }
+
+        // 处理重量输入：如果是"自重"或空字符串，则设为0
+        let actualWeight: Double
+        if weight.lowercased() == "自重" || weight.isEmpty {
+            actualWeight = 0.0
+        } else {
+            guard let weightValue = Double(weight) else {
+                return
+            }
+            actualWeight = weightValue
         }
 
         // 使用WorkoutViewModel的增强方法保存参数并完成练习
