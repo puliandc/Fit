@@ -13,10 +13,6 @@ struct MainScreen: View {
     @EnvironmentObject var workoutSessionManager: WorkoutSessionManager
     @State private var hasWorkoutPlan: Bool = false
     @State private var isReadingPlan: Bool = false
-    @State private var animationOffset: CGSize = .zero
-    @State private var scale: CGFloat = 0.9
-    @State private var isAnimating: Bool = false
-    @State private var showContent: Bool = false
 
     // 版本1.0: 外部训练计划服务集成
     @StateObject private var externalTrainingService = ExternalTrainingPlanService()
@@ -34,8 +30,8 @@ struct MainScreen: View {
 
     var body: some View {
         ZStack {
-            // 现代化背景
-            ModernBackground()
+            // 基于React设计的动画背景
+            AnimatedBackground()
                 .ignoresSafeArea()
 
             ScrollView {
@@ -43,13 +39,8 @@ struct MainScreen: View {
                     // 顶部安全区域
                     Color.clear.frame(height: 20)
 
-                    // 头部区域
-                    HeaderSection(
-                        animationOffset: $animationOffset,
-                        scale: $scale,
-                        isAnimating: $isAnimating,
-                        showContent: $showContent
-                    )
+                    // 头部区域 - 基于React设计的LogoHeader
+                    LogoHeader()
 
                     // 主要功能区域
                     VStack(spacing: 24) {
@@ -205,22 +196,8 @@ struct MainScreen: View {
     }
 
     private func startAnimations() {
-        // 延迟显示内容
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            withAnimation(.spring(response: 0.8, dampingFraction: 0.8)) {
-                showContent = true
-                scale = 1.0
-            }
-        }
-
-        // 背景动画
-        withAnimation(.easeInOut(duration: 15.0).repeatForever(autoreverses: true)) {
-            animationOffset = CGSize(width: 80, height: 60)
-        }
-
-        withAnimation(.easeInOut(duration: 3.0).repeatForever(autoreverses: true)) {
-            isAnimating = true
-        }
+        // LogoHeader现在自己管理所有动画
+        // MainScreen不再需要管理Header动画
     }
 
     private func readWorkoutPlan() {
