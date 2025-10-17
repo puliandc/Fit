@@ -50,7 +50,7 @@ struct MainScreen: View {
                                 icon: "figure.run",
                                 title: "开始训练",
                                 subtitle: "开始训练吧！",
-                                hasContent: true,
+                                hasContent: false,
                                 contentText: externalTrainingService.currentWorkoutPlan?.name ?? "准备就绪",
                                 isLoading: false,
                                 buttonText: "开始训练",
@@ -67,17 +67,17 @@ struct MainScreen: View {
                             )
                         }
 
-                        // 版本1.3: 隐藏训练计划摘要卡片，保持界面简洁
-                        // if hasWorkoutPlan, let workoutPlan = externalTrainingService.currentWorkoutPlan {
-                        //     CompleteWorkoutPlanCard(workoutPlan: workoutPlan, delay: 0.3)
-                        // }
+                        // 训练计划摘要卡片 - 在有计划时显示
+                        if hasWorkoutPlan, let workoutPlan = externalTrainingService.currentWorkoutPlan {
+                            CompleteWorkoutPlanCard(workoutPlan: workoutPlan, delay: 0.3)
+                        }
 
                         // 读取计划卡片 - 移到最底部
                         FeatureCard(
                             icon: "doc.text.fill",
                             title: "读取健身计划",
                             subtitle: "请选择健身计划",
-                            hasContent: hasWorkoutPlan,
+                            hasContent: false,
                             contentText: hasWorkoutPlan ?
                                 (externalTrainingService.currentWorkoutPlan?.name ?? "计划读取成功") :
                                 "计划读取成功",
