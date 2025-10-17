@@ -1063,10 +1063,9 @@ struct CompleteWorkoutPlanCard: View {
     @State private var shimmerOffset: CGFloat = -200
     @State private var isHovered: Bool = false
 
-    // 计算动作数量（排除热身项目）
+    // 计算动作数量（包括所有项目）
     private var exerciseCount: Int {
-        // 假设第一个项目是热身，不计入动作数量
-        max(0, workoutPlan.exercises.count - 1)
+        workoutPlan.exercises.count
     }
 
     // 计算总组数（排除热身项目）
@@ -1111,7 +1110,7 @@ struct CompleteWorkoutPlanCard: View {
 
                 // 标题和信息
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("训练计划已加载")
+                    Text("训练计划")
                         .font(.system(size: 20, weight: .bold))
                         .multilineTextAlignment(.leading)
                         .foregroundStyle(
@@ -1197,11 +1196,26 @@ struct CompleteWorkoutPlanCard: View {
                     // 显示按动作分组的汇总列表
                     VStack(spacing: 6) {
                         ForEach(Array(groupedExercises.enumerated()), id: \.offset) { index, exercise in
-                            HStack {
-                                Text("\(index + 1)")
-                                    .font(.system(size: 12, weight: .semibold))
-                                    .foregroundColor(.appTextSecondary)
-                                    .frame(width: 20, alignment: .leading)
+                            HStack(spacing: 8) {
+                                // 序号圆圈 - 参考React原型的绿色背景
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 4)
+                                        .fill(
+                                            LinearGradient(
+                                                colors: [
+                                                    Color(red: 0.05, green: 0.62, blue: 0.34), // green-500
+                                                    Color(red: 0.05, green: 0.75, blue: 0.41)  // emerald-500
+                                                ],
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            )
+                                        )
+                                        .frame(width: 24, height: 24)
+
+                                    Text("\(index + 1)")
+                                        .font(.system(size: 12, weight: .semibold))
+                                        .foregroundColor(.white)
+                                }
 
                                 Text(exercise.name)
                                     .font(.system(size: 14, weight: .medium))
@@ -1209,15 +1223,15 @@ struct CompleteWorkoutPlanCard: View {
                                     .lineLimit(1)
                                     .frame(maxWidth: .infinity, alignment: .leading)
 
-                                Text("\(exercise.sets)组×\(exercise.reps)次")
+                                Text("\(exercise.sets)组")
                                     .font(.system(size: 12, weight: .medium))
-                                    .foregroundColor(.appTextSecondary)
+                                    .foregroundColor(.appText)
                             }
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 8)
                             .background(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .fill(Color.appSurfaceLight.opacity(0.15))
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(Color.appSurfaceLight.opacity(0.1))
                             )
                         }
                     }
