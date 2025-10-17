@@ -481,12 +481,36 @@ struct FeatureCard: View {
                 // 标题和副标题
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
-                        .featureTitleStyle()
+                        .font(.system(size: 20, weight: .bold))
                         .multilineTextAlignment(.leading)
+                        .foregroundStyle(
+                            title == "读取健身计划" ?
+                            LinearGradient(
+                                colors: [
+                                    Color(red: 0.22, green: 0.51, blue: 0.96), // blue-600
+                                    Color(red: 0.06, green: 0.75, blue: 0.82)  // cyan-600
+                                ],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            ) :
+                            LinearGradient(
+                                colors: [
+                                    Color(red: 0.95, green: 0.29, blue: 0.26), // orange-600 (开始训练)
+                                    Color(red: 0.91, green: 0.15, blue: 0.46)  // pink-600
+                                ],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
 
                     Text(subtitle)
-                        .featureBodyStyle()
+                        .font(.system(size: 16, weight: .medium))
                         .multilineTextAlignment(.leading)
+                        .foregroundColor(
+                            title == "读取健身计划" ?
+                            Color(red: 0.439, green: 0.447, blue: 0.498) : // gray-600
+                            .appTextSecondary
+                        )
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
@@ -534,7 +558,7 @@ struct FeatureCard: View {
             ModernButton(
                 text: buttonText,
                 action: buttonAction,
-                style: hasContent ? .primary : (isLoading ? .disabled : .secondary),
+                style: (title == "读取健身计划") ? .readPlan : (hasContent ? .primary : (isLoading ? .disabled : .secondary)),
                 isDisabled: isLoading,
                 fullWidth: true
             )
@@ -638,6 +662,7 @@ struct ModernButton: View {
         case primary
         case secondary
         case disabled
+        case readPlan // 新增读取计划专用样式
     }
 
     var body: some View {
@@ -698,6 +723,16 @@ struct ModernButton: View {
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
+            case .readPlan:
+                // 参考React原型：蓝色到青色渐变
+                LinearGradient(
+                    colors: [
+                        Color(red: 0.13, green: 0.59, blue: 0.95), // blue-500
+                        Color(red: 0.06, green: 0.75, blue: 0.82)  // cyan-600
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
             }
         }
     }
@@ -710,6 +745,8 @@ struct ModernButton: View {
             return isDisabled ? .appTextDisabled : .appText
         case .disabled:
             return .appTextDisabled
+        case .readPlan:
+            return .white // 读取计划按钮使用白色文字
         }
     }
 
@@ -721,6 +758,8 @@ struct ModernButton: View {
             return .appSurfaceElevated.opacity(0.3)
         case .disabled:
             return .clear
+        case .readPlan:
+            return Color(red: 0.13, green: 0.59, blue: 0.95).opacity(0.4) // blue-500 opacity
         }
     }
 }
