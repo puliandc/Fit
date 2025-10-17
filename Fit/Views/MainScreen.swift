@@ -558,7 +558,7 @@ struct FeatureCard: View {
             ModernButton(
                 text: buttonText,
                 action: buttonAction,
-                style: (title == "读取健身计划") ? .readPlan : (hasContent ? .primary : (isLoading ? .disabled : .secondary)),
+                style: (title == "读取健身计划") ? .readPlan : .primary,
                 isDisabled: isLoading,
                 fullWidth: true
             )
@@ -1063,6 +1063,31 @@ struct CompleteWorkoutPlanCard: View {
     @State private var shimmerOffset: CGFloat = -200
     @State private var isHovered: Bool = false
 
+    // 计算动作数量（排除热身项目）
+    private var exerciseCount: Int {
+        // 假设第一个项目是热身，不计入动作数量
+        max(0, workoutPlan.exercises.count - 1)
+    }
+
+    // 计算总组数（排除热身项目）
+    private var totalSets: Int {
+        workoutPlan.exercises.dropFirst().reduce(0) { total, exercise in
+            total + 1 // 每个exercise算一组
+        }
+    }
+
+    // 按动作名称分组汇总（排除热身项目）
+    private var groupedExercises: [(name: String, sets: Int, reps: Int)] {
+        let exercisesWithoutWarmup = workoutPlan.exercises.dropFirst()
+        let grouped = Dictionary(grouping: exercisesWithoutWarmup) { $0.exercise.name }
+
+        return grouped.map { (name, exercises) in
+            let sets = exercises.count
+            let reps = exercises.first?.targetReps ?? 0
+            return (name: name, sets: sets, reps: reps)
+        }.sorted { $0.name < $1.name }
+    }
+
     var body: some View {
         VStack(spacing: 20) {
             // 卡片头部
@@ -1113,18 +1138,18 @@ struct CompleteWorkoutPlanCard: View {
             // 训练统计信息
             VStack(spacing: 12) {
                 HStack(spacing: 16) {
-                    // 练习数量
+                    // 动作数量
                     StatItem(
                         icon: "dumbbell.fill",
-                        value: "\(workoutPlan.exercises.count)",
-                        label: "练习项目",
+                        value: "\(exerciseCount)",
+                        label: "动作数量",
                         color: .appPrimary
                     )
 
                     // 总组数
                     StatItem(
                         icon: "number.circle.fill",
-                        value: "\(workoutPlan.exercises.count)",
+                        value: "\(totalSets)",
                         label: "总组数",
                         color: .success
                     )
@@ -1169,12 +1194,30 @@ struct CompleteWorkoutPlanCard: View {
                 }
 
                 if showAllExercises {
-                    // 显示所有练习项目 - 匹配React原型的单个项目显示
-                    VStack(spacing: 8) {
-                        ForEach(0..<workoutPlan.exercises.count, id: \.self) { index in
-                            ExerciseRow(
-                                exerciseSet: workoutPlan.exercises[index],
-                                index: index
+                    // 显示按动作分组的汇总列表
+                    VStack(spacing: 6) {
+                        ForEach(Array(groupedExercises.enumerated()), id: \.offset) { index, exercise in
+                            HStack {
+                                Text("\(index + 1)")
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundColor(.appTextSecondary)
+                                    .frame(width: 20, alignment: .leading)
+
+                                Text(exercise.name)
+                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundColor(.appText)
+                                    .lineLimit(1)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                                Text("\(exercise.sets)组×\(exercise.reps)次")
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundColor(.appTextSecondary)
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .fill(Color.appSurfaceLight.opacity(0.15))
                             )
                         }
                     }
@@ -1184,16 +1227,16 @@ struct CompleteWorkoutPlanCard: View {
                     ))
                 } else {
                     // 默认不显示任何训练项目，只有点击展开后才显示
-                    VStack(spacing: 8) {
-                        // 空状态，不显示任何训练动作
-                        HStack {
-                            Text("点击展开查看训练动作")
-                                .font(.system(size: 12, weight: .medium))
-                                .foregroundColor(.appTextSecondary)
-                            Spacer()
-                        }
-                        .padding(.horizontal, 16)
+                    HStack {
+                        Text("点击展开查看训练动作")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.appTextSecondary)
+                        Spacer()
+                        Text("展开")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.appPrimary)
                     }
+                    .padding(.horizontal, 16)
                 }
             }
         }

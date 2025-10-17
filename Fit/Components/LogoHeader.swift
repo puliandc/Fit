@@ -157,16 +157,15 @@ struct LogoHeader: View {
         }
 
         // Logo摇摆动画 (3秒循环) - 参考React原型：[0, 10, -10, 0]
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            withAnimation(
-                .easeInOut(duration: 3.0)
-                    .repeatForever(autoreverses: false)
-            ) {
-                logoRotation = 10.0
-            }
+        withAnimation(
+            .easeInOut(duration: 3.0)
+                .repeatForever(autoreverses: false)
+        ) {
+            logoRotation = 10.0
         }
 
-        // 脉冲光晕动画 (2秒循环) - 参考React原型：scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5]
+        // 脉冲光晕动画已注释 - 仅保留Logo摇摆动画
+        /*
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             withAnimation(
                 .easeInOut(duration: 2.0)
@@ -176,20 +175,11 @@ struct LogoHeader: View {
                 glowOpacity = 0.0
             }
         }
+        */
 
-        // 主标题淡入动画 (延迟0.4秒) - 一次性动画，无循环
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-            withAnimation(.easeIn(duration: 0.8)) {
-                titleOpacity = 1.0
-            }
-        }
-
-        // 副标题淡入动画 (延迟0.5秒) - 一次性动画，无循环
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            withAnimation(.easeIn(duration: 0.8)) {
-                subtitleOpacity = 1.0
-            }
-        }
+        // 主标题和副标题不使用淡入动画 - 直接显示
+        titleOpacity = 1.0
+        subtitleOpacity = 1.0
     }
 }
 
