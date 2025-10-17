@@ -49,7 +49,7 @@ struct MainScreen: View {
                             FeatureCard(
                                 icon: "figure.run",
                                 title: "开始训练",
-                                subtitle: "您的健身计划已准备就绪，开始今天的训练吧！",
+                                subtitle: "开始训练吧！",
                                 hasContent: true,
                                 contentText: externalTrainingService.currentWorkoutPlan?.name ?? "准备就绪",
                                 isLoading: false,
@@ -67,16 +67,16 @@ struct MainScreen: View {
                             )
                         }
 
-                        // 版本1.3: 完整训练计划显示 - 放在开始训练卡片后面
-                        if hasWorkoutPlan, let workoutPlan = externalTrainingService.currentWorkoutPlan {
-                            CompleteWorkoutPlanCard(workoutPlan: workoutPlan, delay: 0.3)
-                        }
+                        // 版本1.3: 隐藏训练计划摘要卡片，保持界面简洁
+                        // if hasWorkoutPlan, let workoutPlan = externalTrainingService.currentWorkoutPlan {
+                        //     CompleteWorkoutPlanCard(workoutPlan: workoutPlan, delay: 0.3)
+                        // }
 
                         // 读取计划卡片 - 移到最底部
                         FeatureCard(
                             icon: "doc.text.fill",
                             title: "读取健身计划",
-                            subtitle: "从 iPhone 下载文件夹选择您的健身训练计划",
+                            subtitle: "请选择健身计划",
                             hasContent: hasWorkoutPlan,
                             contentText: hasWorkoutPlan ?
                                 (externalTrainingService.currentWorkoutPlan?.name ?? "计划读取成功") :
@@ -455,7 +455,7 @@ struct FeatureCard: View {
     var body: some View {
         VStack(spacing: 20) {
             // 卡片头部
-            HStack(spacing: 16) {
+            HStack(alignment: .top, spacing: 16) {
                 // 图标容器
                 ZStack {
                     RoundedRectangle(cornerRadius: 16)
@@ -1063,28 +1063,10 @@ struct CompleteWorkoutPlanCard: View {
     @State private var shimmerOffset: CGFloat = -200
     @State private var isHovered: Bool = false
 
-    private var exerciseGroups: [(String, [ExerciseSet])] {
-        // 保持原始顺序进行分组，避免字典重排序
-        var seenNames = Set<String>()
-        var groupedItems: [(String, [ExerciseSet])] = []
-
-        for exerciseSet in workoutPlan.exercises {
-            let exerciseName = exerciseSet.exercise.name
-
-            if !seenNames.contains(exerciseName) {
-                seenNames.insert(exerciseName)
-                let exercisesForName = workoutPlan.exercises.filter { $0.exercise.name == exerciseName }
-                groupedItems.append((exerciseName, exercisesForName))
-            }
-        }
-
-        return groupedItems
-    }
-
     var body: some View {
         VStack(spacing: 20) {
             // 卡片头部
-            HStack(spacing: 16) {
+            HStack(alignment: .top, spacing: 16) {
                 // 图标容器
                 ZStack {
                     RoundedRectangle(cornerRadius: 16)
@@ -1105,8 +1087,18 @@ struct CompleteWorkoutPlanCard: View {
                 // 标题和信息
                 VStack(alignment: .leading, spacing: 4) {
                     Text("训练计划已加载")
-                        .featureTitleStyle()
+                        .font(.system(size: 20, weight: .bold))
                         .multilineTextAlignment(.leading)
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [
+                                    Color(red: 0.05, green: 0.62, blue: 0.34), // green-600
+                                    Color(red: 0.05, green: 0.75, blue: 0.41)  // emerald-600
+                                ],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
 
                     Text(workoutPlan.name)
                         .font(.system(size: 14, weight: .medium))
@@ -1124,7 +1116,7 @@ struct CompleteWorkoutPlanCard: View {
                     // 练习数量
                     StatItem(
                         icon: "dumbbell.fill",
-                        value: "\(exerciseGroups.count)",
+                        value: "\(workoutPlan.exercises.count)",
                         label: "练习项目",
                         color: .appPrimary
                     )
@@ -1177,14 +1169,12 @@ struct CompleteWorkoutPlanCard: View {
                 }
 
                 if showAllExercises {
-                    // 显示所有练习项目
+                    // 显示所有练习项目 - 匹配React原型的单个项目显示
                     VStack(spacing: 8) {
-                        ForEach(0..<exerciseGroups.count, id: \.self) { index in
-                            let exerciseGroup = exerciseGroups[index]
-                            ExerciseGroupRow(
-                                exerciseName: exerciseGroup.0,
-                                exerciseSets: exerciseGroup.1,
-                                isExpanded: true
+                        ForEach(0..<workoutPlan.exercises.count, id: \.self) { index in
+                            ExerciseRow(
+                                exerciseSet: workoutPlan.exercises[index],
+                                index: index
                             )
                         }
                     }
@@ -1193,27 +1183,16 @@ struct CompleteWorkoutPlanCard: View {
                         removal: .opacity
                     ))
                 } else {
-                    // 只显示前3个练习项目
+                    // 默认不显示任何训练项目，只有点击展开后才显示
                     VStack(spacing: 8) {
-                        let displayCount = min(3, exerciseGroups.count)
-                        ForEach(0..<displayCount, id: \.self) { index in
-                            let exerciseGroup = exerciseGroups[index]
-                            ExerciseGroupRow(
-                                exerciseName: exerciseGroup.0,
-                                exerciseSets: exerciseGroup.1,
-                                isExpanded: false
-                            )
+                        // 空状态，不显示任何训练动作
+                        HStack {
+                            Text("点击展开查看训练动作")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(.appTextSecondary)
+                            Spacer()
                         }
-
-                        if exerciseGroups.count > 3 {
-                            HStack {
-                                Text("还有 \(exerciseGroups.count - 3) 个练习项目...")
-                                    .font(.system(size: 12, weight: .medium))
-                                    .foregroundColor(.appTextSecondary)
-                                Spacer()
-                            }
-                            .padding(.horizontal, 16)
-                        }
+                        .padding(.horizontal, 16)
                     }
                 }
             }
@@ -1337,60 +1316,51 @@ struct StatItem: View {
     }
 }
 
-// MARK: - Exercise Group Row
-struct ExerciseGroupRow: View {
-    let exerciseName: String
-    let exerciseSets: [ExerciseSet]
-    let isExpanded: Bool
+// MARK: - Exercise Row (单个练习项目，匹配React原型)
+struct ExerciseRow: View {
+    let exerciseSet: ExerciseSet
+    let index: Int
 
     var body: some View {
-        VStack(spacing: 8) {
+        HStack(spacing: 8) {
+            // 序号圆圈 - 匹配React原型样式
+            ZStack {
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(red: 0.05, green: 0.62, blue: 0.34), // green-500
+                                Color(red: 0.05, green: 0.75, blue: 0.41)  // emerald-500
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 24, height: 24)
+
+                Text("\(index + 1)")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(.white)
+            }
+
             // 练习名称
-            HStack {
-                Image(systemName: "figure.strengthtraining.traditional")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.appPrimary)
+            Text(exerciseSet.exercise.name)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(.appText)
+                .lineLimit(1)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-                Text(exerciseName)
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.appText)
-
-                Spacer()
-
-                Text("\(exerciseSets.count)组")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.appTextSecondary)
-            }
-
-            // 组数详情（仅在展开时显示）
-            if isExpanded {
-                VStack(spacing: 4) {
-                    ForEach(0..<exerciseSets.count, id: \.self) { index in
-                        let exerciseSet = exerciseSets[index]
-                        HStack {
-                            Text("第\(index + 1)组:")
-                                .font(.system(size: 12))
-                                .foregroundColor(.appTextSecondary)
-
-                            Text("\(exerciseSet.targetReps)次 × \(Int(exerciseSet.targetWeight))kg")
-                                .font(.system(size: 12, weight: .medium))
-                                .foregroundColor(.appText)
-
-                            Spacer()
-
-                            Text("休息\(exerciseSet.restTime)秒")
-                                .font(.system(size: 12))
-                                .foregroundColor(.warning)
-                        }
-                        .padding(.leading, 24)
-                    }
-                }
-                .transition(.opacity.combined(with: .scale))
-            }
+            // 组数和次数信息 - 匹配React原型格式
+            Text("\(exerciseSet.targetReps)次 × \(Int(exerciseSet.targetWeight))kg")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(.appTextSecondary)
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 8)
         .padding(.vertical, 8)
-        .background(Color.appSurfaceLight, in: RoundedRectangle(cornerRadius: 12))
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.appSurfaceLight.opacity(0.5))
+        )
     }
 }
 
