@@ -1063,28 +1063,36 @@ struct CompleteWorkoutPlanCard: View {
     @State private var shimmerOffset: CGFloat = -200
     @State private var isHovered: Bool = false
 
-    // 计算动作数量（包括所有项目）
+    // 计算动作数量（按不同的练习名称统计）
     private var exerciseCount: Int {
+        let uniqueExerciseNames = Set(workoutPlan.exercises.map { $0.exercise.name })
+        return uniqueExerciseNames.count
+    }
+
+    // 计算总组数（所有ExerciseSet的数量）
+    private var totalSets: Int {
         workoutPlan.exercises.count
     }
 
-    // 计算总组数（排除热身项目）
-    private var totalSets: Int {
-        workoutPlan.exercises.dropFirst().reduce(0) { total, exercise in
-            total + 1 // 每个exercise算一组
-        }
-    }
-
-    // 按动作名称分组汇总（排除热身项目）
+    // 按动作名称分组汇总（保持原始顺序）
     private var groupedExercises: [(name: String, sets: Int, reps: Int)] {
-        let exercisesWithoutWarmup = workoutPlan.exercises.dropFirst()
-        let grouped = Dictionary(grouping: exercisesWithoutWarmup) { $0.exercise.name }
+        // 按练习名称分组，但保持原始顺序
+        var seenNames: Set<String> = []
+        var result: [(name: String, sets: Int, reps: Int)] = []
 
-        return grouped.map { (name, exercises) in
-            let sets = exercises.count
-            let reps = exercises.first?.targetReps ?? 0
-            return (name: name, sets: sets, reps: reps)
-        }.sorted { $0.name < $1.name }
+        for exercise in workoutPlan.exercises {
+            let name = exercise.exercise.name
+            if !seenNames.contains(name) {
+                // 第一次遇到这个练习名称，添加到结果中
+                seenNames.insert(name)
+                let allSetsForExercise = workoutPlan.exercises.filter { $0.exercise.name == name }
+                let sets = allSetsForExercise.count
+                let reps = allSetsForExercise.first?.targetReps ?? 0
+                result.append((name: name, sets: sets, reps: reps))
+            }
+        }
+
+        return result
     }
 
     var body: some View {
@@ -1197,41 +1205,32 @@ struct CompleteWorkoutPlanCard: View {
                     VStack(spacing: 6) {
                         ForEach(Array(groupedExercises.enumerated()), id: \.offset) { index, exercise in
                             HStack(spacing: 8) {
-                                // 序号圆圈 - 参考React原型的绿色背景
+                                // 序号圆圈 - 使用指定的绿色
                                 ZStack {
                                     RoundedRectangle(cornerRadius: 4)
-                                        .fill(
-                                            LinearGradient(
-                                                colors: [
-                                                    Color(red: 0.05, green: 0.62, blue: 0.34), // green-500
-                                                    Color(red: 0.05, green: 0.75, blue: 0.41)  // emerald-500
-                                                ],
-                                                startPoint: .topLeading,
-                                                endPoint: .bottomTrailing
-                                            )
-                                        )
+                                        .fill(Color(red: 0, green: 0.79, blue: 0.32))
                                         .frame(width: 24, height: 24)
 
                                     Text("\(index + 1)")
                                         .font(.system(size: 12, weight: .semibold))
-                                        .foregroundColor(.white)
+                                        .foregroundColor(Color(red: 1, green: 1, blue: 1))
                                 }
 
                                 Text(exercise.name)
                                     .font(.system(size: 14, weight: .medium))
-                                    .foregroundColor(.appText)
+                                    .foregroundColor(Color(red: 0.12, green: 0.16, blue: 0.22))
                                     .lineLimit(1)
                                     .frame(maxWidth: .infinity, alignment: .leading)
 
                                 Text("\(exercise.sets)组")
                                     .font(.system(size: 12, weight: .medium))
-                                    .foregroundColor(.appText)
+                                    .foregroundColor(Color(red: 0.42, green: 0.45, blue: 0.51))
                             }
                             .padding(.horizontal, 8)
                             .padding(.vertical, 8)
                             .background(
                                 RoundedRectangle(cornerRadius: 8)
-                                    .fill(Color.appSurfaceLight.opacity(0.1))
+                                    .fill(Color(red: 1, green: 1, blue: 1).opacity(0.5))
                             )
                         }
                     }
@@ -1239,18 +1238,6 @@ struct CompleteWorkoutPlanCard: View {
                         insertion: .scale.combined(with: .opacity),
                         removal: .opacity
                     ))
-                } else {
-                    // 默认不显示任何训练项目，只有点击展开后才显示
-                    HStack {
-                        Text("点击展开查看训练动作")
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.appTextSecondary)
-                        Spacer()
-                        Text("展开")
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.appPrimary)
-                    }
-                    .padding(.horizontal, 16)
                 }
             }
         }
@@ -1380,43 +1367,34 @@ struct ExerciseRow: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            // 序号圆圈 - 匹配React原型样式
+            // 序号圆圈 - 使用指定的绿色
             ZStack {
                 RoundedRectangle(cornerRadius: 4)
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                Color(red: 0.05, green: 0.62, blue: 0.34), // green-500
-                                Color(red: 0.05, green: 0.75, blue: 0.41)  // emerald-500
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
+                    .fill(Color(red: 0, green: 0.79, blue: 0.32))
                     .frame(width: 24, height: 24)
 
                 Text("\(index + 1)")
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(Color(red: 1, green: 1, blue: 1))
             }
 
             // 练习名称
             Text(exerciseSet.exercise.name)
                 .font(.system(size: 14, weight: .medium))
-                .foregroundColor(.appText)
+                .foregroundColor(Color(red: 0.12, green: 0.16, blue: 0.22))
                 .lineLimit(1)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             // 组数和次数信息 - 匹配React原型格式
             Text("\(exerciseSet.targetReps)次 × \(Int(exerciseSet.targetWeight))kg")
                 .font(.system(size: 12, weight: .medium))
-                .foregroundColor(.appTextSecondary)
+                .foregroundColor(Color(red: 0.42, green: 0.45, blue: 0.51))
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 8)
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(Color.appSurfaceLight.opacity(0.5))
+                .fill(Color(red: 1, green: 1, blue: 1).opacity(0.5))
         )
     }
 }
