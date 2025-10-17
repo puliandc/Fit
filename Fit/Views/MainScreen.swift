@@ -449,6 +449,8 @@ struct FeatureCard: View {
 
     @State private var isVisible: Bool = false
     @State private var pulseScale: CGFloat = 1.0
+    @State private var shimmerOffset: CGFloat = -200
+    @State private var isHovered: Bool = false
 
     var body: some View {
         VStack(spacing: 20) {
@@ -565,17 +567,59 @@ struct FeatureCard: View {
                             lineWidth: 1.5
                         )
                 )
+                .overlay(
+                    // 光泽动画覆盖层
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color.clear,
+                                    Color.white.opacity(0.3),
+                                    Color.clear
+                                ],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .mask(
+                            LinearGradient(
+                                colors: [
+                                    Color.clear,
+                                    Color.black,
+                                    Color.clear
+                                ],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .offset(x: shimmerOffset)
+                        .animation(
+                            .easeInOut(duration: 2.5)
+                            .repeatForever(autoreverses: false),
+                            value: shimmerOffset
+                        )
+                )
                 .shadow(color: .appBackground.opacity(0.12), radius: 25, x: 0, y: 10)
         )
         .scaleEffect(isVisible ? 1.0 : 0.95)
+        .scaleEffect(isHovered ? 1.02 : 1.0) // 悬停时的缩放效果
         .opacity(isVisible ? 1.0 : 0)
         .offset(y: isVisible ? 0 : 20)
+        .offset(y: isHovered ? -2 : 0) // 悬停时的轻微上移
         .animation(.spring(response: 0.8, dampingFraction: 0.8).delay(delay), value: isVisible)
+        .animation(.easeInOut(duration: 0.2), value: isHovered)
         .onAppear {
             withAnimation {
                 isVisible = true
                 pulseScale = 1.1
+                // 启动光泽动画
+                shimmerOffset = 200
             }
+        }
+        .onTapGesture {
+            // 添加触觉反馈
+            let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+            impactFeedback.impactOccurred()
         }
     }
 }
@@ -977,6 +1021,8 @@ struct CompleteWorkoutPlanCard: View {
 
     @State private var isVisible: Bool = false
     @State private var showAllExercises: Bool = false
+    @State private var shimmerOffset: CGFloat = -200
+    @State private var isHovered: Bool = false
 
     private var exerciseGroups: [(String, [ExerciseSet])] {
         // 保持原始顺序进行分组，避免字典重排序
@@ -1161,16 +1207,58 @@ struct CompleteWorkoutPlanCard: View {
                             lineWidth: 1.5
                         )
                 )
+                .overlay(
+                    // 光泽动画覆盖层
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color.clear,
+                                    Color.white.opacity(0.3),
+                                    Color.clear
+                                ],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .mask(
+                            LinearGradient(
+                                colors: [
+                                    Color.clear,
+                                    Color.black,
+                                    Color.clear
+                                ],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .offset(x: shimmerOffset)
+                        .animation(
+                            .easeInOut(duration: 2.5)
+                            .repeatForever(autoreverses: false),
+                            value: shimmerOffset
+                        )
+                )
                 .shadow(color: .appBackground.opacity(0.12), radius: 25, x: 0, y: 10)
         )
         .scaleEffect(isVisible ? 1.0 : 0.95)
+        .scaleEffect(isHovered ? 1.02 : 1.0) // 悬停时的缩放效果
         .opacity(isVisible ? 1.0 : 0)
         .offset(y: isVisible ? 0 : 20)
+        .offset(y: isHovered ? -2 : 0) // 悬停时的轻微上移
         .animation(.spring(response: 0.8, dampingFraction: 0.8).delay(delay), value: isVisible)
+        .animation(.easeInOut(duration: 0.2), value: isHovered)
         .onAppear {
             withAnimation {
                 isVisible = true
+                // 启动光泽动画
+                shimmerOffset = 200
             }
+        }
+        .onTapGesture {
+            // 添加触觉反馈
+            let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+            impactFeedback.impactOccurred()
         }
     }
 }
