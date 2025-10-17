@@ -33,8 +33,8 @@ struct LogoHeader: View {
             // 副标题
             subtitle
         }
-        .padding(.top, 56)    // pt-14 (3.5rem)
-        .padding(.bottom, 24) // pb-6 (1.5rem)
+        .padding(.top, 40)    // 减少顶部padding
+        .padding(.bottom, 16) // 减少底部padding
         .padding(.horizontal, 24) // px-6 (1.5rem)
         .opacity(headerOpacity)
         .offset(y: headerOffset)
@@ -91,7 +91,7 @@ struct LogoHeader: View {
                     .foregroundColor(.white)
                     .zIndex(10)
             }
-            .padding(.bottom, 20) // mb-5
+            .padding(.bottom, 12) // 减少Logo底部spacing
 
             Spacer()
         }
@@ -104,7 +104,7 @@ struct LogoHeader: View {
             .fontWeight(.black) // 800 weight
             .tracking(-1.5) // tracking-tight
             .multilineTextAlignment(.center)
-            .padding(.bottom, 12) // mb-3
+            .padding(.bottom, 8) // 减少标题底部spacing
             .opacity(titleOpacity)
             .foregroundStyle(
                 LinearGradient(
