@@ -30,6 +30,9 @@ class WorkoutViewModel: ObservableObject {
     // 简化计时方案：只记录开始时间
     private var workoutStartTime: Date?
 
+    // TTS相关状态
+    private var hasAnnounced15Seconds = false
+
     // DEPRECATED: 简化数据结构，不再使用复杂的预建立系统
     // 直接使用workoutPlan和completedSets来跟踪进度
 
@@ -454,6 +457,12 @@ class WorkoutViewModel: ObservableObject {
         restTimer?.invalidate()
         restTimer = nil
 
+        // 重置15秒播报标志
+        hasAnnounced15Seconds = false
+
+        // 播报下一组动作信息
+        announceNextSetIfNeeded()
+
         // 确保在主线程上创建和启动计时器
         DispatchQueue.main.async {
             self.restTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] timer in
@@ -466,6 +475,12 @@ class WorkoutViewModel: ObservableObject {
                 DispatchQueue.main.async {
                     if self.timeLeft > 0 {
                         self.timeLeft -= 1
+
+                        // 当倒计时到15秒时播报
+                        if self.timeLeft == 15 && !self.hasAnnounced15Seconds {
+                            self.hasAnnounced15Seconds = true
+                            VoiceManager.shared.announceRestCountdown(seconds: 15)
+                        }
                     } else {
                         timer.invalidate()
                         self.restTimer = nil
@@ -484,6 +499,63 @@ class WorkoutViewModel: ObservableObject {
         }
     }
 
+    // MARK: - TTS Integration
+
+    /// 获取下一组动作信息用于TTS播报
+    /// - Returns: 下一组的动作信息，如果没有下一组则返回nil
+    func getNextExerciseInfo() -> (exerciseName: String, weight: Double, reps: Int)? {
+        let currentExerciseIndex = self.currentExerciseIndex
+        let allExercises = workoutPlan.exercises
+
+        // 确保索引有效
+        guard currentExerciseIndex < allExercises.count else {
+            return nil
+        }
+
+        let currentExercise = allExercises[currentExerciseIndex].exercise
+        let exerciseSets = allExercises.filter { $0.exercise.id == currentExercise.id }
+
+        // 找到当前ExerciseSet在相同练习中的位置
+        guard let currentPositionInExercise = exerciseSets.firstIndex(where: { $0.id == allExercises[currentExerciseIndex].id }) else {
+            return nil
+        }
+
+        // 检查是否还有下一组（相同练习）
+        if currentPositionInExercise < exerciseSets.count - 1 {
+            let nextSet = exerciseSets[currentPositionInExercise + 1]
+            return (nextSet.exercise.name, nextSet.targetWeight, nextSet.targetReps)
+        }
+
+        // 检查是否还有下一个练习
+        var nextIndex = currentExerciseIndex + 1
+        while nextIndex < allExercises.count {
+            let nextExerciseSet = allExercises[nextIndex]
+            if nextExerciseSet.exercise.id != currentExercise.id {
+                return (nextExerciseSet.exercise.name, nextExerciseSet.targetWeight, nextExerciseSet.targetReps)
+            }
+            nextIndex += 1
+        }
+
+        return nil
+    }
+
+    /// 播报下一组动作信息
+    private func announceNextSetIfNeeded() {
+        guard let nextExerciseInfo = getNextExerciseInfo() else {
+            return
+        }
+
+        // 使用VoiceManager播报下一组信息
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            VoiceManager.shared.announceNextSet(
+                exerciseName: nextExerciseInfo.exerciseName,
+                weight: nextExerciseInfo.weight,
+                reps: nextExerciseInfo.reps
+            )
+        }
+    }
+
+  
     // MARK: - Training Log Integration
     // 添加训练完成方法
     func finishWorkoutAndSaveLog() -> Bool {
