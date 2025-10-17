@@ -540,12 +540,32 @@ struct FeatureCard: View {
         .padding(24)
         .background(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(LinearGradient.surfaceGradient)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color(red: 0.98, green: 0.98, blue: 1.0),
+                            Color(red: 0.95, green: 0.96, blue: 1.0)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
                 .overlay(
                     RoundedRectangle(cornerRadius: 24, style: .continuous)
-                        .stroke(Color.glassBorder, lineWidth: 1)
+                        .stroke(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(0.9),
+                                    Color.white.opacity(0.6),
+                                    Color.white.opacity(0.2)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1.5
+                        )
                 )
-                .shadow(color: Color.glassShadowEffect, radius: 20, x: 0, y: 10)
+                .shadow(color: .appBackground.opacity(0.12), radius: 25, x: 0, y: 10)
         )
         .scaleEffect(isVisible ? 1.0 : 0.95)
         .opacity(isVisible ? 1.0 : 0)
@@ -1116,12 +1136,32 @@ struct CompleteWorkoutPlanCard: View {
         .padding(24)
         .background(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(LinearGradient.surfaceGradient)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color(red: 0.98, green: 0.98, blue: 1.0),
+                            Color(red: 0.95, green: 0.96, blue: 1.0)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
                 .overlay(
                     RoundedRectangle(cornerRadius: 24, style: .continuous)
-                        .stroke(Color.success.opacity(0.3), lineWidth: 1)
+                        .stroke(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(0.9),
+                                    Color.white.opacity(0.6),
+                                    Color.white.opacity(0.2)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1.5
+                        )
                 )
-                .shadow(color: Color.success.opacity(0.2), radius: 20, x: 0, y: 10)
+                .shadow(color: .appBackground.opacity(0.12), radius: 25, x: 0, y: 10)
         )
         .scaleEffect(isVisible ? 1.0 : 0.95)
         .opacity(isVisible ? 1.0 : 0)
