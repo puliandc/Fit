@@ -157,20 +157,24 @@ struct LogoHeader: View {
         }
 
         // Logo摇摆动画 (3秒循环) - 参考React原型：[0, 10, -10, 0]
-        withAnimation(
-            .easeInOut(duration: 3.0)
-                .repeatForever(autoreverses: false)
-        ) {
-            logoRotation = 10.0
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            withAnimation(
+                .easeInOut(duration: 3.0)
+                    .repeatForever(autoreverses: false)
+            ) {
+                logoRotation = 10.0
+            }
         }
 
         // 脉冲光晕动画 (2秒循环) - 参考React原型：scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5]
-        withAnimation(
-            .easeInOut(duration: 2.0)
-                .repeatForever(autoreverses: true)
-        ) {
-            glowScale = 1.2
-            glowOpacity = 0.0
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            withAnimation(
+                .easeInOut(duration: 2.0)
+                    .repeatForever(autoreverses: true)
+            ) {
+                glowScale = 1.2
+                glowOpacity = 0.0
+            }
         }
 
         // 主标题淡入动画 (延迟0.4秒) - 一次性动画，无循环
