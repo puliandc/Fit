@@ -156,7 +156,7 @@ struct LogoHeader: View {
             }
         }
 
-        // Logo摇摆动画 (3秒循环)
+        // Logo摇摆动画 (3秒循环) - 参考React原型：[0, 10, -10, 0]
         withAnimation(
             .easeInOut(duration: 3.0)
                 .repeatForever(autoreverses: false)
@@ -164,42 +164,23 @@ struct LogoHeader: View {
             logoRotation = 10.0
         }
 
-        // 持续摇摆动画
-        Timer.scheduledTimer(withTimeInterval: 3.0, repeats: true) { _ in
-            withAnimation(.easeInOut(duration: 1.5)) {
-                logoRotation = logoRotation == 0 ? 10 : -10
-            }
-
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                withAnimation(.easeInOut(duration: 1.5)) {
-                    logoRotation = 0
-                }
-            }
+        // 脉冲光晕动画 (2秒循环) - 参考React原型：scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5]
+        withAnimation(
+            .easeInOut(duration: 2.0)
+                .repeatForever(autoreverses: true)
+        ) {
+            glowScale = 1.2
+            glowOpacity = 0.0
         }
 
-        // 脉冲光晕动画 (2秒循环)
-        Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { _ in
-            withAnimation(.easeInOut(duration: 2.0)) {
-                glowScale = 1.2
-                glowOpacity = 0.0
-            }
-
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                withAnimation(.easeInOut(duration: 1.0)) {
-                    glowScale = 1.0
-                    glowOpacity = 0.5
-                }
-            }
-        }
-
-        // 主标题淡入动画 (延迟0.4秒)
+        // 主标题淡入动画 (延迟0.4秒) - 一次性动画，无循环
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
             withAnimation(.easeIn(duration: 0.8)) {
                 titleOpacity = 1.0
             }
         }
 
-        // 副标题淡入动画 (延迟0.5秒)
+        // 副标题淡入动画 (延迟0.5秒) - 一次性动画，无循环
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             withAnimation(.easeIn(duration: 0.8)) {
                 subtitleOpacity = 1.0
