@@ -3,7 +3,7 @@
 //  Fit
 //
 //  Created by 陆家贤 on 9/10/2025.
-//  Updated: 2025-01-10 - 基于Figma设计重新实现主界面
+//  Updated: 2025-10-18 14:59 - 清理废弃代码和优化注释结构
 //
 
 import SwiftUI
@@ -14,32 +14,32 @@ struct MainScreen: View {
     @State private var hasWorkoutPlan: Bool = false
     @State private var isReadingPlan: Bool = false
 
-    // 版本1.0: 外部训练计划服务集成
+    // 外部训练计划服务 - 负责JSON文件解析和训练计划管理
     @StateObject private var externalTrainingService = ExternalTrainingPlanService()
 
-    // 版本1.1: 文件选择功能状态变量
+    // 文件选择相关状态
     @State private var showFilePicker: Bool = false
     @State private var selectedFileURL: URL?
     @State private var fileSelectionError: String?
 
-    
+  
     var body: some View {
         ZStack {
-            // 基于React设计的动画背景
+            // 动画背景层
             AnimatedBackground()
                 .ignoresSafeArea()
 
             ScrollView {
                 VStack(spacing: 32) {
-                    // 顶部安全区域
+                    // 顶部安全区域间距
                     Color.clear.frame(height: 20)
 
-                    // 头部区域 - 基于React设计的LogoHeader
+                    // 应用头部Logo组件
                     LogoHeader()
 
                     // 主要功能区域
                     VStack(spacing: 24) {
-                        // 开始训练卡片 - 只在有计划时显示，放在最前面
+                        // 开始训练卡片 - 仅在已加载训练计划时显示
                         if hasWorkoutPlan {
                             FeatureCard(
                                 icon: "figure.run",
@@ -50,10 +50,12 @@ struct MainScreen: View {
                                 isLoading: false,
                                 buttonText: "开始训练",
                                 buttonAction: {
-                                    // 版本1.2: 优先使用解析的训练计划，fallback到MockData
-                                    let workoutPlan = externalTrainingService.currentWorkoutPlan ?? MockDataProvider.shared.sampleWorkoutPlans.first!
+                                    // 获取训练计划
+                                    guard let workoutPlan = externalTrainingService.currentWorkoutPlan else {
+                                        return
+                                    }
 
-                                    // 使用新的WorkoutSessionManager启动训练
+                                    // 启动训练会话
                                     workoutSessionManager.startWorkout(workoutPlan)
                                     navigationManager.navigateToWorkout(plan: workoutPlan)
                                 },
@@ -62,12 +64,12 @@ struct MainScreen: View {
                             )
                         }
 
-                        // 训练计划摘要卡片 - 在有计划时显示
+                        // 训练计划摘要卡片 - 显示已加载计划的详细信息
                         if hasWorkoutPlan, let workoutPlan = externalTrainingService.currentWorkoutPlan {
                             CompleteWorkoutPlanCard(workoutPlan: workoutPlan, delay: 0.3)
                         }
 
-                        // 读取计划卡片 - 移到最底部
+                        // 读取健身计划卡片 - 文件选择和JSON解析入口
                         FeatureCard(
                             icon: "doc.text.fill",
                             title: "读取健身计划",
@@ -88,19 +90,12 @@ struct MainScreen: View {
                         )
                     }
 
-
-
-                    // 底部空间
                     Spacer(minLength: 40)
                 }
                 .padding(.horizontal, 20)
             }
-            // .scrollIndicators(.hidden) // 暂时注释，需要iOS 16.0+支持
         }
-        .onAppear {
-            startAnimations()
-        }
-        // 版本1.1: 文件选择器集成
+        // 文件选择器弹窗
         .sheet(isPresented: $showFilePicker) {
             FilePickerView(
                 isPresented: $showFilePicker,
@@ -112,7 +107,7 @@ struct MainScreen: View {
                 }
             )
         }
-        // 版本1.1: 文件选择错误提示
+        // 文件选择错误提示弹窗
         .alert("文件选择错误", isPresented: .constant(fileSelectionError != nil)) {
             Button("确定") {
                 fileSelectionError = nil
@@ -122,7 +117,7 @@ struct MainScreen: View {
                 Text(error)
             }
         }
-        // 版本1.2: JSON解析错误提示
+        // JSON解析错误提示弹窗
         .alert("JSON解析错误", isPresented: .constant(externalTrainingService.errorMessage != nil)) {
             Button("确定") {
                 externalTrainingService.clearError()
@@ -134,20 +129,16 @@ struct MainScreen: View {
         }
     }
 
-    private func startAnimations() {
-        // LogoHeader现在自己管理所有动画
-        // MainScreen不再需要管理Header动画
-    }
-
+  
     private func readWorkoutPlan() {
         print("📱 用户点击文件选择按钮")
         print("📂 正在从下载文件夹打开文档选择器")
 
-        // 版本1.1: 打开文件选择器而不是模拟处理
+        // 显示文件选择器
         showFilePicker = true
     }
 
-    // 版本1.2: 处理文件选择成功
+    // 处理文件选择成功事件
     private func handleFileSelection(_ url: URL) {
         print("👆 用户选择了文件: \(url.lastPathComponent)")
         print("📄 文件路径确认: \(url.path)")
@@ -155,18 +146,18 @@ struct MainScreen: View {
         selectedFileURL = url
         isReadingPlan = true
 
-        // 版本1.2: 使用外部服务处理选中的文件，进行实际JSON解析
+        // 使用外部服务进行JSON文件解析
         Task {
             await externalTrainingService.loadWorkoutPlan(from: url)
 
-            // 版本1.2: 根据解析结果更新界面状态
+            // 根据解析结果更新UI状态
             DispatchQueue.main.async {
                 if externalTrainingService.currentWorkoutPlan != nil {
                     hasWorkoutPlan = true
-                    print("✅ 版本1.2: JSON解析成功，训练计划已加载")
+                    print("✅ JSON解析成功，训练计划已加载")
                 } else if let error = externalTrainingService.errorMessage {
-                    print("❌ 版本1.2: JSON解析失败: \(error)")
-                    // 错误已经在服务中处理，这里不需要额外处理
+                    print("❌ JSON解析失败: \(error)")
+                    // 错误处理已在服务中完成
                 }
 
                 isReadingPlan = false
@@ -174,7 +165,7 @@ struct MainScreen: View {
         }
     }
 
-    // 版本1.1: 处理文件选择错误
+    // 处理文件选择错误事件
     private func handleFileSelectionError(_ error: String) {
         print("❌ 文件选择出现错误: \(error)")
         fileSelectionError = error
@@ -182,7 +173,7 @@ struct MainScreen: View {
     }
 }
 
-// MARK: - Modern Background
+// MARK: - Modern Background (动画背景组件)
 struct ModernBackground: View {
     @State private var blob1Offset: CGSize = .zero
     @State private var blob1Scale: CGFloat = 1.0
@@ -192,11 +183,11 @@ struct ModernBackground: View {
 
     var body: some View {
         ZStack {
-            // 主背景渐变
+            // 主背景渐变层
             LinearGradient.backgroundGradient
                 .ignoresSafeArea()
 
-            // 动态渐变叠加
+            // 动态渐变叠加层 - 旋转动画效果
             LinearGradient(
                 colors: [
                     .primaryGradientStart.opacity(0.15),
@@ -238,7 +229,7 @@ struct ModernBackground: View {
                     value: blob1Scale
                 )
 
-            // 动态光斑 2
+            // 动态光斑2 - 右下角区域的光斑动画
             Circle()
                 .fill(
                     RadialGradient(
@@ -263,7 +254,7 @@ struct ModernBackground: View {
                     value: blob2Scale
                 )
 
-            // 细微纹理
+            // 细微纹理叠加
             MeshGradientBackground()
                 .opacity(0.03)
                 .ignoresSafeArea()
@@ -283,7 +274,7 @@ struct ModernBackground: View {
 // MARK: - Mesh Gradient Background
 struct MeshGradientBackground: View {
     var body: some View {
-        // 创建细微的网格纹理
+        // 创建细微的网格纹理背景
         Canvas { context, size in
             let gridSize: CGFloat = 40
             let columns = Int(size.width / gridSize)
@@ -309,70 +300,6 @@ struct MeshGradientBackground: View {
     }
 }
 
-// MARK: - Header Section
-struct HeaderSection: View {
-    @Binding var animationOffset: CGSize
-    @Binding var scale: CGFloat
-    @Binding var isAnimating: Bool
-    @Binding var showContent: Bool
-
-    var body: some View {
-        VStack(spacing: 24) {
-            // 应用Logo动画
-            ZStack {
-                // 背景光环
-                Circle()
-                    .fill(LinearGradient.primaryGradient)
-                    .frame(width: 100, height: 100)
-                    .scaleEffect(isAnimating ? 1.2 : 1.0)
-                    .opacity(isAnimating ? 0.6 : 0.8)
-                    .blur(radius: 20)
-                    .animation(
-                        .easeInOut(duration: 3.0).repeatForever(autoreverses: true),
-                        value: isAnimating
-                    )
-
-                // 主Logo背景
-                Circle()
-                    .fill(LinearGradient.primaryGradient)
-                    .frame(width: 88, height: 88)
-                    .scaleEffect(isAnimating ? 1.05 : 1.0)
-                    .opacity(showContent ? 1.0 : 0)
-                    .shadow(color: .primaryGradientStart.opacity(0.4), radius: 20, x: 0, y: 10)
-                    .animation(
-                        .easeInOut(duration: 2.5).repeatForever(autoreverses: true),
-                        value: isAnimating
-                    )
-                    .animation(.spring(response: 0.8, dampingFraction: 0.8).delay(0.2), value: showContent)
-
-                // Logo图标
-                Image(systemName: "dumbbell.fill")
-                    .font(.system(size: 36, weight: .bold))
-                    .foregroundColor(.appText)
-                    .scaleEffect(showContent ? 1.0 : 0.8)
-                    .opacity(showContent ? 1.0 : 0)
-                    .animation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.3), value: showContent)
-            }
-
-            // 应用标题
-            VStack(spacing: 8) {
-                Text("Fit")
-                    .displayTitleStyle()
-                    .scaleEffect(showContent ? 1.0 : 0.9)
-                    .opacity(showContent ? 1.0 : 0)
-
-                Text("你的智能健身助手")
-                    .featureBodyStyle()
-                    .scaleEffect(showContent ? 1.0 : 0.95)
-                    .opacity(showContent ? 1.0 : 0)
-            }
-            .animation(.spring(response: 0.8, dampingFraction: 0.8).delay(0.4), value: showContent)
-        }
-        .scaleEffect(scale)
-        .animation(.spring(response: 0.8, dampingFraction: 0.8), value: scale)
-    }
-}
-
 // MARK: - Feature Card
 struct FeatureCard: View {
     let icon: String
@@ -393,7 +320,7 @@ struct FeatureCard: View {
 
     var body: some View {
         VStack(spacing: 20) {
-            // 卡片头部
+            // 卡片头部 - 图标和标题
             HStack(alignment: .top, spacing: 16) {
                 // 图标容器
                 ZStack {
@@ -456,7 +383,7 @@ struct FeatureCard: View {
                 Spacer()
             }
 
-            // 状态显示
+            // 状态显示区域
             if hasContent {
                 HStack {
                     Image(systemName: "checkmark.circle.fill")
@@ -475,7 +402,7 @@ struct FeatureCard: View {
                 .transition(.scale.combined(with: .opacity))
             }
 
-            // 加载状态
+            // 加载状态显示
             if isLoading {
                 HStack {
                     ProgressView()
@@ -601,7 +528,7 @@ struct ModernButton: View {
         case primary
         case secondary
         case disabled
-        case readPlan // 新增读取计划专用样式
+        case readPlan // 读取计划专用样式
     }
 
     var body: some View {
@@ -611,6 +538,7 @@ struct ModernButton: View {
             }
         }) {
             HStack(spacing: 8) {
+                // 根据按钮样式显示不同图标
                 if style == .primary {
                     Image(systemName: "arrow.right.circle.fill")
                         .font(.system(size: 18, weight: .semibold))
@@ -663,7 +591,7 @@ struct ModernButton: View {
                     endPoint: .bottomTrailing
                 )
             case .readPlan:
-                // 参考React原型：蓝色到青色渐变
+                // 蓝色到青色渐变
                 LinearGradient(
                     colors: [
                         Color(red: 0.13, green: 0.59, blue: 0.95), // blue-500
@@ -698,13 +626,13 @@ struct ModernButton: View {
         case .disabled:
             return .clear
         case .readPlan:
-            return Color(red: 0.13, green: 0.59, blue: 0.95).opacity(0.4) // blue-500 opacity
+            return Color(red: 0.13, green: 0.59, blue: 0.95).opacity(0.4)
         }
     }
 }
 
 
-// MARK: - Complete Workout Plan Card (版本1.3)
+// MARK: - Complete Workout Plan Card
 struct CompleteWorkoutPlanCard: View {
     let workoutPlan: WorkoutPlan
     let delay: Double
@@ -727,14 +655,12 @@ struct CompleteWorkoutPlanCard: View {
 
     // 按动作名称分组汇总（保持原始顺序）
     private var groupedExercises: [(name: String, sets: Int, reps: Int)] {
-        // 按练习名称分组，但保持原始顺序
         var seenNames: Set<String> = []
         var result: [(name: String, sets: Int, reps: Int)] = []
 
         for exercise in workoutPlan.exercises {
             let name = exercise.exercise.name
             if !seenNames.contains(name) {
-                // 第一次遇到这个练习名称，添加到结果中
                 seenNames.insert(name)
                 let allSetsForExercise = workoutPlan.exercises.filter { $0.exercise.name == name }
                 let sets = allSetsForExercise.count
@@ -748,7 +674,7 @@ struct CompleteWorkoutPlanCard: View {
 
     var body: some View {
         VStack(spacing: 20) {
-            // 卡片头部
+            // 卡片头部 - 图标和标题
             HStack(alignment: .top, spacing: 16) {
                 // 图标容器
                 ZStack {
@@ -767,7 +693,7 @@ struct CompleteWorkoutPlanCard: View {
                         .foregroundColor(.appText)
                 }
 
-                // 标题和信息
+                // 标题和计划名称
                 VStack(alignment: .leading, spacing: 4) {
                     Text("训练计划")
                         .font(.system(size: 20, weight: .bold))
@@ -856,7 +782,7 @@ struct CompleteWorkoutPlanCard: View {
                     VStack(spacing: 6) {
                         ForEach(Array(groupedExercises.enumerated()), id: \.offset) { index, exercise in
                             HStack(spacing: 8) {
-                                // 序号圆圈 - 使用指定的绿色
+                                // 序号圆圈
                                 ZStack {
                                     RoundedRectangle(cornerRadius: 4)
                                         .fill(Color(red: 0, green: 0.79, blue: 0.32))
@@ -1011,14 +937,14 @@ struct StatItem: View {
     }
 }
 
-// MARK: - Exercise Row (单个练习项目，匹配React原型)
+// MARK: - Exercise Row
 struct ExerciseRow: View {
     let exerciseSet: ExerciseSet
     let index: Int
 
     var body: some View {
         HStack(spacing: 8) {
-            // 序号圆圈 - 使用指定的绿色
+            // 序号圆圈
             ZStack {
                 RoundedRectangle(cornerRadius: 4)
                     .fill(Color(red: 0, green: 0.79, blue: 0.32))
@@ -1036,7 +962,7 @@ struct ExerciseRow: View {
                 .lineLimit(1)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            // 组数和次数信息 - 匹配React原型格式
+            // 组数和次数信息
             Text("\(exerciseSet.targetReps)次 × \(Int(exerciseSet.targetWeight))kg")
                 .font(.system(size: 12, weight: .medium))
                 .foregroundColor(Color(red: 0.42, green: 0.45, blue: 0.51))
