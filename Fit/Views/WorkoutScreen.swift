@@ -79,19 +79,38 @@ struct WorkoutScreen: View {
 
                 Spacer()
 
-                // 底部固定按钮区域 - 只保留放弃按钮并居中
-                ModernButton(
-                    text: "放弃动作",
-                    action: {
-                        dialogManager.presentDialog(.quitWorkout)
-                    },
-                    style: .secondary,
-                    isDisabled: false,
-                    fullWidth: true
-                )
-                .accessibilityLabel("放弃当前动作")
-                .accessibilityHint("点击这里可以放弃当前的动作并返回主界面")
-                .accessibilityAddTraits(.isButton)
+                // FooterBox容器 - 动作完成和放弃按钮
+                VStack(spacing: 12) { // space-y-3 ≈ 12pt
+                    // 动作完成按钮 - Primary样式，仅在非休息状态显示
+                    if !workoutViewModel.isResting {
+                        ModernButton(
+                            text: "动作完成",
+                            action: {
+                                dialogManager.presentDialog(.editSet(workoutViewModel.currentExercise, workoutViewModel.currentSet, workoutViewModel))
+                            },
+                            style: .primary,
+                            isDisabled: false,
+                            fullWidth: true
+                        )
+                        .accessibilityLabel("完成当前动作")
+                        .accessibilityHint("点击这里记录当前动作的完成并打开参数编辑对话框")
+                        .accessibilityAddTraits(.isButton)
+                    }
+
+                    // 放弃按钮 - Secondary样式，始终显示
+                    ModernButton(
+                        text: "放弃动作",
+                        action: {
+                            dialogManager.presentDialog(.quitWorkout)
+                        },
+                        style: .secondary,
+                        isDisabled: false,
+                        fullWidth: true
+                    )
+                    .accessibilityLabel("放弃当前动作")
+                    .accessibilityHint("点击这里可以放弃当前的动作并返回主界面")
+                    .accessibilityAddTraits(.isButton)
+                }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 16)
             }
