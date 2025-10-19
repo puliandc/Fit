@@ -24,8 +24,8 @@ struct WorkoutScreen: View {
 
     var body: some View {
         ZStack {
-            // 简化背景 - 基于Figma设计
-            CompactWorkoutBackground()
+            // 动画背景层 - 与 MainScreen 保持一致
+            AnimatedBackground()
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
@@ -208,37 +208,6 @@ struct WorkoutScreen: View {
     }
 }
 
-// MARK: - Compact Workout Background
-struct CompactWorkoutBackground: View {
-    var body: some View {
-        ZStack {
-            // 基于Figma设计的渐变背景
-            LinearGradient(
-                colors: [
-                    Color(red: 1.0, green: 0.97, blue: 0.93), // rgba(255, 247, 237, 1)
-                    Color(red: 1.0, green: 0.95, blue: 0.98), // rgba(253, 242, 248, 1)
-                    Color(red: 0.95, green: 0.91, blue: 1.0)  // rgba(243, 232, 255, 1)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
-
-            // 模糊光斑效果
-            Circle()
-                .fill(Color.warning.opacity(0.1))
-                .frame(width: 384, height: 384)
-                .offset(x: 180, y: 132)
-                .blur(radius: 100)
-
-            Circle()
-                .fill(Color.appAccent.opacity(0.08))
-                .frame(width: 320, height: 320)
-                .offset(x: -74, y: 407)
-                .blur(radius: 80)
-        }
-    }
-}
 
 // MARK: - Compact Workout Header
 struct CompactWorkoutHeader: View {
