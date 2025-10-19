@@ -304,6 +304,72 @@ struct CompactWorkoutHeader: View {
 }
 
 
+// MARK: - Action Timer View (新设计)
+struct ActionTimerView: View {
+    let elapsedTime: Int
+    @Binding var isVisible: Bool
+    @State private var rotationAngle: Double = 0
+    @Environment(\.colorScheme) var colorScheme: ColorScheme
+
+    // 时间格式化逻辑 - 复用CompactTimerView的实现
+    private var formattedTime: String {
+        let minutes = elapsedTime / 60
+        let seconds = elapsedTime % 60
+        return String(format: "%d:%02d", minutes, seconds)
+    }
+
+    var body: some View {
+        HStack(spacing: 10) { // gap-2.5 ≈ 10pt
+            // 旋转时钟图标
+            Image(systemName: "timer")
+                .font(.system(size: 20)) // w-5 h-5
+                .foregroundColor(.orange)
+                .rotationEffect(.degrees(rotationAngle))
+                .animation(.linear(duration: 2).repeatForever(autoreverses: false), value: rotationAngle)
+
+            VStack(spacing: 4) {
+                Text("动作时间")
+                    .font(.system(size: 12, weight: .medium)) // text-xs font-medium
+                    .foregroundColor(colorScheme == .light ? Color.gray.opacity(0.7) : Color.gray.opacity(0.3)) // gray-700 / gray-300
+
+                Text(formattedTime)
+                    .font(.system(size: 20, weight: .bold, design: .monospaced)) // text-xl font-mono font-bold
+                    .foregroundColor(colorScheme == .light ? Color.orange.opacity(0.8) : Color.orange.opacity(0.6)) // orange-600 / orange-400
+            }
+        }
+        .padding(12) // p-3
+        .background(
+            // Tailwind CSS背景: from-orange-500/10 to-pink-500/10 (浅色) → from-orange-500/20 to-pink-500/20 (深色)
+            RoundedRectangle(cornerRadius: 12) // rounded-xl
+                .fill(
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            colorScheme == .light ? Color.orange.opacity(0.1) : Color.orange.opacity(0.2),
+                            colorScheme == .light ? Color.pink.opacity(0.1) : Color.pink.opacity(0.2)
+                        ]),
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .overlay(
+                    // 边框: orange-200 (浅色) → orange-800/50 (深色)
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(
+                            colorScheme == .light ? Color.orange.opacity(0.2) : Color.orange.opacity(0.5),
+                            lineWidth: 1
+                        )
+                )
+        )
+        .scaleEffect(isVisible ? 1.0 : 0.95) // 入场动画: scale: 0.95 → 1.0
+        .animation(.easeOut(duration: 0.3), value: isVisible) // 0.3s弹回正常大小
+        .onAppear {
+            // 启动图标旋转动画
+            rotationAngle = 360
+        }
+    }
+}
+
+
 // MARK: - Compact Exercise Info Card (版本1.3增强)
 struct CompactExerciseInfoCard: View {
     let exercise: Exercise
