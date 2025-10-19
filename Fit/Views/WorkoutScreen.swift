@@ -213,6 +213,12 @@ struct WorkoutScreen: View {
                 showContent = true
             }
         }
+        .onChange(of: workoutViewModel.currentExercise.id) { _ in
+            // 当练习切换时，重新触发内容动画
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.1)) {
+                showContent = true
+            }
+        }
         .onDisappear {
             workoutViewModel.pauseExercise()
         }
@@ -387,6 +393,15 @@ struct ActionTimerView: View {
         .onAppear {
             // 启动图标旋转动画
             rotationAngle = 360
+        }
+        .onChange(of: elapsedTime) { newValue in
+            // 当时间重置为0或接近0时（通常表示新练习开始），重新触发微动画
+            if newValue <= 3 {
+                withAnimation(.easeOut(duration: 0.3)) {
+                    // 重新触发微妙的scale动画
+                    rotationAngle = 360
+                }
+            }
         }
     }
 }
@@ -702,6 +717,14 @@ struct CompactExerciseInfoCard: View {
             withAnimation {
                 isVisible = true
                 // 启动光泽动画
+                shimmerOffset = 200
+            }
+        }
+        .onChange(of: exercise.id) { _ in
+            // 当练习切换时，重新触发入场动画
+            withAnimation(.spring(response: 0.8, dampingFraction: 0.8).delay(0.2)) {
+                isVisible = true
+                // 重新启动光泽动画
                 shimmerOffset = 200
             }
         }
