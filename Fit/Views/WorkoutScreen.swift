@@ -80,7 +80,7 @@ struct WorkoutScreen: View {
                 Spacer()
 
                 // FooterBox容器 - 动作完成和放弃按钮
-                VStack(spacing: 12) { // space-y-3 ≈ 12pt
+                VStack(spacing: 10) { // space-y-2.5 ≈ 10pt
                     // 动作完成按钮 - Primary样式，仅在非休息状态显示
                     if !workoutViewModel.isResting {
                         ModernButton(
@@ -111,8 +111,29 @@ struct WorkoutScreen: View {
                     .accessibilityHint("点击这里可以放弃当前的动作并返回主界面")
                     .accessibilityAddTraits(.isButton)
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 16)
+                .padding(.horizontal, 24) // px-6
+                .padding(.vertical, 12) // py-3 pt-3 pb-5
+                .background(
+                    // 毛玻璃背景：rgba(255,255,255,0.8) / dark:rgba(34,34,34,0.8) + backdrop-blur
+                    RoundedRectangle(cornerRadius: 0)
+                        .fill(.ultraThinMaterial)
+                        .overlay(
+                            // 上边框：rgba(229,229,229,0.5) / dark:rgba(55,65,81,0.5)
+                            Rectangle()
+                                .fill(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [
+                                            Color(red: 0.9, green: 0.9, blue: 0.9, opacity: 0.5), // rgba(229,229,229,0.5)
+                                            Color(red: 0.9, green: 0.9, blue: 0.9, opacity: 0.3)
+                                        ]),
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
+                                .frame(height: 1),
+                            alignment: .top
+                        )
+                )
             }
 
             // Dialog Overlay for workout-related dialogs
@@ -504,10 +525,10 @@ struct CompactExerciseInfoCard: View {
     }
 
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 12) { // space-y-3 ≈ 12pt
             // 运动名称
             Text(exercise.name)
-                .font(.system(size: 16, weight: .medium))
+                .font(.system(size: 32, weight: .bold)) // text-2xl font-bold
                 .foregroundStyle(
                     LinearGradient(
                         colors: [Color.warning, Color.appAccent],
@@ -516,6 +537,7 @@ struct CompactExerciseInfoCard: View {
                     )
                 )
                 .frame(maxWidth: .infinity)
+                .multilineTextAlignment(.center) // 居中对齐
 
             // 动作时间计时器 - 根据isResting状态决定是否显示
             if !isResting {
