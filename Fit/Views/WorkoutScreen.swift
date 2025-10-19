@@ -77,11 +77,18 @@ struct WorkoutScreen: View {
                 Spacer()
 
                 // 底部固定按钮区域 - 只保留放弃按钮并居中
-                CompactQuitButton(
-                    onQuit: {
+                ModernButton(
+                    text: "放弃动作",
+                    action: {
                         dialogManager.presentDialog(.quitWorkout)
-                    }
+                    },
+                    style: .secondary,
+                    isDisabled: false,
+                    fullWidth: true
                 )
+                .accessibilityLabel("放弃当前动作")
+                .accessibilityHint("点击这里可以放弃当前的动作并返回主界面")
+                .accessibilityAddTraits(.isButton)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 16)
             }
@@ -603,57 +610,7 @@ struct CompactExerciseInfoCard: View {
 }
 
 // MARK: - Compact Complete Button
-struct CompactCompleteButton: View {
-    let isDisabled: Bool
-    let onComplete: () -> Void
 
-    var body: some View {
-        Button(action: onComplete) {
-            Text("动作完成")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(.appText)
-                .frame(maxWidth: .infinity)
-                .frame(height: 48) // 减少高度
-                .background(
-                    LinearGradient(
-                        colors: [Color.success, Color.success],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 14)) // 稍微减小圆角
-                .shadow(color: .success.opacity(0.3), radius: 15, x: 0, y: 6) // 减小阴影
-        }
-        .disabled(isDisabled)
-        .opacity(isDisabled ? 0.5 : 1.0)
-    }
-}
-
-// MARK: - Compact Quit Button
-struct CompactQuitButton: View {
-    let onQuit: () -> Void
-
-    var body: some View {
-        Button(action: onQuit) {
-            Text("放弃动作")
-                .font(.system(size: 14, weight: .medium))
-                .foregroundColor(.error)
-                .frame(maxWidth: .infinity)
-                .frame(height: 48) // 与完成按钮保持一致高度
-                .background(Color.appSurfaceLight.opacity(0.6)) // 稍微增加透明度
-                .clipShape(RoundedRectangle(cornerRadius: 14)) // 与完成按钮保持一致圆角
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14)
-                        .stroke(Color.error.opacity(0.3), lineWidth: 1.5) // 增强边框可见性
-                )
-                .shadow(color: .appBackground.opacity(0.1), radius: 10, x: 0, y: 4) // 减小阴影
-        }
-        .buttonStyle(PlainButtonStyle())
-        .accessibilityLabel("放弃当前动作")
-        .accessibilityHint("点击这里可以放弃当前的动作并返回主界面")
-        .accessibilityAddTraits(.isButton)
-    }
-}
 
 // MARK: - Compact Timer View (Unified Time Module)
 struct CompactTimerView: View {
@@ -681,22 +638,7 @@ struct CompactTimerView: View {
         }
     }
 
-    private var buttonColor: Color {
-        if isResting {
-            return .appTextSecondary
-        } else {
-            return .success
-        }
-    }
-
-    private var buttonTextColor: Color {
-        if isResting {
-            return .appText
-        } else {
-            return .appText
-        }
-    }
-
+    
     private var buttonTitle: String {
         if isResting {
             return "跳过休息"
@@ -737,26 +679,22 @@ struct CompactTimerView: View {
                 .foregroundColor(isResting ? .appPrimary : .success)
                 .frame(height: 36) // 固定时间显示区域高度
 
-            // 按钮 - 动态颜色和标题，固定高度
-            Button(action: {
-                if isResting {
-                    print("🔚 DEBUG: User clicked skip rest - timeLeft: \(timeLeft)")
-                    onSkipRest()
-                } else {
-                    print("✅ DEBUG: User clicked complete exercise - elapsedTime: \(elapsedTime)")
-                    onCompleteAction()
-                }
-            }) {
-                Text(buttonTitle)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(buttonTextColor)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 48)
-                    .background(buttonColor, in: RoundedRectangle(cornerRadius: 14))
-                    .shadow(color: buttonColor.opacity(0.3), radius: 15, x: 0, y: 6)
-            }
-            .disabled(!isExerciseActive && !isResting)
-            .opacity(!isExerciseActive && !isResting ? 0.5 : 1.0)
+            // 按钮 - 使用ModernButton统一样式
+            ModernButton(
+                text: buttonTitle,
+                action: {
+                    if isResting {
+                        print("🔚 DEBUG: User clicked skip rest - timeLeft: \(timeLeft)")
+                        onSkipRest()
+                    } else {
+                        print("✅ DEBUG: User clicked complete exercise - elapsedTime: \(elapsedTime)")
+                        onCompleteAction()
+                    }
+                },
+                style: .primary,
+                isDisabled: !isExerciseActive && !isResting,
+                fullWidth: true
+            )
             .accessibilityLabel(isResting ? "跳过休息时间" : "完成当前动作")
             .accessibilityHint(isResting ? "点击这里可以跳过剩余的休息时间，直接开始下一个动作" : "点击这里记录当前动作的完成并打开参数编辑对话框")
             .accessibilityAddTraits(.isButton)
