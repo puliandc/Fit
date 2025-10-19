@@ -15,6 +15,7 @@ struct WorkoutScreen: View {
     @EnvironmentObject var workoutSessionManager: WorkoutSessionManager
     @EnvironmentObject var workoutViewModel: WorkoutViewModel
     @State private var showContent: Bool = false
+    @State private var viewID: UUID = UUID() // 用于强制视图更新
 
     // 保持init方法用于接收workoutPlan参数，但不创建WorkoutViewModel
     init(workoutPlan: WorkoutPlan) {
@@ -24,9 +25,10 @@ struct WorkoutScreen: View {
 
     var body: some View {
         ZStack {
-            // 动画背景层 - 与 MainScreen 保持一致
+            // 动画背景层 - 限制在内容区域，避免覆盖Header和Footer
             AnimatedBackground()
-                .ignoresSafeArea()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .clipped()
 
             VStack(spacing: 0) {
                 // 顶部标题栏 - 基于Figma设计
@@ -116,7 +118,7 @@ struct WorkoutScreen: View {
                 .background(
                     // 统一的白色半透明毛玻璃背景效果，与 Header 和动作卡片保持一致
                     RoundedRectangle(cornerRadius: 0)
-                        .fill(Color.white.opacity(0.8))
+                        .fill(Color.white.opacity(0.9)) // 增加不透明度
                         .background(.ultraThinMaterial)
                         .overlay(
                             // 统一的上边框颜色
@@ -126,6 +128,8 @@ struct WorkoutScreen: View {
                             alignment: .top
                         )
                 )
+                .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: -2) // 增强阴影效果
+                .zIndex(1) // 确保Footer在背景之上
             }
 
             // Dialog Overlay for workout-related dialogs
@@ -340,7 +344,7 @@ struct CompactWorkoutHeader: View {
         .background(
             // 统一的白色半透明毛玻璃背景效果，与动作卡片保持一致
             Rectangle()
-                .fill(Color.white.opacity(0.8))
+                .fill(Color.white.opacity(0.9)) // 增加不透明度
                 .background(.ultraThinMaterial) // backdrop-blur-xl 效果
                 .overlay(
                     // 统一的边框颜色
@@ -350,7 +354,8 @@ struct CompactWorkoutHeader: View {
                     alignment: .bottom
                 )
         )
-        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 1) // shadow-sm
+        .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 2) // 增强阴影效果
+        .zIndex(1) // 确保Header在背景之上
         }
     }
 }
@@ -388,11 +393,15 @@ struct ActionTimerView: View {
                     .font(.system(size: 20, weight: .bold, design: .monospaced)) // text-xl font-mono font-bold
                     .foregroundColor(colorScheme == .light ? Color.orange.opacity(0.8) : Color.orange.opacity(0.6)) // orange-600 / orange-400
             }
+
+            Spacer() // 添加Spacer确保与当前组数模块布局一致
         }
-        .padding(12) // p-3
+        .frame(maxWidth: .infinity) // 填充可用宽度，与当前组数模块保持一致
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
         .background(
             // Tailwind CSS背景: from-orange-500/10 to-pink-500/10 (浅色) → from-orange-500/20 to-pink-500/20 (深色)
-            RoundedRectangle(cornerRadius: 12) // rounded-xl
+            RoundedRectangle(cornerRadius: 14) // 与当前组数模块保持一致
                 .fill(
                     LinearGradient(
                         gradient: Gradient(colors: [
@@ -405,7 +414,7 @@ struct ActionTimerView: View {
                 )
                 .overlay(
                     // 边框: orange-200 (浅色) → orange-800/50 (深色)
-                    RoundedRectangle(cornerRadius: 12)
+                    RoundedRectangle(cornerRadius: 14)
                         .stroke(
                             colorScheme == .light ? Color.orange.opacity(0.2) : Color.orange.opacity(0.5),
                             lineWidth: 1
@@ -538,6 +547,7 @@ struct CompactExerciseInfoCard: View {
                     elapsedTime: elapsedTime,
                     isVisible: $isVisible
                 )
+                .id("action-timer-\(elapsedTime)") // 强制更新ID
                 .scaleEffect(isVisible ? 1.0 : 0.95) // 入场动画
                 .animation(.easeOut(duration: 0.3), value: isVisible)
             }
