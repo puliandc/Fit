@@ -25,10 +25,13 @@ struct WorkoutScreen: View {
 
     var body: some View {
         ZStack {
-            // 动画背景层 - 限制在内容区域，避免覆盖Header和Footer
+            // 基础安全区域背景 - 使用与AnimatedBackground协调的颜色
+            SafeAreaBackground()
+                .ignoresSafeArea(.all)
+
+            // 动画背景层 - 完全覆盖安全区域
             AnimatedBackground()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .clipped()
+                .ignoresSafeArea(.all) // 移除clipped()，让背景延伸到安全区域
 
             VStack(spacing: 0) {
                 // 顶部标题栏 - 基于Figma设计
@@ -116,10 +119,8 @@ struct WorkoutScreen: View {
                 .padding(.horizontal, 24) // px-6
                 .padding(.vertical, 12) // py-3 pt-3 pb-5
                 .background(
-                    // 统一的白色半透明毛玻璃背景效果，与 Header 和动作卡片保持一致
-                    RoundedRectangle(cornerRadius: 0)
-                        .fill(Color.white.opacity(0.9)) // 增加不透明度
-                        .background(.ultraThinMaterial)
+                    // 使用新的组件安全区域背景，确保与Header一致
+                    ComponentSafeAreaBackground(opacity: 0.9, useMaterial: true)
                         .overlay(
                             // 统一的上边框颜色
                             Rectangle()
@@ -342,10 +343,8 @@ struct CompactWorkoutHeader: View {
         .padding(.horizontal, 20)
         .padding(.vertical, 16)
         .background(
-            // 统一的白色半透明毛玻璃背景效果，与动作卡片保持一致
-            Rectangle()
-                .fill(Color.white.opacity(0.9)) // 增加不透明度
-                .background(.ultraThinMaterial) // backdrop-blur-xl 效果
+            // 使用新的组件安全区域背景，确保与Footer一致
+            ComponentSafeAreaBackground(opacity: 0.9, useMaterial: true)
                 .overlay(
                     // 统一的边框颜色
                     Rectangle()
@@ -356,6 +355,14 @@ struct CompactWorkoutHeader: View {
         )
         .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 2) // 增强阴影效果
         .zIndex(1) // 确保Header在背景之上
+        .overlay(
+            // 临时调试标识 - 确认背景修复生效
+            Text("v2.0")
+                .font(.caption2)
+                .foregroundColor(.green)
+                .opacity(0.7)
+                .offset(x: -10, y: -10)
+        )
         }
     }
 }
