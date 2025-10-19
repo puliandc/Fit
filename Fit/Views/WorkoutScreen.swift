@@ -211,7 +211,6 @@ struct WorkoutScreen: View {
                     dialogManager.presentDialog(.workoutComplete)
                 }
             }
-        }
     }
 }
 
@@ -222,72 +221,80 @@ struct CompactWorkoutHeader: View {
     let progress: Double
     let onBack: () -> Void
 
+    @Environment(\.colorScheme) var colorScheme: ColorScheme
+
+    private var progressTextColor: Color {
+        colorScheme == .light ? .warningLight : .warningDark
+    }
+
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 16) {
             // 顶部导航栏
             HStack(spacing: 12) {
                 // 返回按钮
                 Button(action: onBack) {
-                    RoundedRectangle(cornerRadius: 14)
-                        .fill(Color.appSurfaceLight.opacity(0.7))
-                        .frame(width: 36, height: 32)
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(.ultraThinMaterial)
+                        .frame(width: 44, height: 44)
                         .overlay(
                             Image(systemName: "chevron.left")
-                                .font(.system(size: 16, weight: .medium))
+                                .font(.system(size: 18, weight: .medium))
                                 .foregroundColor(.appText)
                         )
+                        .shadow(color: .appBackground.opacity(0.1), radius: 4, x: 0, y: 2)
                 }
                 .buttonStyle(PlainButtonStyle())
 
                 // 标题和百分比
                 HStack(spacing: 8) {
                     Text(workoutPlan.name)
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundStyle(
-                            LinearGradient(
-                                colors: [Color.warning, Color.appAccent],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.appText)
+                        .lineLimit(1)
+
+                    Spacer()
 
                     Text("\(Int(progress * 100))%")
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.warning)
+                        .foregroundColor(progressTextColor)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
 
+            // 简化的进度条
             GeometryReader { geometry in
                 ZStack(alignment: .leading) {
                     // 背景轨道
                     RoundedRectangle(cornerRadius: 4)
-                        .fill(Color.appTextMuted.opacity(0.3))
-                        .frame(height: 8)
+                        .fill(Color.appTextMuted.opacity(0.2))
+                        .frame(height: 6)
 
-                    // 进度条
+                    // 进度条 - 单色
                     RoundedRectangle(cornerRadius: 4)
-                        .fill(
-                            LinearGradient(
-                                colors: [Color.warning, Color.appAccent],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .frame(width: geometry.size.width * progress, height: 8)
+                        .fill(Color.warning)
+                        .frame(width: geometry.size.width * progress, height: 6)
                         .animation(.easeOut(duration: 0.3), value: progress)
                 }
             }
-            .frame(height: 8)
+            .frame(height: 6)
         }
-        .padding(.horizontal, 17)
-        .padding(.top, 13)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 16)
         .background(
-            // 基于Figma设计的半透明背景
-            RoundedRectangle(cornerRadius: 24)
-                .fill(Color.appSurfaceLight.opacity(0.7))
-                .shadow(color: .appBackground.opacity(0.08), radius: 32, x: 0, y: 8)
+            // 现代化毛玻璃背景效果
+            Rectangle()
+                .fill(.ultraThinMaterial)
+                .overlay(Color.appSurfaceLight.opacity(0.1))
+                .overlay(
+                    // 底边框效果
+                    Rectangle()
+                        .fill(colorScheme == .light ? Color.appTextTertiary.opacity(0.2) : Color.appTextTertiary.opacity(0.3))
+                        .frame(height: 1),
+                    alignment: .bottom
+                )
         )
+        .shadow(color: .appBackground.opacity(0.05), radius: 20, x: 0, y: 4)
+        }
     }
 }
 
