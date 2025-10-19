@@ -523,11 +523,12 @@ struct ModernButton: View {
     let fullWidth: Bool
 
     @State private var isPressed: Bool = false
+    @State private var shimmerOffset: CGFloat = -200 // 扫光动画偏移
     @Environment(\.colorScheme) var colorScheme: ColorScheme
 
     enum ModernButtonStyle {
-        case primary
-        case secondary
+        case primary      // 绿色渐变 + 扫光动画 + h-14高度
+        case secondary    // 红色边框outline样式 + h-12高度
         case disabled
         case readPlan // 读取计划专用样式
     }
@@ -539,14 +540,8 @@ struct ModernButton: View {
             }
         }) {
             HStack(spacing: 8) {
-                // 根据按钮样式显示不同图标
-                if style == .primary {
-                    Image(systemName: "arrow.right.circle.fill")
-                        .font(.system(size: 18, weight: .semibold))
-                } else if style == .secondary {
-                    Image(systemName: isDisabled ? "lock.circle.fill" : "play.circle.fill")
-                        .font(.system(size: 18, weight: .semibold))
-                } else {
+                // 移除primary和secondary的内置图标，只保留readPlan的图标
+                if style == .readPlan {
                     Image(systemName: "hourglass.circle.fill")
                         .font(.system(size: 18, weight: .semibold))
                 }
@@ -556,7 +551,7 @@ struct ModernButton: View {
             }
             .frame(maxWidth: fullWidth ? .infinity : nil)
             .padding(.horizontal, 24)
-            .padding(.vertical, 16)
+            .padding(.vertical, 16) // 恢复到原来的高度：32px(16pt上下)
             .background(
                 buttonBackground
                     .scaleEffect(isPressed ? 0.98 : 1.0)
@@ -581,13 +576,59 @@ struct ModernButton: View {
         .onLongPressGesture(minimumDuration: 0, maximumDistance: .infinity, pressing: { pressing in
             isPressed = pressing
         }, perform: {})
+        .onAppear {
+            // 启动扫光动画
+            Timer.scheduledTimer(withTimeInterval: 0.02, repeats: true) { timer in
+                shimmerOffset += 4
+                if shimmerOffset > 400 {
+                    shimmerOffset = -200
+                }
+            }
+        }
     }
 
     private var buttonBackground: some View {
         Group {
             switch style {
             case .primary:
-                LinearGradient.accentGradient
+                // 绿色渐变背景: from-green-500 to green-600
+                LinearGradient(
+                    colors: [
+                        Color(red: 0.13, green: 0.69, blue: 0.29), // green-500
+                        Color(red: 0.05, green: 0.64, blue: 0.26)  // green-600
+                    ],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+                .overlay(
+                    // 扫光动画效果 (方案A: 线性扫光)
+                    LinearGradient(
+                        colors: [
+                            Color.clear,
+                            Color.white.opacity(0.4),
+                            Color.clear
+                        ],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                    .mask(
+                        LinearGradient(
+                            colors: [
+                                Color.clear,
+                                Color.black,
+                                Color.clear
+                            ],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .offset(x: shimmerOffset)
+                    .animation(
+                        .linear(duration: 2)
+                        .repeatForever(autoreverses: false),
+                        value: shimmerOffset
+                    )
+                )
             case .secondary:
                 // 红色警告按钮样式 - 白色半透明背景配红色边框和文字
                 Color.white.opacity(0.9)
@@ -614,7 +655,7 @@ struct ModernButton: View {
     private var buttonTextColor: Color {
         switch style {
         case .primary:
-            return .appText
+            return .white // 绿色渐变背景使用白色文字
         case .secondary:
             return isDisabled ? .appTextDisabled : (colorScheme == .light ? .errorDark : .errorLight)
         case .disabled:
