@@ -43,6 +43,8 @@ extension Color {
     static let success = Color(hex: "#22C55E") // Green-500
     static let warning = Color(hex: "#F59E0B") // Amber-500
     static let error = Color(hex: "#EF4444") // Red-500
+    static let errorDark = Color(hex: "#DC2626") // Red-600 - 更深的红色用于警告按钮
+    static let errorLight = Color(hex: "#F87171") // Red-400 - 较浅的红色用于深色模式
     static let info = Color(hex: "#3B82F6") // Blue-500
 
     // MARK: - Gradient Colors - 渐变系统

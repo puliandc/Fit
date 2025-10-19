@@ -523,6 +523,7 @@ struct ModernButton: View {
     let fullWidth: Bool
 
     @State private var isPressed: Bool = false
+    @Environment(\.colorScheme) var colorScheme: ColorScheme
 
     enum ModernButtonStyle {
         case primary
@@ -551,7 +552,7 @@ struct ModernButton: View {
                 }
 
                 Text(text)
-                    .buttonPrimaryStyle()
+                    .buttonTextStyle()
             }
             .frame(maxWidth: fullWidth ? .infinity : nil)
             .padding(.horizontal, 24)
@@ -563,6 +564,15 @@ struct ModernButton: View {
             )
             .foregroundColor(buttonTextColor)
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(
+                // 为secondary样式添加红色边框
+                Group {
+                    if style == .secondary {
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .stroke(secondaryBorderColor, lineWidth: 1.5)
+                    }
+                }
+            )
             .shadow(color: buttonShadowColor, radius: isPressed ? 5 : 15, x: 0, y: isPressed ? 3 : 8)
         }
         .buttonStyle(PlainButtonStyle())
@@ -579,11 +589,8 @@ struct ModernButton: View {
             case .primary:
                 LinearGradient.accentGradient
             case .secondary:
-                LinearGradient(
-                    colors: [.appSurfaceElevated, .appSurfaceLight],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
+                // 红色警告按钮样式 - 白色半透明背景配红色边框和文字
+                Color.white.opacity(0.9)
             case .disabled:
                 LinearGradient(
                     colors: [.appTextDisabled.opacity(0.3), .appTextDisabled.opacity(0.2)],
@@ -609,11 +616,19 @@ struct ModernButton: View {
         case .primary:
             return .appText
         case .secondary:
-            return isDisabled ? .appTextDisabled : .appText
+            return isDisabled ? .appTextDisabled : (colorScheme == .light ? .errorDark : .errorLight)
         case .disabled:
             return .appTextDisabled
         case .readPlan:
             return .white // 读取计划按钮使用白色文字
+        }
+    }
+
+    private var secondaryBorderColor: Color {
+        if colorScheme == .light {
+            return Color.errorDark.opacity(0.3)
+        } else {
+            return Color.errorLight.opacity(0.3)
         }
     }
 
@@ -622,7 +637,7 @@ struct ModernButton: View {
         case .primary:
             return .accentGradientStart.opacity(0.4)
         case .secondary:
-            return .appSurfaceElevated.opacity(0.3)
+            return .appBackground.opacity(0.1)
         case .disabled:
             return .clear
         case .readPlan:

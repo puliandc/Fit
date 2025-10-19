@@ -92,4 +92,11 @@ extension Text {
             .foregroundColor(AppFontStyle.buttonPrimary.color)
             .lineSpacing(AppFontStyle.buttonPrimary.lineHeight - 20)
     }
+
+    // 新增：不设置颜色的按钮文字样式 - 用于需要自定义颜色的按钮
+    func buttonTextStyle() -> some View {
+        self
+            .font(AppFontStyle.buttonPrimary.font)
+            .lineSpacing(AppFontStyle.buttonPrimary.lineHeight - 20)
+    }
 }
