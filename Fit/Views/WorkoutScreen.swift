@@ -68,7 +68,8 @@ struct WorkoutScreen: View {
                         totalSets: workoutViewModel.getCurrentExerciseTotalSets(),
                         targetReps: workoutViewModel.currentExerciseSet.targetReps,
                         targetWeight: workoutViewModel.currentExerciseSet.targetWeight,
-                        elapsedTime: workoutViewModel.exerciseElapsedTime
+                        elapsedTime: workoutViewModel.exerciseElapsedTime,
+                        isResting: workoutViewModel.isResting
                     )
                 }
                 .padding(.horizontal, 16)
@@ -378,6 +379,7 @@ struct CompactExerciseInfoCard: View {
     let targetReps: Int
     let targetWeight: Double
     let elapsedTime: Int
+    let isResting: Bool
 
     @State private var isVisible: Bool = false
     @State private var shimmerOffset: CGFloat = -200
@@ -469,7 +471,16 @@ struct CompactExerciseInfoCard: View {
                 )
                 .frame(maxWidth: .infinity)
 
-  
+            // 动作时间计时器 - 根据isResting状态决定是否显示
+            if !isResting {
+                ActionTimerView(
+                    elapsedTime: elapsedTime,
+                    isVisible: $isVisible
+                )
+                .scaleEffect(isVisible ? 1.0 : 0.95) // 入场动画
+                .animation(.easeOut(duration: 0.3), value: isVisible)
+            }
+
             // 组数、次数和重量模块 - 增强版本
             VStack(spacing: 12) {
                 // 当前组数模块 - 蓝色背景
@@ -507,12 +518,6 @@ struct CompactExerciseInfoCard: View {
                                 .stroke(Color.appPrimary.opacity(0.3), lineWidth: 1)
                         )
                 )
-
-                // 版本1.3: 本轮训练进度
-                ProgressView(value: max(0, min(1, Double(currentSet) / Double(totalSets))))
-                    .progressViewStyle(LinearProgressViewStyle(tint: .appPrimary))
-                    .scaleEffect(x: 1, y: 2, anchor: .center)
-                .padding(.horizontal, 16)
 
                 // 次数和重量模块 - 水平排列，基于Figma设计
                 HStack(spacing: 12) {
