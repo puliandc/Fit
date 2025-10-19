@@ -114,22 +114,14 @@ struct WorkoutScreen: View {
                 .padding(.horizontal, 24) // px-6
                 .padding(.vertical, 12) // py-3 pt-3 pb-5
                 .background(
-                    // 毛玻璃背景：rgba(255,255,255,0.8) / dark:rgba(34,34,34,0.8) + backdrop-blur
+                    // 统一的白色半透明毛玻璃背景效果，与 Header 和动作卡片保持一致
                     RoundedRectangle(cornerRadius: 0)
-                        .fill(.ultraThinMaterial)
+                        .fill(Color.white.opacity(0.8))
+                        .background(.ultraThinMaterial)
                         .overlay(
-                            // 上边框：rgba(229,229,229,0.5) / dark:rgba(55,65,81,0.5)
+                            // 统一的上边框颜色
                             Rectangle()
-                                .fill(
-                                    LinearGradient(
-                                        gradient: Gradient(colors: [
-                                            Color(red: 0.9, green: 0.9, blue: 0.9, opacity: 0.5), // rgba(229,229,229,0.5)
-                                            Color(red: 0.9, green: 0.9, blue: 0.9, opacity: 0.3)
-                                        ]),
-                                        startPoint: .leading,
-                                        endPoint: .trailing
-                                    )
-                                )
+                                .fill(Color.glassBorder)
                                 .frame(height: 1),
                             alignment: .top
                         )
@@ -277,7 +269,8 @@ struct CompactWorkoutHeader: View {
     }
 
     private var primaryTextColor: Color {
-        colorScheme == .light ? Color(UIColor.darkText) : Color.white // text-gray-900 dark:text-white
+        // 由于现在使用白色半透明背景，文本颜色应该始终为深色以确保可读性
+        Color.appTextSecondary
     }
 
     var body: some View {
@@ -287,8 +280,9 @@ struct CompactWorkoutHeader: View {
                 // 返回按钮
                 Button(action: onBack) {
                     RoundedRectangle(cornerRadius: 18) // w-9 h-9 = 36px rounded-full
-                        .fill(.ultraThinMaterial)
-                        .frame(width: 36, height: 36)
+                        .fill(Color.white.opacity(0.8))
+                        .background(.ultraThinMaterial)
+                        .frame(width: 36, height: 36) // 36x36像素尺寸
                         .overlay(
                             Image(systemName: "chevron.left")
                                 .font(.system(size: 18, weight: .medium))
@@ -344,15 +338,14 @@ struct CompactWorkoutHeader: View {
         .padding(.horizontal, 20)
         .padding(.vertical, 16)
         .background(
-            // Tailwind CSS风格毛玻璃背景效果
-            // bg-white/80 dark:bg-gray-800/80 + backdrop-blur-xl
+            // 统一的白色半透明毛玻璃背景效果，与动作卡片保持一致
             Rectangle()
-                .fill(colorScheme == .light ? Color.white.opacity(0.8) : Color.gray.opacity(0.8))
+                .fill(Color.white.opacity(0.8))
                 .background(.ultraThinMaterial) // backdrop-blur-xl 效果
                 .overlay(
-                    // border-b border-gray-200/50 dark:border-gray-700/50
+                    // 统一的边框颜色
                     Rectangle()
-                        .fill(colorScheme == .light ? Color.gray.opacity(0.2) : Color.gray.opacity(0.3))
+                        .fill(Color.glassBorder)
                         .frame(height: 1),
                     alignment: .bottom
                 )
