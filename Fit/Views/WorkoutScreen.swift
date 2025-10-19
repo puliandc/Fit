@@ -40,25 +40,27 @@ struct WorkoutScreen: View {
 
                 // 主要内容区域 - 移除滚动属性
                 VStack(spacing: 16) {
-                    // 统一时间模块显示（始终显示，根据状态切换内容）
-                CompactTimerView(
-                    isResting: workoutViewModel.isResting,
-                    elapsedTime: workoutViewModel.exerciseElapsedTime,
-                    timeLeft: workoutViewModel.timeLeft,
-                    isExerciseActive: workoutViewModel.isExerciseActive,
-                    onCompleteAction: {
-                        // 动作时间模式下点击"动作完成"
-                        dialogManager.presentDialog(.editSet(workoutViewModel.currentExercise, workoutViewModel.currentSet, workoutViewModel))
-                    },
-                    onSkipRest: {
-                        // 休息时间模式下点击"跳过休息"
-                        workoutViewModel.skipRest()
-                    }
-                )
-                .transition(.asymmetric(
-                    insertion: .scale.combined(with: .opacity),
-                    removal: .opacity
-                ))
+                    // 统一时间模块显示（仅在休息时间显示，动作时间由ActionTimerView显示）
+                if workoutViewModel.isResting {
+                    CompactTimerView(
+                        isResting: workoutViewModel.isResting,
+                        elapsedTime: workoutViewModel.exerciseElapsedTime,
+                        timeLeft: workoutViewModel.timeLeft,
+                        isExerciseActive: workoutViewModel.isExerciseActive,
+                        onCompleteAction: {
+                            // 动作时间模式下点击"动作完成"（现在由底部按钮处理）
+                            dialogManager.presentDialog(.editSet(workoutViewModel.currentExercise, workoutViewModel.currentSet, workoutViewModel))
+                        },
+                        onSkipRest: {
+                            // 休息时间模式下点击"跳过休息"
+                            workoutViewModel.skipRest()
+                        }
+                    )
+                    .transition(.asymmetric(
+                        insertion: .scale.combined(with: .opacity),
+                        removal: .opacity
+                    ))
+                }
 
 
                     // 运动信息卡片 - 基于Figma设计，移除滚动和编辑按钮
