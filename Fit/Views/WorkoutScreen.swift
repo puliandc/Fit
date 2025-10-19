@@ -294,6 +294,9 @@ struct CompactExerciseInfoCard: View {
     let targetWeight: Double
     let elapsedTime: Int
 
+    @State private var isVisible: Bool = false
+    @State private var shimmerOffset: CGFloat = -200
+
     private var formattedTime: String {
         let minutes = elapsedTime / 60
         let seconds = elapsedTime % 60
@@ -518,12 +521,84 @@ struct CompactExerciseInfoCard: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
         }
-        .padding(16)
+        .padding(24)
         .background(
-            RoundedRectangle(cornerRadius: 14)
-                .fill(Color.appSurfaceLight.opacity(0.7))
-                .shadow(color: .appBackground.opacity(0.08), radius: 32, x: 0, y: 8)
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color(red: 0.98, green: 0.98, blue: 1.0),
+                            Color(red: 0.95, green: 0.96, blue: 1.0)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .stroke(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(0.9),
+                                    Color.white.opacity(0.6),
+                                    Color.white.opacity(0.2)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1.5
+                        )
+                )
+                .overlay(
+                    // 光泽动画覆盖层
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color.clear,
+                                    Color.white.opacity(0.3),
+                                    Color.clear
+                                ],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .mask(
+                            LinearGradient(
+                                colors: [
+                                    Color.clear,
+                                    Color.black,
+                                    Color.clear
+                                ],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .offset(x: shimmerOffset)
+                        .animation(
+                            .easeInOut(duration: 2.5)
+                            .repeatForever(autoreverses: false),
+                            value: shimmerOffset
+                        )
+                )
+                .shadow(color: .appBackground.opacity(0.12), radius: 25, x: 0, y: 10)
         )
+        .scaleEffect(isVisible ? 1.0 : 0.95)
+        .opacity(isVisible ? 1.0 : 0)
+        .offset(y: isVisible ? 0 : 20)
+        .animation(.spring(response: 0.8, dampingFraction: 0.8).delay(0.2), value: isVisible)
+        .onAppear {
+            withAnimation {
+                isVisible = true
+                // 启动光泽动画
+                shimmerOffset = 200
+            }
+        }
+        .onTapGesture {
+            // 添加触觉反馈
+            let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+            impactFeedback.impactOccurred()
+        }
     }
 }
 
