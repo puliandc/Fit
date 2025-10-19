@@ -265,9 +265,9 @@ struct CompactWorkoutHeader: View {
             HStack(spacing: 12) {
                 // 返回按钮
                 Button(action: onBack) {
-                    RoundedRectangle(cornerRadius: 10)
+                    RoundedRectangle(cornerRadius: 18) // w-9 h-9 = 36px rounded-full
                         .fill(.ultraThinMaterial)
-                        .frame(width: 44, height: 44)
+                        .frame(width: 36, height: 36)
                         .overlay(
                             Image(systemName: "chevron.left")
                                 .font(.system(size: 18, weight: .medium))
@@ -280,7 +280,7 @@ struct CompactWorkoutHeader: View {
                 // 标题和百分比
                 HStack(spacing: 8) {
                     Text(workoutPlan.name)
-                        .font(.system(size: 18, weight: .semibold))
+                        .font(.system(size: 24, weight: .semibold))
                         .foregroundColor(primaryTextColor) // text-gray-900 dark:text-white
                         .lineLimit(1)
 
@@ -301,11 +301,21 @@ struct CompactWorkoutHeader: View {
                         .fill(Color.appTextMuted.opacity(0.2))
                         .frame(height: 6)
 
-                    // 进度条 - 单色
+                    // 进度条 - 渐变色填充 (#f97316 → #ec4899 → #a855f7)
                     RoundedRectangle(cornerRadius: 4)
-                        .fill(Color.warning)
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    Color(red: 0.97, green: 0.45, blue: 0.09), // #f97316
+                                    Color(red: 0.93, green: 0.28, blue: 0.60), // #ec4899
+                                    Color(red: 0.66, green: 0.33, blue: 0.97)  // #a855f7
+                                ]),
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
                         .frame(width: geometry.size.width * progress, height: 6)
-                        .animation(.easeOut(duration: 0.3), value: progress)
+                        .animation(.easeOut(duration: 0.5), value: progress)
                 }
             }
             .frame(height: 6)
