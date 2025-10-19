@@ -19,13 +19,13 @@ struct AnimatedBackground: View {
     // MARK: - Body
     var body: some View {
         ZStack {
-            // 基础渐变背景容器
+            // 基础渐变背景容器 - 完全覆盖整个屏幕包括安全区域
             baseGradientBackground
-                .ignoresSafeArea()
+                // 移除clipped()，让背景延伸到安全区域
 
-            // 动画模糊球层
+            // 动画模糊球层 - 完全覆盖整个屏幕包括安全区域
             animatedBlobLayer
-                .ignoresSafeArea()
+                // 移除clipped()，让动画效果延伸到安全区域
         }
         .onAppear {
             startAnimations()

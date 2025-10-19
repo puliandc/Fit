@@ -25,9 +25,13 @@ struct MainScreen: View {
   
     var body: some View {
         ZStack {
-            // 动画背景层
+            // 基础安全区域背景 - 确保与WorkoutScreen一致的背景架构
+            SafeAreaBackground()
+                .ignoresSafeArea(.all)
+
+            // 动画背景层 - 完全覆盖安全区域
             AnimatedBackground()
-                .ignoresSafeArea()
+                .ignoresSafeArea(.all)
 
             ScrollView {
                 VStack(spacing: 32) {
