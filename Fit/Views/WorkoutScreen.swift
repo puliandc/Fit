@@ -227,6 +227,10 @@ struct CompactWorkoutHeader: View {
         colorScheme == .light ? .warningLight : .warningDark
     }
 
+    private var primaryTextColor: Color {
+        colorScheme == .light ? Color(UIColor.darkText) : Color.white // text-gray-900 dark:text-white
+    }
+
     var body: some View {
         VStack(spacing: 16) {
             // 顶部导航栏
@@ -239,7 +243,7 @@ struct CompactWorkoutHeader: View {
                         .overlay(
                             Image(systemName: "chevron.left")
                                 .font(.system(size: 18, weight: .medium))
-                                .foregroundColor(.appText)
+                                .foregroundColor(primaryTextColor) // text-gray-900 dark:text-white
                         )
                         .shadow(color: .appBackground.opacity(0.1), radius: 4, x: 0, y: 2)
                 }
@@ -249,7 +253,7 @@ struct CompactWorkoutHeader: View {
                 HStack(spacing: 8) {
                     Text(workoutPlan.name)
                         .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.appText)
+                        .foregroundColor(primaryTextColor) // text-gray-900 dark:text-white
                         .lineLimit(1)
 
                     Spacer()
@@ -281,19 +285,20 @@ struct CompactWorkoutHeader: View {
         .padding(.horizontal, 20)
         .padding(.vertical, 16)
         .background(
-            // 现代化毛玻璃背景效果
+            // Tailwind CSS风格毛玻璃背景效果
+            // bg-white/80 dark:bg-gray-800/80 + backdrop-blur-xl
             Rectangle()
-                .fill(.ultraThinMaterial)
-                .overlay(Color.appSurfaceLight.opacity(0.1))
+                .fill(colorScheme == .light ? Color.white.opacity(0.8) : Color.gray.opacity(0.8))
+                .background(.ultraThinMaterial) // backdrop-blur-xl 效果
                 .overlay(
-                    // 底边框效果
+                    // border-b border-gray-200/50 dark:border-gray-700/50
                     Rectangle()
-                        .fill(colorScheme == .light ? Color.appTextTertiary.opacity(0.2) : Color.appTextTertiary.opacity(0.3))
+                        .fill(colorScheme == .light ? Color.gray.opacity(0.2) : Color.gray.opacity(0.3))
                         .frame(height: 1),
                     alignment: .bottom
                 )
         )
-        .shadow(color: .appBackground.opacity(0.05), radius: 20, x: 0, y: 4)
+        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 1) // shadow-sm
         }
     }
 }
