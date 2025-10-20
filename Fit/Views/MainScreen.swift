@@ -680,7 +680,9 @@ struct ModernButton: View {
     private var buttonShadowColor: Color {
         switch style {
         case .primary:
-            return .accentGradientStart.opacity(0.4)
+            // 橙色光晕效果 - 暂时注释掉测试
+            // return .accentGradientStart.opacity(0.4)
+            return .appBackground.opacity(0.15) // 使用更中性的阴影
         case .secondary:
             return .appBackground.opacity(0.1)
         case .disabled:
