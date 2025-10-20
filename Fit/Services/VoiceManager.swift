@@ -37,6 +37,12 @@ class VoiceManager: NSObject {
         speak(message)
     }
 
+    /// 播报休息完成，准备开始训练
+    func announceRestComplete() {
+        let message = "休息完成，开始训练"
+        speak(message)
+    }
+
     /// 格式化重量用于语音播报
     /// - Parameter weight: 重量值
     /// - Returns: 格式化后的重量字符串
