@@ -3,8 +3,8 @@
 //  Fit
 //
 //  Created by 陆家贤 on 9/10/2025.
-//  Updated: 2025-01-12 - 移除图片组件，基于Figma设计优化信息卡片布局
-//  Architecture: 单一信息卡片设计，垂直布局，模块化组件
+//  Updated: 09:00:00 10/20/2025 by Jason Lu - 修复Header和Footer背景延伸到安全区域
+//  Architecture: 单一信息卡片设计，垂直布局，模块化组件，优化安全区域背景
 //
 
 import SwiftUI
@@ -119,15 +119,8 @@ struct WorkoutScreen: View {
                 .padding(.horizontal, 24) // px-6
                 .padding(.vertical, 12) // py-3 pt-3 pb-5
                 .background(
-                    // 使用新的组件安全区域背景，确保与Header一致
-                    ComponentSafeAreaBackground(opacity: 0.9, useMaterial: true)
-                        .overlay(
-                            // 统一的上边框颜色
-                            Rectangle()
-                                .fill(Color.glassBorder)
-                                .frame(height: 1),
-                            alignment: .top
-                        )
+                    // 使用新的扩展背景，确保延伸到底部安全区域，边框已集成在组件内
+                    ExtendedFooterBackground(showTopBorder: true)
                 )
                 .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: -2) // 增强阴影效果
                 .zIndex(1) // 确保Footer在背景之上
@@ -343,15 +336,8 @@ struct CompactWorkoutHeader: View {
         .padding(.horizontal, 20)
         .padding(.vertical, 16)
         .background(
-            // 使用新的组件安全区域背景，确保与Footer一致
-            ComponentSafeAreaBackground(opacity: 0.9, useMaterial: true)
-                .overlay(
-                    // 统一的边框颜色
-                    Rectangle()
-                        .fill(Color.glassBorder)
-                        .frame(height: 1),
-                    alignment: .bottom
-                )
+            // 使用新的扩展背景，确保延伸到顶部安全区域，边框已集成在组件内
+            ExtendedHeaderBackground(showBottomBorder: true)
         )
         .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 2) // 增强阴影效果
         .zIndex(1) // 确保Header在背景之上
