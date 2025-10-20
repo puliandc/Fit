@@ -32,6 +32,7 @@ class WorkoutViewModel: ObservableObject {
 
     // TTS相关状态
     private var hasAnnounced15Seconds = false
+    private var hasAnnounced3Seconds = false
 
     // DEPRECATED: 简化数据结构，不再使用复杂的预建立系统
     // 直接使用workoutPlan和completedSets来跟踪进度
@@ -457,8 +458,9 @@ class WorkoutViewModel: ObservableObject {
         restTimer?.invalidate()
         restTimer = nil
 
-        // 重置15秒播报标志
+        // 重置播报标志
         hasAnnounced15Seconds = false
+        hasAnnounced3Seconds = false
 
         // 播报下一组动作信息
         announceNextSetIfNeeded()
@@ -480,6 +482,12 @@ class WorkoutViewModel: ObservableObject {
                         if self.timeLeft == 15 && !self.hasAnnounced15Seconds {
                             self.hasAnnounced15Seconds = true
                             VoiceManager.shared.announceRestCountdown(seconds: 15)
+                        }
+
+                        // 当倒计时到3秒时播报休息完成
+                        if self.timeLeft == 3 && !self.hasAnnounced3Seconds {
+                            self.hasAnnounced3Seconds = true
+                            VoiceManager.shared.announceRestComplete()
                         }
                     } else {
                         timer.invalidate()
