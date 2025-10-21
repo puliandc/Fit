@@ -134,7 +134,7 @@ struct UniversalDialog: View {
 
             Text(dialogTitle)
                 .font(.system(size: dialogTitleFont, weight: .semibold))
-                .foregroundColor(.appPrimary)
+                .foregroundColor(.appTextSecondary) // 深色文本适配白色背景
                 .multilineTextAlignment(.center)
         }
         .padding(.top, 20)
@@ -183,7 +183,7 @@ struct UniversalDialog: View {
         VStack(spacing: 16) {
             Text(subtitle)
                 .font(.system(size: 14, weight: .regular))
-                .foregroundColor(.appTextTertiary)
+                .foregroundColor(.appTextTertiary) // 深色文本适配白色背景
                 .multilineTextAlignment(.center)
 
             // Reps Input
@@ -222,7 +222,7 @@ struct UniversalDialog: View {
         VStack(spacing: 16) {
             Text(message)
                 .font(.system(size: 14, weight: .regular))
-                .foregroundColor(.appTextTertiary)
+                .foregroundColor(.appTextTertiary) // 深色文本适配白色背景
                 .multilineTextAlignment(.center)
 
             if case .confirmation(_, let warningMessage, _, _, _) = type {
@@ -253,7 +253,7 @@ struct UniversalDialog: View {
         VStack(spacing: 16) {
             Text(message)
                 .font(.system(size: 14, weight: .regular))
-                .foregroundColor(.appTextTertiary)
+                .foregroundColor(.appTextTertiary) // 深色文本适配白色背景
                 .multilineTextAlignment(.center)
 
             // Options
@@ -269,7 +269,7 @@ struct UniversalDialog: View {
         VStack(spacing: 16) {
             Text(message)
                 .font(.system(size: 14, weight: .regular))
-                .foregroundColor(.appTextTertiary)
+                .foregroundColor(.appTextTertiary) // 深色文本适配白色背景
                 .multilineTextAlignment(.center)
 
             // Stats
@@ -278,11 +278,11 @@ struct UniversalDialog: View {
                     HStack {
                         Text(stat.0)
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.appTextTertiary)
+                            .foregroundColor(.appTextTertiary) // 深色文本适配白色背景
                         Spacer()
                         Text(stat.1)
                             .font(.system(size: 14, weight: .semibold, design: .monospaced))
-                            .foregroundColor(.appPrimary)
+                            .foregroundColor(.appTextSecondary) // 深色文本适配白色背景
                     }
                 }
             }
@@ -304,13 +304,13 @@ struct UniversalDialog: View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
                 .font(.system(size: 14, weight: .medium))
-                .foregroundColor(.appTextTertiary)
+                .foregroundColor(.appTextSecondary) // 深色文本适配白色背景
 
             TextField(placeholder, text: text)
                 .keyboardType(keyboardType)
                 .textFieldStyle(PlainTextFieldStyle())
                 .font(.system(size: 16, weight: .medium, design: .monospaced))
-                .foregroundColor(.appTextTertiary)
+                .foregroundColor(.appTextSecondary) // 深色文本适配白色背景
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
@@ -350,12 +350,12 @@ struct UniversalDialog: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(option.title)
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.appPrimary)
+                        .foregroundColor(.appTextSecondary) // 深色文本适配白色背景
                         .multilineTextAlignment(.leading)
 
                     Text(option.description)
                         .font(.system(size: 12, weight: .regular))
-                        .foregroundColor(.appTextTertiary)
+                        .foregroundColor(.appTextTertiary) // 深色文本适配白色背景
                         .multilineTextAlignment(.leading)
                         .lineLimit(2)
                 }
@@ -393,11 +393,10 @@ struct UniversalDialog: View {
 
     private var universalBackground: some View {
         RoundedRectangle(cornerRadius: 20)
-            .fill(Color.appSurfaceLight.opacity(0.95))
+            .fill(Color.white.opacity(0.9))
             .background(
                 RoundedRectangle(cornerRadius: 20)
                     .fill(.ultraThinMaterial)
-                    .opacity(0.3)
             )
     }
 
@@ -422,11 +421,20 @@ struct UniversalDialog: View {
 struct PrimaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.system(size: 16, weight: .medium))
+            .font(.system(size: 17, weight: .semibold)) // 符合设计规范17pt
             .foregroundColor(.appText)
-            .frame(height: 56)
+            .frame(height: 60) // 符合设计规范60pt高度
             .frame(maxWidth: .infinity)
-            .background(Color.appPrimary)
+            .background(
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        Color.appPrimary,
+                        Color.appPrimary.opacity(0.8)
+                    ]),
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            )
             .clipShape(RoundedRectangle(cornerRadius: 16))
             .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
             .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
@@ -437,15 +445,15 @@ struct SecondaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(size: 16, weight: .semibold))
-            .foregroundColor(.appTextTertiary)
-            .frame(height: 56)
+            .foregroundColor(.appTextSecondary) // 深色文本适配白色背景
+            .frame(height: 48) // 符合设计规范48pt高度
             .frame(maxWidth: .infinity)
             .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.appTextMuted.opacity(0.15))
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.white.opacity(0.5))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(Color.appTextMuted.opacity(0.4), lineWidth: 1.5)
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.appPrimary, lineWidth: 2) // 主色边框现代化设计
                     )
             )
             .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
@@ -456,12 +464,21 @@ struct SecondaryButtonStyle: ButtonStyle {
 struct DangerButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.system(size: 16, weight: .semibold))
+            .font(.system(size: 14, weight: .medium)) // 符合设计规范14pt
             .foregroundColor(.appText)
-            .frame(height: 56)
+            .frame(height: 40) // 符合设计规范40pt高度
             .frame(maxWidth: .infinity)
-            .background(Color.error)
-            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .background(
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        Color.error,
+                        Color.error.opacity(0.8)
+                    ]),
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 8)) // 符合设计规范8pt圆角
             .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
             .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
     }
