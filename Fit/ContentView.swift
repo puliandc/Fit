@@ -248,31 +248,7 @@ struct SettingsButtonStyle: ButtonStyle {
     }
 }
 
-// MARK: - Extensions for WorkoutCategory (keeping existing code)
-extension WorkoutCategory {
-    var systemImage: String {
-        switch self {
-        case .fullBody:
-            return "figure.walk"
-        case .upperBody:
-            return "figure.arms.open"
-        case .lowerBody:
-            return "figure.run"
-        case .core:
-            return "circle.circle" // iOS 15.0+ compatible alternative
-        case .cardio:
-            return "heart.fill"
-        case .hiit:
-            return "flame.fill"
-        case .yoga:
-            return "figure.yoga"
-        case .strength:
-            return "dumbbell.fill"
-        case .endurance:
-            return "timer"
-        }
-    }
-}
+// NOTE: WorkoutCategory extension removed as WorkoutCategory enum was deleted during model refactoring
 
 // MARK: - Preview
 #Preview {

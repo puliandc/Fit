@@ -57,15 +57,7 @@ class WorkoutViewModel: ObservableObject {
                 return firstExercise.exercise
             } else {
                 // 创建一个安全的默认练习
-                return Exercise(
-                    name: "默认练习",
-                    category: .strength,
-                    muscleGroups: [.chest],
-                    equipment: .none,
-                    difficulty: .beginner,
-                    instructions: ["请联系开发者"],
-                    imageName: "default"
-                )
+                return Exercise(name: "默认练习")
             }
         }
         return workoutPlan.exercises[currentExerciseIndex].exercise
@@ -77,15 +69,7 @@ class WorkoutViewModel: ObservableObject {
                 return firstExercise
             } else {
                 // 创建一个安全的默认练习组
-                let defaultExercise = Exercise(
-                    name: "默认练习",
-                    category: .strength,
-                    muscleGroups: [.chest],
-                    equipment: .none,
-                    difficulty: .beginner,
-                    instructions: ["请联系开发者"],
-                    imageName: "default"
-                )
+                let defaultExercise = Exercise(name: "默认练习")
                 return ExerciseSet(
                     exercise: defaultExercise,
                     targetReps: 1,
