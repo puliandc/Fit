@@ -130,8 +130,9 @@ struct WorkoutScreen: View {
             if let dialog = dialogManager.presentedDialog {
                 switch dialog {
                 case .quitWorkout, .quitCurrentExercise, .quitRemainingExercises:
-                    // Background overlay
-                    Color.appBackground.opacity(0.4)
+                    // Background overlay - 白色半透明现代化设计
+                    Color.white.opacity(0.9)
+                        .background(.ultraThinMaterial)
                         .ignoresSafeArea()
                         .onTapGesture {
                             dialogManager.dismissDialog()
@@ -163,8 +164,9 @@ struct WorkoutScreen: View {
                     ))
 
                 case .editSet(let exercise, let setIndex, let workoutViewModel):
-                    // Background overlay
-                    Color.appBackground.opacity(0.4)
+                    // Background overlay - 白色半透明现代化设计
+                    Color.white.opacity(0.9)
+                        .background(.ultraThinMaterial)
                         .ignoresSafeArea()
                         .onTapGesture {
                             dialogManager.dismissDialog()
@@ -185,8 +187,9 @@ struct WorkoutScreen: View {
                     ))
 
                 case .workoutComplete:
-                    // Background overlay
-                    Color.appBackground.opacity(0.4)
+                    // Background overlay - 白色半透明现代化设计
+                    Color.white.opacity(0.9)
+                        .background(.ultraThinMaterial)
                         .ignoresSafeArea()
                         .onTapGesture {
                             dialogManager.dismissDialog()
