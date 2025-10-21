@@ -105,16 +105,7 @@ class JSONWorkoutParser {
 
     // 创建基础Exercise对象（简化版）
     private func createExerciseFromName(_ exerciseName: String) -> Exercise {
-        return Exercise(
-            name: exerciseName,
-            category: .strength,
-            muscleGroups: [.chest],
-            equipment: .none,
-            difficulty: .intermediate,
-            instructions: ["保持正确的姿势"],
-            tips: ["注意安全"],
-            imageName: "default"
-        )
+        return Exercise(name: exerciseName)
     }
 
     // 创建ExerciseSet对象
@@ -150,13 +141,8 @@ class JSONWorkoutParser {
 
         let workoutPlan = WorkoutPlan(
             name: name,
-            description: "从外部JSON文件导入的训练计划",
-            category: .strength,
-            difficulty: .intermediate,
             duration: Int(totalEstimatedTime / 60), // 基于实际计算
-            exercises: exerciseSets,
-            estimatedCalories: 0,
-            createdBy: "外部JSON文件"
+            exercises: exerciseSets
         )
 
         return workoutPlan

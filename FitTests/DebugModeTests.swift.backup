@@ -31,6 +31,8 @@ class DebugModeTests: TestSuiteConfiguration {
         // 验证所有示例练习
         for (index, exercise) in provider.sampleExercises.enumerated() {
             XCTAssertFalse(exercise.name.isEmpty, "练习 \(index + 1) 名称不应为空")
+            XCTAssertFalse(exercise.instructions.isEmpty, "练习 \(index + 1) 指导说明不应为空")
+            XCTAssertFalse(exercise.imageName.isEmpty, "练习 \(index + 1) 图片名称不应为空")
         }
 
         // 验证所有示例锻炼计划
@@ -38,6 +40,7 @@ class DebugModeTests: TestSuiteConfiguration {
             XCTAssertFalse(workoutPlan.name.isEmpty, "锻炼计划 \(index + 1) 名称不应为空")
             XCTAssertFalse(workoutPlan.exercises.isEmpty, "锻炼计划 \(index + 1) 练习列表不应为空")
             XCTAssertGreaterThan(workoutPlan.duration, 0, "锻炼计划 \(index + 1) 时长应大于0")
+            XCTAssertGreaterThan(workoutPlan.estimatedCalories, 0, "锻炼计划 \(index + 1) 卡路里应大于0")
         }
     }
 

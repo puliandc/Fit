@@ -7,6 +7,33 @@
 
 import Foundation
 
+// MARK: - Completed Set (for backward compatibility)
+// 简化的完成组记录，用于WorkoutViewModel的completedSets数组
+struct CompletedSet: Identifiable, Codable {
+    let id: UUID
+    let exerciseSetId: UUID
+    let actualReps: Int
+    let actualWeight: Double
+    let completedAt: Date
+    var notes: String?
+
+    init(
+        id: UUID = UUID(),
+        exerciseSetId: UUID,
+        actualReps: Int,
+        actualWeight: Double,
+        completedAt: Date = Date(),
+        notes: String? = nil
+    ) {
+        self.id = id
+        self.exerciseSetId = exerciseSetId
+        self.actualReps = actualReps
+        self.actualWeight = actualWeight
+        self.completedAt = completedAt
+        self.notes = notes
+    }
+}
+
 // MARK: - Prebuilt Workout Session Data Structure
 // 预建立的训练会话数据结构，包含完整的训练信息
 class PrebuiltWorkoutSession {

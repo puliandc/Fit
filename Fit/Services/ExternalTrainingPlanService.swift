@@ -67,7 +67,7 @@ class ExternalTrainingPlanService: ObservableObject {
             print("📝 计划名称: \(workoutPlan.name)")
             print("📝 训练组数: \(workoutPlan.exercises.count)")
             print("📝 预估时长: \(workoutPlan.duration)分钟")
-            print("📝 预估热量: \(workoutPlan.estimatedCalories)卡路里")
+            // NOTE: estimatedCalories field removed during model refactoring to simplify data structure
 
             // 版本1.3: 显示解析出的练习项目详情
             print("📋 练习项目详情:")
