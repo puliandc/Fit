@@ -1,4 +1,5 @@
 {
   "claudeCode.useTerminal": true,
-  "claudeCode.allowDangerouslySkipPermissions": false
+  "claudeCode.allowDangerouslySkipPermissions": false,
+  "git.ignoreLimitWarning": true
 }
