@@ -1,0 +1,118 @@
+//created by Jason Lu on 16:13:00 10/27/2025
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React App Debug</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #1a1a2e;
+            color: white;
+        }
+        .debug-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+        .warning { color: #f59e0b; }
+    </style>
+</head>
+<body>
+    <div class="debug-info">
+        <h1>React应用调试页面</h1>
+        <p>正在检查React应用的加载状态...</p>
+    </div>
+
+    <div id="root"></div>
+
+    <script type="module">
+        console.log('=== React应用调试开始 ===');
+
+        // 检查基本DOM
+        const rootElement = document.getElementById('root');
+        if (rootElement) {
+            console.log('✅ Root元素找到:', rootElement);
+            rootElement.innerHTML = '<div class="success">✅ Root元素正确挂载</div>';
+        } else {
+            console.error('❌ Root元素未找到');
+        }
+
+        // 尝试导入React
+        import('react').then(React => {
+            console.log('✅ React导入成功:', React);
+            const debugDiv = document.createElement('div');
+            debugDiv.className = 'debug-info success';
+            debugDiv.innerHTML = '<h2>✅ React模块加载成功</h2><p>版本: ' + React.version + '</p>';
+            document.body.appendChild(debugDiv);
+
+            // 尝试导入React DOM
+            return import('react-dom/client');
+        }).then(ReactDOM => {
+            console.log('✅ React DOM导入成功:', ReactDOM);
+            const debugDiv = document.createElement('div');
+            debugDiv.className = 'debug-info success';
+            debugDiv.innerHTML = '<h2>✅ React DOM模块加载成功</h2>';
+            document.body.appendChild(debugDiv);
+
+            // 尝试渲染简单的React组件
+            try {
+                const { createRoot } = ReactDOM;
+                const root = createRoot(document.getElementById('root'));
+                root.render(React.createElement('div', {
+                    style: {
+                        background: 'rgba(16, 185, 129, 0.1)',
+                        padding: '20px',
+                        borderRadius: '8px',
+                        border: '1px solid rgba(16, 185, 129, 0.3)',
+                        color: 'white',
+                        margin: '20px 0'
+                    }
+                }, '🎉 React渲染成功！应用正在工作。'));
+
+                console.log('✅ React组件渲染成功');
+
+                const successDiv = document.createElement('div');
+                successDiv.className = 'debug-info success';
+                successDiv.innerHTML = '<h2>🎉 React渲染测试成功！</h2><p>问题可能在于应用组件本身</p>';
+                document.body.appendChild(successDiv);
+
+            } catch (renderError) {
+                console.error('❌ React渲染失败:', renderError);
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'debug-info error';
+                errorDiv.innerHTML = '<h2>❌ React渲染失败</h2><p>' + renderError.message + '</p>';
+                document.body.appendChild(errorDiv);
+            }
+
+        }).catch(importError => {
+            console.error('❌ 模块导入失败:', importError);
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'debug-info error';
+            errorDiv.innerHTML = '<h2>❌ React模块导入失败</h2><p>' + importError.message + '</p>';
+            document.body.appendChild(errorDiv);
+        });
+
+        // 尝试导入main.tsx文件
+        console.log('尝试导入main.tsx...');
+        import('/src/main.tsx').then(mainModule => {
+            console.log('✅ main.tsx导入成功:', mainModule);
+        }).catch(mainError => {
+            console.error('❌ main.tsx导入失败:', mainError);
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'debug-info error';
+            errorDiv.innerHTML = '<h2>❌ main.tsx导入失败</h2><p>' + mainError.message + '</p><p>这是导致问题的根本原因</p>';
+            document.body.appendChild(errorDiv);
+        });
+
+        console.log('=== 调试脚本执行完成 ===');
+    </script>
+</body>
+</html>
