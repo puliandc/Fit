@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #1a1a2e;
+        }
+        .test-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            max-width: 300px;
+        }
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+        .warning { color: #f59e0b; }
+    </style>
+</head>
+<body>
+    <div class="test-info" id="test-info">
+        <h3>React应用测试状态</h3>
+        <div id="loading">正在加载...</div>
+    </div>
+
+    <div id="root"></div>
+
+    <script type="module">
+        const testInfo = document.getElementById('test-info');
+        const loading = document.getElementById('loading');
+
+        function log(message, type = 'info') {
+            console.log(message);
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            testInfo.appendChild(div);
+        }
+
+        log('开始测试React应用...', 'info');
+        log('Root元素: ' + document.getElementById('root'), 'info');
+
+        // 测试基本模块加载
+        import('/src/main-simple.tsx')
+            .then(() => {
+                log('✅ React模块加载成功', 'success');
+                loading.style.display = 'none';
+            })
+            .catch(error => {
+                log('❌ React模块加载失败: ' + error.message, 'error');
+                loading.textContent = '加载失败 - 检查控制台';
+            });
+
+        // 检查是否有任何控制台错误
+        window.addEventListener('error', (e) => {
+            log('JavaScript错误: ' + e.message, 'error');
+        });
+
+        // 监听未处理的Promise拒绝
+        window.addEventListener('unhandledrejection', (e) => {
+            log('未处理的Promise拒绝: ' + e.reason, 'error');
+        });
+    </script>
+</body>
+</html>
