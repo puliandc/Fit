@@ -98,8 +98,6 @@ export const useWorkoutStore = create<WorkoutStore>()(
           voiceVolume: 0.8,
           restTimeEnabled: true,
           autoStartNextSet: false,
-          weightUnit: 'kg',
-          soundEnabled: true,
         },
 
         // 训练相关Actions

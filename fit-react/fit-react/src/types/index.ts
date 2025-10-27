@@ -70,20 +70,18 @@ export interface WorkoutProgress {
 
 /// 应用导航状态
 export interface NavigationState {
-  currentScreen: 'main' | 'workout' | 'history' | 'settings';
+  currentScreen: 'main' | 'workout';
   workoutStatus: WorkoutStatus;
   hasActiveWorkout: boolean;
 }
 
 
-/// 用户设置
+/// 用户设置 - 简化版，只保留训练核心功能
 export interface UserSettings {
   voiceEnabled: boolean;
   voiceVolume: number;        // 0-1
   restTimeEnabled: boolean;
   autoStartNextSet: boolean;
-  weightUnit: 'kg' | 'lbs';
-  soundEnabled: boolean;
 }
 
 /// 语音播报内容类型
