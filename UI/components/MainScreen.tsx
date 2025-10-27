@@ -46,7 +46,7 @@ export function MainScreen({
   };
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-br from-orange-50 via-pink-50 to-purple-100 dark:from-gray-900 dark:to-gray-800 relative overflow-hidden">
+    <div className="h-full flex flex-col bg-gradient-to-br from-orange-50 via-pink-50 to-purple-100 dark:from-gray-900 dark:to-gray-800 relative overflow-hidden mobile-padding">
       {/* Animated background blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
@@ -81,8 +81,8 @@ export function MainScreen({
       </div>
 
       {/* Header */}
-      <motion.div 
-        className="pt-14 pb-6 px-6 relative z-10"
+      <motion.div
+        className="pt-12 pb-6 relative z-10"
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
@@ -125,8 +125,8 @@ export function MainScreen({
           </motion.div>
         </motion.div>
         
-        <motion.h1 
-          className="text-6xl text-center bg-gradient-to-r from-orange-600 via-pink-600 to-purple-600 bg-clip-text text-transparent mb-3 tracking-tight"
+        <motion.h1
+          className="mobile-title text-center bg-gradient-to-r from-orange-600 via-pink-600 to-purple-600 bg-clip-text text-transparent mb-3 tracking-tight"
           style={{ fontFamily: "'Rounded Mplus 1c', 'Nunito', -apple-system, BlinkMacSystemFont, 'SF Pro Rounded', system-ui, sans-serif", fontWeight: 800 }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -135,8 +135,8 @@ export function MainScreen({
           FIT
         </motion.h1>
         
-        <motion.p 
-          className="text-center text-base bg-gradient-to-r from-orange-500 via-pink-500 to-purple-500 bg-clip-text text-transparent"
+        <motion.p
+          className="mobile-caption text-center bg-gradient-to-r from-orange-500 via-pink-500 to-purple-500 bg-clip-text text-transparent"
           style={{ fontFamily: "'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif", fontWeight: 600 }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -147,7 +147,7 @@ export function MainScreen({
       </motion.div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col px-6 pb-8 space-y-4 relative z-10">
+      <div className="flex-1 flex flex-col pb-8 space-y-4 relative z-10">
         {showStep === 1 ? (
         // 步骤1：只显示读取计划卡片
         <motion.div
@@ -156,7 +156,7 @@ export function MainScreen({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7 }}
         >
-          <Card className="glass-card dark:glass-card-dark border-0 shadow-2xl overflow-hidden relative">
+          <Card className="mobile-card glass-card dark:glass-card-dark border-0 shadow-2xl overflow-hidden relative">
             <motion.div
               className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-pink-500/10 to-purple-500/10"
               animate={{
@@ -200,7 +200,7 @@ export function MainScreen({
                 <Button
                   size="lg"
                   onClick={handleReadPlan}
-                  className="w-full h-14 bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white border-0 shadow-xl rounded-2xl relative overflow-hidden group"
+                  className="mobile-button-primary bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white border-0 shadow-xl relative overflow-hidden group"
                 >
                   <motion.div
                     className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0"
@@ -232,7 +232,7 @@ export function MainScreen({
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
           >
-            <Card className="glass-card dark:glass-card-dark border-0 shadow-2xl overflow-hidden relative">
+            <Card className="mobile-card glass-card dark:glass-card-dark border-0 shadow-2xl overflow-hidden relative">
               <motion.div
                 className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-pink-500/10 to-purple-500/10"
                 animate={{
@@ -276,7 +276,7 @@ export function MainScreen({
                   <Button
                     size="lg"
                     onClick={onStartWorkout}
-                    className="w-full h-14 bg-gradient-to-r from-orange-500 via-pink-500 to-purple-600 hover:from-orange-600 hover:via-pink-600 hover:to-purple-700 text-white border-0 shadow-xl rounded-2xl relative overflow-hidden group"
+                    className="mobile-button-primary relative overflow-hidden group"
                   >
                     <motion.div
                       className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0"
@@ -307,7 +307,7 @@ export function MainScreen({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
             >
-              <Card className="glass-card dark:glass-card-dark border-0 shadow-2xl overflow-hidden relative">
+              <Card className="mobile-card glass-card dark:glass-card-dark border-0 shadow-2xl overflow-hidden relative">
                 <motion.div
                   className="absolute inset-0 bg-gradient-to-br from-green-500/10 via-emerald-500/10 to-teal-500/10"
                   animate={{
@@ -439,7 +439,7 @@ export function MainScreen({
             animate={{ y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
           >
-            <Card className="glass-card dark:glass-card-dark border-0 shadow-2xl overflow-hidden relative">
+            <Card className="mobile-card glass-card dark:glass-card-dark border-0 shadow-2xl overflow-hidden relative">
               <motion.div
                 className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-pink-500/10 to-purple-500/10"
                 animate={{

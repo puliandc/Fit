@@ -41,19 +41,19 @@ const MainScreen: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
-      <div className="container mx-auto px-4 py-8">
-        {/* 头部Logo */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-4">
-            Fit Training
-          </h1>
-          <p className="text-xl text-gray-300">
-            专业健身训练记录应用
-          </p>
-        </div>
+      <div className="py-6">
+          {/* 头部Logo */}
+          <div className="text-center mb-8">
+            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+              Fit Training
+            </h1>
+            <p className="text-lg sm:text-xl text-gray-300">
+              专业健身训练记录应用
+            </p>
+          </div>
 
-        {/* 主要功能区域 */}
-        <div className="max-w-2xl mx-auto space-y-6">
+          {/* 主要功能区域 */}
+          <div className="space-y-6">
           {/* 开始训练卡片 - 仅在已加载训练计划时显示 */}
           {workoutPlan && (
             <GlassCard variant="default" padding="lg" className="transform transition-all duration-300 hover:scale-105">
@@ -171,44 +171,13 @@ const MainScreen: React.FC = () => {
               className="w-full"
             />
           </GlassCard>
-        </div>
+          </div>
 
-        {/* 功能预览卡片 */}
-        <div className="max-w-2xl mx-auto grid md:grid-cols-2 gap-6 mt-8">
-          <GlassCard variant="light" padding="md" className="transform transition-all duration-300 hover:scale-105">
-            <div className="flex items-center mb-4">
-              <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center mr-4">
-                <svg className="w-6 h-6 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 00016zm1-11a1 1 0 10-2 0v2a1 1 0 102 0v-2zM9 9a1 1 0 012 0v2a1 1 0 11-2 0V9z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold">训练记录</h3>
-            </div>
-            <p className="text-gray-300">
-              查看历史训练数据和进度统计
-            </p>
-          </GlassCard>
-
-          <GlassCard variant="light" padding="md" className="transform transition-all duration-300 hover:scale-105">
-            <div className="flex items-center mb-4">
-              <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mr-4">
-                <svg className="w-6 h-6 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 00-2.286.948c-.782.576-1.432 1.45-1.487 2.31l.547 1.93a2.311 2.311 0 01-.95 3.17l1.625.513a2.313 2.313 0 012.795 0l1.623-.513a2.316 2.316 0 01-.951-3.17z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold">应用设置</h3>
-            </div>
-            <p className="text-gray-300">
-              个性化配置和偏好设置
-            </p>
-          </GlassCard>
-        </div>
-
-        {/* 底部安全区域 */}
-        <div className="text-center text-gray-400 text-sm mt-12">
-          <p>React + Capacitor + Tailwind CSS</p>
-          <p className="text-xs mt-1">玻璃态设计系统 v1.0</p>
-        </div>
+          {/* 底部安全区域 */}
+          <div className="text-center text-gray-400 text-sm mt-12">
+            <p>React + Capacitor + Tailwind CSS</p>
+            <p className="text-xs mt-1">玻璃态设计系统 v1.0</p>
+          </div>
       </div>
     </div>
   )

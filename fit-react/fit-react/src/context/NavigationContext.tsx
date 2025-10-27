@@ -1,8 +1,8 @@
 //created by Jason Lu on 10:45:00 10/27/2025
 import React, { createContext, useContext, useReducer, type ReactNode } from 'react'
 
-// 页面类型定义
-export type PageType = 'main' | 'workout' | 'settings' | 'history'
+// 页面类型定义 - 与Swift版本保持一致，仅包含核心功能页面
+export type PageType = 'main' | 'workout'
 
 // 导航状态定义
 interface NavigationState {
