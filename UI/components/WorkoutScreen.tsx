@@ -186,7 +186,7 @@ export function WorkoutScreen({ workoutPlan, onFinish }: WorkoutScreenProps) {
   const progress = Math.round((completedSets / totalSets) * 100);
 
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-orange-50/30 via-pink-50/20 to-purple-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 relative overflow-hidden">
+    <div className="h-screen flex flex-col bg-gradient-to-br from-orange-50/30 via-pink-50/20 to-purple-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 relative overflow-hidden mobile-padding">
       {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
@@ -219,8 +219,8 @@ export function WorkoutScreen({ workoutPlan, onFinish }: WorkoutScreenProps) {
       </div>
 
       {/* Header */}
-      <motion.div 
-        className="px-6 pt-4 pb-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 relative z-10 shadow-sm"
+      <motion.div
+        className="pt-4 pb-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 relative z-10 shadow-sm mobile-top-nav"
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
@@ -230,11 +230,11 @@ export function WorkoutScreen({ workoutPlan, onFinish }: WorkoutScreenProps) {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
           >
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setShowQuitDialog(true)}
-              className="w-9 h-9 p-0 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="w-10 h-10 p-0 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 touch-target"
             >
               <ArrowLeft className="w-5 h-5 text-gray-700 dark:text-gray-300" />
             </Button>
@@ -259,8 +259,8 @@ export function WorkoutScreen({ workoutPlan, onFinish }: WorkoutScreenProps) {
       {/* Rest Timer Overlay */}
       <AnimatePresence>
         {isResting && (
-          <motion.div 
-            className="mx-6 mt-3 relative z-10"
+          <motion.div
+            className="mt-3 relative z-10"
             initial={{ opacity: 0, y: -20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
@@ -314,7 +314,7 @@ export function WorkoutScreen({ workoutPlan, onFinish }: WorkoutScreenProps) {
       </AnimatePresence>
 
       {/* Exercise Content */}
-      <div className="flex-1 overflow-y-auto px-6 py-3 space-y-3 relative z-10">
+      <div className="flex-1 mobile-scroll-hide-scrollbar py-3 space-y-3 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -486,8 +486,8 @@ export function WorkoutScreen({ workoutPlan, onFinish }: WorkoutScreenProps) {
       </div>
 
       {/* Bottom Action Buttons */}
-      <motion.div 
-        className="px-6 pb-5 pt-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-t border-gray-200/50 dark:border-gray-700/50 space-y-2.5 relative z-10"
+      <motion.div
+        className="pb-5 pt-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-t border-gray-200/50 dark:border-gray-700/50 space-y-2.5 relative z-10 mobile-bottom-bar"
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 30, delay: 0.2 }}
@@ -500,7 +500,7 @@ export function WorkoutScreen({ workoutPlan, onFinish }: WorkoutScreenProps) {
             size="lg"
             onClick={() => setShowCompletionDialog(true)}
             disabled={isResting}
-            className="w-full h-14 bg-gradient-to-r from-green-500 via-emerald-500 to-green-600 hover:from-green-600 hover:via-emerald-600 hover:to-green-700 text-white font-semibold text-base border-0 shadow-lg rounded-xl disabled:opacity-40 disabled:cursor-not-allowed relative overflow-hidden"
+            className="mobile-button-primary bg-gradient-to-r from-green-500 via-emerald-500 to-green-600 hover:from-green-600 hover:via-emerald-600 hover:to-green-700 disabled:opacity-40 disabled:cursor-not-allowed relative overflow-hidden"
           >
             <motion.div
               className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0"
@@ -519,7 +519,7 @@ export function WorkoutScreen({ workoutPlan, onFinish }: WorkoutScreenProps) {
             size="lg"
             variant="outline"
             onClick={() => setShowQuitDialog(true)}
-            className="w-full h-12 bg-white/50 dark:bg-gray-800/50 border-2 border-red-200 dark:border-red-800/50 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 font-medium rounded-xl"
+            className="mobile-button-secondary border-2 border-red-200 dark:border-red-800/50 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
           >
             放弃动作
           </Button>

@@ -75,15 +75,6 @@ export interface NavigationState {
   hasActiveWorkout: boolean;
 }
 
-/// 训练统计数据
-export interface WorkoutStats {
-  totalWorkouts: number;
-  totalCompletedSets: number;
-  averageWorkoutDuration: number; // 分钟
-  totalWorkoutTime: number;      // 总训练时间（分钟）
-  lastWorkoutDate?: Date;
-  favoriteExercise?: string;      // 最常训练的动作
-}
 
 /// 用户设置
 export interface UserSettings {
@@ -139,8 +130,7 @@ export interface ApiResponse<T> {
 export enum StorageKeys {
   WORKOUT_PLANS = 'workout_plans',
   WORKOUT_SESSIONS = 'workout_sessions',
-  USER_SETTINGS = 'user_settings',
-  WORKOUT_STATS = 'workout_stats'
+  USER_SETTINGS = 'user_settings'
 }
 
 /// 训练计划导入格式（JSON）

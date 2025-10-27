@@ -76,6 +76,11 @@ export default {
       spacing: {
         '18': '4.5rem',
         '88': '22rem',
+        // iOS 安全区域间距
+        'safe-top': 'env(safe-area-inset-top)',
+        'safe-bottom': 'env(safe-area-inset-bottom)',
+        'safe-left': 'env(safe-area-inset-left)',
+        'safe-right': 'env(safe-area-inset-right)',
       },
       borderRadius: {
         '4xl': '2rem',
@@ -88,5 +93,21 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    function({ addUtilities }) {
+      const newUtilities = {
+        '.safe-area-top': { 'padding-top': 'env(safe-area-inset-top)' },
+        '.safe-area-bottom': { 'padding-bottom': 'env(safe-area-inset-bottom)' },
+        '.safe-area-left': { 'padding-left': 'env(safe-area-inset-left)' },
+        '.safe-area-right': { 'padding-right': 'env(safe-area-inset-right)' },
+        '.pt-safe-area-top': { 'padding-top': 'env(safe-area-inset-top)' },
+        '.pb-safe-area-bottom': { 'padding-bottom': 'env(safe-area-inset-bottom)' },
+        '.pl-safe-area-left': { 'padding-left': 'env(safe-area-inset-left)' },
+        '.pr-safe-area-right': { 'padding-right': 'env(safe-area-inset-right)' },
+        '.mt-safe-area-top': { 'margin-top': 'env(safe-area-inset-top)' },
+        '.mb-safe-area-bottom': { 'margin-bottom': 'env(safe-area-inset-bottom)' },
+      }
+      addUtilities(newUtilities)
+    }
+  ],
 }

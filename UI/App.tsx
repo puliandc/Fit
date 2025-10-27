@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { MainScreen } from './components/MainScreen';
 import { WorkoutScreen } from './components/WorkoutScreen';
+import { MobileContainer } from './components/ui/container';
+import './styles/mobile.css';
 
 export type WorkoutExercise = {
   id: string;
@@ -70,7 +72,7 @@ export default function App() {
   };
 
   return (
-    <div className="size-full max-w-[393px] mx-auto bg-background">
+    <MobileContainer className="size-full bg-background safe-area-top safe-area-bottom">
       {currentScreen === 'main' && (
         <MainScreen
           onReadPlan={readWorkoutPlan}
@@ -81,13 +83,13 @@ export default function App() {
           workoutPlan={workoutPlan}
         />
       )}
-      
+
       {currentScreen === 'workout' && workoutPlan && (
         <WorkoutScreen
           workoutPlan={workoutPlan}
           onFinish={finishWorkout}
         />
       )}
-    </div>
+    </MobileContainer>
   );
 }

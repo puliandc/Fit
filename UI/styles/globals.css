@@ -1,5 +1,8 @@
 @custom-variant dark (&:is(.dark *));
 
+/* 导入移动端优化样式 */
+@import './mobile.css';
+
 :root {
   --font-size: 16px;
   --background: #ffffff;
