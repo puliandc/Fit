@@ -1,0 +1,36 @@
+{
+  "name": "测试训练计划",
+  "duration": 30,
+  "exercises": [
+    {
+      "name": "深蹲",
+      "targetReps": 12,
+      "targetWeight": 50,
+      "restTime": 60
+    },
+    {
+      "name": "俯卧撑",
+      "targetReps": 15,
+      "targetWeight": 0,
+      "restTime": 45
+    },
+    {
+      "name": "引体向上",
+      "targetReps": 8,
+      "targetWeight": 0,
+      "restTime": 90
+    },
+    {
+      "name": "平板支撑",
+      "targetReps": 1,
+      "targetWeight": 0,
+      "restTime": 30
+    },
+    {
+      "name": "箭步蹲",
+      "targetReps": 10,
+      "targetWeight": 20,
+      "restTime": 60
+    }
+  ]
+}

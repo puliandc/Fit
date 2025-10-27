@@ -2,7 +2,9 @@
 import React from 'react'
 import { GlassCard, GlassButton } from './index'
 import FileUploadButton from './FileUploadButton'
+import QuickTestButton from './QuickTestButton'
 import { useNavigationActions } from '../context/NavigationContext'
+import { isQuickTestEnabled } from '../utils/mockData'
 
 interface WorkoutPlan {
   id: string
@@ -41,7 +43,7 @@ const MainScreen: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
-      <div className="py-6">
+      <div className="pt-5 px-4 max-w-md mx-auto">
           {/* 头部Logo */}
           <div className="text-center mb-8">
             <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4">
@@ -52,8 +54,8 @@ const MainScreen: React.FC = () => {
             </p>
           </div>
 
-          {/* 主要功能区域 */}
-          <div className="space-y-6">
+          {/* 主要功能区域 - VStack equivalent with 32pt spacing */}
+          <div className="space-y-8">
           {/* 开始训练卡片 - 仅在已加载训练计划时显示 */}
           {workoutPlan && (
             <GlassCard variant="default" padding="lg" className="transform transition-all duration-300 hover:scale-105">
@@ -144,6 +146,29 @@ const MainScreen: React.FC = () => {
                   </div>
                 )}
               </div>
+            </GlassCard>
+          )}
+
+          {/* 快速测试卡片 - 开发环境调试用 */}
+          {isQuickTestEnabled() && (
+            <GlassCard variant="default" padding="md" className="transform transition-all duration-300 hover:scale-105">
+              <div className="flex items-center mb-3">
+                <div className="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center mr-3">
+                  <svg className="w-5 h-5 text-orange-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 00016zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-md font-semibold text-white mb-1">
+                    开发者快速测试
+                  </h3>
+                  <p className="text-xs text-gray-400">
+                    使用mock数据直接跳转到训练页面
+                  </p>
+                </div>
+              </div>
+
+              <QuickTestButton />
             </GlassCard>
           )}
 
