@@ -8,6 +8,7 @@
 
 import SwiftUI
 import Combine
+import QuartzCore
 
 // MARK: - Workout Completion Notification
 extension Notification.Name {
@@ -24,8 +25,8 @@ class WorkoutViewModel: ObservableObject {
     @Published var completedSets: [CompletedSet] = []
 
     let workoutPlan: WorkoutPlan
-    private var exerciseTimer: Timer?
-    private var restTimer: Timer?
+    private var unifiedDisplayLink: CADisplayLink?
+    private var lastUpdateTime: CFTimeInterval = 0
 
     // 简化计时方案：只记录开始时间
     private var workoutStartTime: Date?
@@ -122,12 +123,13 @@ class WorkoutViewModel: ObservableObject {
         // 开始记录当前动作
         workoutLogRecorder.startExercise(exercise: currentExercise)
 
-        startExerciseTimer()
+        // 启动统一计时器
+        startUnifiedTimer()
     }
 
     func pauseExercise() {
         isExerciseActive = false
-        exerciseTimer?.invalidate()
+        stopUnifiedTimer()
     }
 
     func toggleExercise() {
@@ -225,8 +227,8 @@ class WorkoutViewModel: ObservableObject {
                 self.moveToNextExerciseOrSet()
             }
 
-            // 启动休息计时器
-            self.startRestTimer()
+            // 启动统一计时器
+            self.startUnifiedTimer()
         }
     }
 
@@ -359,7 +361,7 @@ class WorkoutViewModel: ObservableObject {
     }
 
     func skipRest() {
-        restTimer?.invalidate()
+        stopUnifiedTimer()
         isResting = false
         startExercise()
     }
@@ -429,68 +431,77 @@ class WorkoutViewModel: ObservableObject {
     }
 
     // MARK: - Timer Management
-    private func startExerciseTimer() {
-        exerciseTimer?.invalidate()
+    private func startUnifiedTimer() {
+        // 停止之前的计时器
+        stopUnifiedTimer()
 
-        exerciseTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-            self.exerciseElapsedTime += 1
-        }
+        // 初始化时间戳
+        lastUpdateTime = CACurrentMediaTime()
+
+        // 创建CADisplayLink，设置为每秒更新1次
+        unifiedDisplayLink = CADisplayLink(target: self, selector: #selector(updateAllTimers))
+        unifiedDisplayLink?.preferredFramesPerSecond = 1
+
+        // 添加到RunLoop
+        unifiedDisplayLink?.add(to: .main, forMode: .common)
     }
 
-    private func startRestTimer() {
-        // 清理之前的计时器
-        restTimer?.invalidate()
-        restTimer = nil
+    private func stopUnifiedTimer() {
+        unifiedDisplayLink?.invalidate()
+        unifiedDisplayLink = nil
+    }
 
-        // 重置播报标志
-        hasAnnounced15Seconds = false
-        hasAnnounced3Seconds = false
+    @objc private func updateAllTimers() {
+        let currentTime = CACurrentMediaTime()
 
-        // 播报下一组动作信息
-        announceNextSetIfNeeded()
+        // 防抖机制：确保真正间隔1秒才更新
+        guard currentTime - lastUpdateTime >= 1.0 else { return }
 
-        // 确保在主线程上创建和启动计时器
-        DispatchQueue.main.async {
-            self.restTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] timer in
-                guard let self = self else {
-                    timer.invalidate()
-                    return
-                }
+        lastUpdateTime = currentTime
 
-                // 确保UI更新在主线程上
+        // 批量更新所有时间相关状态，减少UI刷新次数
+        var needsUIUpdate = false
+
+        // 更新动作计时
+        if isExerciseActive {
+            exerciseElapsedTime += 1
+            needsUIUpdate = true
+        }
+
+        // 更新休息倒计时
+        if isResting && timeLeft > 0 {
+            timeLeft -= 1
+
+            // 语音播报逻辑
+            if timeLeft == 15 && !hasAnnounced15Seconds {
+                hasAnnounced15Seconds = true
+                VoiceManager.shared.announceRestCountdown(seconds: 15)
+            }
+
+            if timeLeft == 3 && !hasAnnounced3Seconds {
+                hasAnnounced3Seconds = true
+                VoiceManager.shared.announceRestComplete()
+            }
+
+            // 休息结束，自动开始下一个动作
+            if timeLeft == 0 {
+                isResting = false
+                // 延迟一帧开始下一个动作，确保状态更新完成
                 DispatchQueue.main.async {
-                    if self.timeLeft > 0 {
-                        self.timeLeft -= 1
-
-                        // 当倒计时到15秒时播报
-                        if self.timeLeft == 15 && !self.hasAnnounced15Seconds {
-                            self.hasAnnounced15Seconds = true
-                            VoiceManager.shared.announceRestCountdown(seconds: 15)
-                        }
-
-                        // 当倒计时到3秒时播报休息完成
-                        if self.timeLeft == 3 && !self.hasAnnounced3Seconds {
-                            self.hasAnnounced3Seconds = true
-                            VoiceManager.shared.announceRestComplete()
-                        }
-                    } else {
-                        timer.invalidate()
-                        self.restTimer = nil
-                        self.isResting = false
-
-                        // 确保下一个动作也在主线程上开始
-                        self.startExercise()
-                    }
+                    self.startExercise()
                 }
             }
 
-            // 将计时器添加到RunLoop中，确保在真机上正常工作
-            let runLoop = RunLoop.current
-            self.restTimer?.fireDate = Date().addingTimeInterval(1.0)
-            runLoop.add(self.restTimer!, forMode: .common)
+            needsUIUpdate = true
+        }
+
+        // 只在需要时触发UI更新
+        if needsUIUpdate {
+            objectWillChange.send()
         }
     }
 
+    
     // MARK: - TTS Integration
 
     /// 获取下一组动作信息用于TTS播报
@@ -557,8 +568,7 @@ class WorkoutViewModel: ObservableObject {
 
     // MARK: - Cleanup
     deinit {
-        exerciseTimer?.invalidate()
-        restTimer?.invalidate()
+        stopUnifiedTimer()
     }
 }
 
