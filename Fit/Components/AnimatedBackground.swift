@@ -13,8 +13,8 @@ struct AnimatedBackground: View {
     // MARK: - Animation State Properties
     @State private var blob1Offset: CGSize = .zero
     @State private var blob1Scale: CGFloat = 1.0
-    @State private var blob2Offset: CGSize = .zero
-    @State private var blob2Scale: CGFloat = 1.0
+    @State private var isLowPowerMode: Bool = false
+    @State private var isAnimationEnabled: Bool = true
 
     // MARK: - Body
     var body: some View {
@@ -23,12 +23,18 @@ struct AnimatedBackground: View {
             baseGradientBackground
                 // 移除clipped()，让背景延伸到安全区域
 
-            // 动画模糊球层 - 完全覆盖整个屏幕包括安全区域
-            animatedBlobLayer
-                // 移除clipped()，让动画效果延伸到安全区域
+            // 条件性显示动画模糊球层
+            if isAnimationEnabled && !isLowPowerMode {
+                animatedBlobLayer
+                    // 移除clipped()，让动画效果延伸到安全区域
+            }
         }
         .onAppear {
+            checkBatteryLevel()
             startAnimations()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIDevice.batteryStateDidChangeNotification)) { _ in
+            checkBatteryLevel()
         }
     }
 
@@ -48,63 +54,65 @@ struct AnimatedBackground: View {
     // MARK: - Animated Blob Layer
     private var animatedBlobLayer: some View {
         GeometryReader { geometry in
-            ZStack {
-                // 模糊球 1 - 左上角 橙粉色
-                AnimatedBlob(
-                    colors: [
-                        Color(hex: "#FDBA74").opacity(0.3), // orange-300/30
-                        Color(hex: "#F9A8D4").opacity(0.3)  // pink-300/30
-                    ],
-                    size: CGSize(width: 384, height: 384),
-                    position: CGPoint(
-                        x: -geometry.size.width * 0.1, // left: -10%
-                        y: -geometry.size.height * 0.1  // top: -10%
-                    ),
-                    offset: blob1Offset,
-                    scale: blob1Scale,
-                    blurRadius: 64
-                )
-
-                // 模糊球 2 - 右下角 紫蓝色
-                AnimatedBlob(
-                    colors: [
-                        Color(hex: "#D8B4FE").opacity(0.3), // purple-300/30
-                        Color(hex: "#93C5FD").opacity(0.3)  // blue-300/30
-                    ],
-                    size: CGSize(width: 320, height: 320),
-                    position: CGPoint(
-                        x: geometry.size.width * 1.1,  // right: -10% (110% from left)
-                        y: geometry.size.height * 1.1  // bottom: -10% (110% from top)
-                    ),
-                    offset: blob2Offset,
-                    scale: blob2Scale,
-                    blurRadius: 64
-                )
-            }
+            // 简化为单个模糊球 - 左上角 橙粉色
+            AnimatedBlob(
+                colors: [
+                    Color(hex: "#FDBA74").opacity(0.2), // 降低透明度 orange-300/20
+                    Color(hex: "#F9A8D4").opacity(0.2)  // 降低透明度 pink-300/20
+                ],
+                size: CGSize(width: 300, height: 300), // 减小尺寸
+                position: CGPoint(
+                    x: -geometry.size.width * 0.05, // left: -5% (减少偏移)
+                    y: -geometry.size.height * 0.05  // top: -5% (减少偏移)
+                ),
+                offset: blob1Offset,
+                scale: blob1Scale,
+                blurRadius: 48 // 减小模糊半径
+            )
         }
         .allowsHitTesting(false) // pointer-events-none equivalent
     }
 
     // MARK: - Animation Control
     private func startAnimations() {
-        // 模糊球 1 动画 (20秒周期)
+        // 智能动画控制：根据电池状态和设置决定是否启动动画
+        guard isAnimationEnabled && !isLowPowerMode else { return }
+
+        // 简化的单球动画 (30秒周期，更慢的动画减少GPU负担)
         withAnimation(
-            .easeInOut(duration: 20.0)
+            .easeInOut(duration: 30.0)
                 .repeatForever(autoreverses: true)
         ) {
-            blob1Offset = CGSize(width: 100, height: 80)
-            blob1Scale = 1.2
+            blob1Offset = CGSize(width: 60, height: 40) // 减小移动幅度
+            blob1Scale = 1.1 // 减小缩放幅度
         }
+    }
 
-        // 模糊球 2 动画 (18秒周期，延迟2秒)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-            withAnimation(
-                .easeInOut(duration: 18.0)
-                    .repeatForever(autoreverses: true)
-            ) {
-                blob2Offset = CGSize(width: -80, height: 100)
-                blob2Scale = 1.3
-            }
+    // MARK: - Battery Level Detection
+    private func checkBatteryLevel() {
+        UIDevice.current.isBatteryMonitoringEnabled = true
+
+        let batteryLevel = UIDevice.current.batteryLevel
+        _ = UIDevice.current.batteryState
+
+        // 低电量模式判断：电量低于20%或处于低功耗模式
+        let isLowBattery = batteryLevel < 0.2 && batteryLevel != -1.0
+        let isPowerSaver = ProcessInfo.processInfo.isLowPowerModeEnabled
+
+        isLowPowerMode = isLowBattery || isPowerSaver
+
+        // 如果进入低电量模式，停止动画
+        if isLowPowerMode {
+            isAnimationEnabled = false
+        }
+    }
+
+    // MARK: - Public Animation Control
+    func toggleAnimation() {
+        isAnimationEnabled.toggle()
+        if isAnimationEnabled {
+            checkBatteryLevel() // 重新检查电池状态
+            startAnimations()
         }
     }
 }
