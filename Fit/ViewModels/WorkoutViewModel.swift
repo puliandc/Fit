@@ -41,6 +41,13 @@ class WorkoutViewModel: ObservableObject {
     private var lastUIUpdateTime: CFTimeInterval = 0
     private let uiUpdateDebounceInterval: CFTimeInterval = 0.1 // 100ms防抖
 
+    // 计算优化：缓存常用计算结果
+    private var _totalExerciseSets: Int = 0
+    private var _completedSetsCount: Int = 0
+    private var _exerciseGroupsCache: [UUID: [ExerciseSet]] = [:]
+    private var _lastExerciseId: UUID = UUID()
+    private var _needsRecalculation: Bool = true
+
     // DEPRECATED: 简化数据结构，不再使用复杂的预建立系统
     // 直接使用workoutPlan和completedSets来跟踪进度
 
@@ -49,6 +56,9 @@ class WorkoutViewModel: ObservableObject {
 
     init(workoutPlan: WorkoutPlan) {
         self.workoutPlan = workoutPlan
+
+        // 初始化计算缓存
+        initializeCaches()
 
         // 初始化当前组数显示
         updateCurrentSetDisplay()
@@ -89,10 +99,12 @@ class WorkoutViewModel: ObservableObject {
     }
 
     var progress: Double {
-        // 简化进度计算：已完成组数/总组数
-        let totalSets = workoutPlan.exercises.count
-        let completedSetsCount = completedSets.count
-        let progressValue = totalSets > 0 ? Double(completedSetsCount) / Double(totalSets) : 0.0
+        // 使用缓存的计算结果：已完成组数/总组数
+        if _needsRecalculation {
+            updateCachesIfNeeded()
+        }
+
+        let progressValue = _totalExerciseSets > 0 ? Double(_completedSetsCount) / Double(_totalExerciseSets) : 0.0
 
         // 防止进度超过100%
         let clampedProgress = min(progressValue, 1.0)
@@ -180,9 +192,11 @@ class WorkoutViewModel: ObservableObject {
         // 更新进度 - 使用防抖机制触发UI刷新
         debouncedUIUpdate()
 
-        // 检查是否还有更多的组需要完成
-        let totalSets = workoutPlan.exercises.count
-        let remainingSetsInWorkout = totalSets - completedSets.count
+        // 检查是否还有更多的组需要完成 - 使用缓存值
+        if _needsRecalculation {
+            updateCachesIfNeeded()
+        }
+        let remainingSetsInWorkout = _totalExerciseSets - _completedSetsCount
 
         if remainingSetsInWorkout > 0 {
             // 进入休息状态，然后继续下一组/下一个动作
@@ -208,10 +222,16 @@ class WorkoutViewModel: ObservableObject {
         return (targetReps, targetWeight)
     }
 
-    // 获取当前练习的总组数
+    // 获取当前练习的总组数 - 使用缓存
     func getCurrentExerciseTotalSets() -> Int {
         let currentExerciseId = currentExercise.id
-        return workoutPlan.exercises.filter { $0.exercise.id == currentExerciseId }.count
+
+        // 如果缓存需要更新或者练习ID改变，重新计算
+        if _needsRecalculation || _lastExerciseId != currentExerciseId {
+            updateCachesIfNeeded()
+        }
+
+        return _exerciseGroupsCache[currentExerciseId]?.count ?? 0
     }
 
     
@@ -257,7 +277,7 @@ class WorkoutViewModel: ObservableObject {
         }
     }
 
-    // 新增：更新当前组数显示
+    // 新增：更新当前组数显示 - 使用缓存优化
     private func updateCurrentSetDisplay() {
         // 安全检查：确保索引有效
         guard currentExerciseIndex < workoutPlan.exercises.count else {
@@ -265,7 +285,17 @@ class WorkoutViewModel: ObservableObject {
         }
 
         let currentExerciseId = currentExercise.id
-        let exerciseSetsForThisExercise = workoutPlan.exercises.filter { $0.exercise.id == currentExerciseId }
+
+        // 如果缓存需要更新，重新计算分组
+        if _needsRecalculation || _lastExerciseId != currentExerciseId {
+            updateCachesIfNeeded()
+        }
+
+        // 从缓存中获取当前练习的所有组
+        guard let exerciseSetsForThisExercise = _exerciseGroupsCache[currentExerciseId] else {
+            currentSet = 1
+            return
+        }
 
         // 计算当前是第几组（基于当前ExerciseSet在所有相同练习中的位置）
         let currentExerciseSet = currentExerciseSet
@@ -283,8 +313,11 @@ class WorkoutViewModel: ObservableObject {
         // 获取当前练习的ID
         let currentExerciseId = currentExercise.id
 
-        // 获取当前组在相同练习中的位置，只跳过当前组及之后的组
-        let currentExerciseSets = workoutPlan.exercises.filter { $0.exercise.id == currentExerciseId }
+        // 获取当前组在相同练习中的位置，只跳过当前组及之后的组 - 使用缓存
+        if _needsRecalculation || _lastExerciseId != currentExerciseId {
+            updateCachesIfNeeded()
+        }
+        let currentExerciseSets = _exerciseGroupsCache[currentExerciseId] ?? []
         let currentSetPosition = currentExerciseSets.firstIndex(where: { $0.id == currentExerciseSet.id }) ?? 0
 
         // 记录跳过的动作到日志（只记录当前组及之后的组）
@@ -377,8 +410,10 @@ class WorkoutViewModel: ObservableObject {
         // 暂停当前练习
         pauseExercise()
 
-        // 为当前及所有剩余的练习组添加跳过记录
-        let totalSets = workoutPlan.exercises.count
+        // 为当前及所有剩余的练习组添加跳过记录 - 使用缓存值
+        if _needsRecalculation {
+            updateCachesIfNeeded()
+        }
         let currentExerciseSet = currentExerciseSet
 
         // 找到当前ExerciseSet在计划中的位置
@@ -386,7 +421,7 @@ class WorkoutViewModel: ObservableObject {
             var lastExerciseName: String = ""
 
             // 从当前位置开始，为所有剩余的练习组添加跳过记录
-            for i in currentPosition..<totalSets {
+            for i in currentPosition..<_totalExerciseSets {
                 let exerciseSetToSkip = workoutPlan.exercises[i]
                 let exerciseName = exerciseSetToSkip.exercise.name
 
@@ -414,8 +449,11 @@ class WorkoutViewModel: ObservableObject {
         // 更新进度 - 使用防抖机制触发UI刷新
         debouncedUIUpdate()
 
-        // 检查是否所有练习都已跳过（训练完成）
-        if completedSets.count == workoutPlan.exercises.count {
+        // 检查是否所有练习都已跳过（训练完成） - 使用缓存值
+        if _needsRecalculation {
+            updateCachesIfNeeded()
+        }
+        if _completedSetsCount == _totalExerciseSets {
             DispatchQueue.main.async {
                 // 发送训练完成通知
                 NotificationCenter.default.post(name: .workoutCompleted, object: self)
@@ -619,6 +657,50 @@ class WorkoutViewModel: ObservableObject {
         } else {
             debouncedUIUpdate()
         }
+    }
+
+    /// 初始化计算缓存
+    private func initializeCaches() {
+        _totalExerciseSets = workoutPlan.exercises.count
+        _completedSetsCount = completedSets.count
+        _needsRecalculation = true
+        _exerciseGroupsCache.removeAll()
+        updateCachesIfNeeded()
+    }
+
+    /// 更新缓存（仅在需要时）
+    private func updateCachesIfNeeded() {
+        guard _needsRecalculation else { return }
+
+        // 更新基础计数缓存
+        _totalExerciseSets = workoutPlan.exercises.count
+        _completedSetsCount = completedSets.count
+
+        // 更新练习分组缓存
+        updateExerciseGroupsCache()
+
+        // 标记缓存已更新
+        _needsRecalculation = false
+        _lastExerciseId = currentExercise.id
+    }
+
+    /// 更新练习分组缓存 - 按练习ID分组所有ExerciseSet
+    private func updateExerciseGroupsCache() {
+        _exerciseGroupsCache.removeAll()
+
+        for exerciseSet in workoutPlan.exercises {
+            let exerciseId = exerciseSet.exercise.id
+
+            if _exerciseGroupsCache[exerciseId] == nil {
+                _exerciseGroupsCache[exerciseId] = []
+            }
+            _exerciseGroupsCache[exerciseId]?.append(exerciseSet)
+        }
+    }
+
+    /// 手动触发缓存失效
+    private func invalidateCaches() {
+        _needsRecalculation = true
     }
 
     // MARK: - Cleanup
