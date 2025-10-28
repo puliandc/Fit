@@ -4,6 +4,7 @@
 //
 //  Created by 陆家贤 on 9/10/2025.
 //  Updated by Jason Lu on 10/14/2025 - 清理调试代码和过度设计的复杂逻辑
+//  Updated by Jason Lu on 10/28/2025 - 状态管理优化：引入防抖机制减少UI重渲染，解决频繁状态更新导致的性能问题
 //
 
 import SwiftUI
@@ -190,9 +191,9 @@ class WorkoutViewModel: ObservableObject {
             // 训练完成
             pauseExercise()
 
-            // 确保进度更新能触发UI刷新 - 主动发送对象变化通知
+            // 确保进度更新能触发UI刷新 - 使用立即更新机制处理关键状态变化
             DispatchQueue.main.async {
-                self.objectWillChange.send()
+                self.immediateUIUpdate()
                 // 发送训练完成通知
                 NotificationCenter.default.post(name: .workoutCompleted, object: self)
             }
@@ -250,8 +251,8 @@ class WorkoutViewModel: ObservableObject {
                 // 立即更新组数显示
                 self.updateCurrentSetDisplay()
 
-                // 强制触发UI更新
-                self.objectWillChange.send()
+                // 使用防抖机制触发UI更新
+                self.debouncedUIUpdate()
             }
         }
     }
@@ -323,8 +324,8 @@ class WorkoutViewModel: ObservableObject {
 
             // 确保在主线程上更新UI状态
             DispatchQueue.main.async {
-                // 发送UI更新通知
-                self.objectWillChange.send()
+                // 使用防抖机制发送UI更新通知
+                self.debouncedUIUpdate()
 
                 // 立即更新组数显示，确保数据正确
                 self.updateCurrentSetDisplay()
@@ -500,9 +501,9 @@ class WorkoutViewModel: ObservableObject {
             needsUIUpdate = true
         }
 
-        // 只在需要时触发UI更新
+        // 只在需要时触发UI更新 - 使用防抖机制减少重渲染
         if needsUIUpdate {
-            objectWillChange.send()
+            debouncedUIUpdate()
         }
     }
 
@@ -571,9 +572,59 @@ class WorkoutViewModel: ObservableObject {
         return workoutLogRecorder.finishWorkout(workoutPlan: workoutPlan)
     }
 
+    // MARK: - State Management Optimization
+
+    /// 防抖UI更新机制 - 减少不必要的重渲染
+    private func debouncedUIUpdate() {
+        // 取消之前的更新任务
+        uiUpdateWorkItem?.cancel()
+
+        // 创建新的更新任务
+        uiUpdateWorkItem = DispatchWorkItem { [weak self] in
+            guard let self = self else { return }
+
+            let currentTime = CACurrentMediaTime()
+            // 确保距离上次更新已超过防抖间隔
+            if currentTime - self.lastUIUpdateTime >= self.uiUpdateDebounceInterval {
+                DispatchQueue.main.async {
+                    self.objectWillChange.send()
+                }
+                self.lastUIUpdateTime = currentTime
+            }
+        }
+
+        // 延迟执行防抖更新
+        DispatchQueue.global(qos: .userInteractive).asyncAfter(deadline: .now() + uiUpdateDebounceInterval, execute: uiUpdateWorkItem!)
+    }
+
+    /// 立即UI更新机制 - 用于关键状态变化
+    private func immediateUIUpdate() {
+        // 取消任何待处理的防抖更新
+        uiUpdateWorkItem?.cancel()
+
+        let currentTime = CACurrentMediaTime()
+        lastUIUpdateTime = currentTime
+
+        // 立即触发UI更新
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.objectWillChange.send()
+        }
+    }
+
+    /// 智能UI更新机制 - 根据状态变化频率自动选择更新策略
+    private func smartUIUpdate(isCriticalStateChange: Bool = false) {
+        if isCriticalStateChange {
+            immediateUIUpdate()
+        } else {
+            debouncedUIUpdate()
+        }
+    }
+
     // MARK: - Cleanup
     deinit {
         stopUnifiedTimer()
+        uiUpdateWorkItem?.cancel()
     }
 }
 
