@@ -10,6 +10,18 @@ class VoiceManager: NSObject {
         synthesizer.delegate = self
     }
 
+    /// 停止当前语音播放并释放资源
+    func stopSpeaking() {
+        if synthesizer.isSpeaking {
+            synthesizer.stopSpeaking(at: .immediate)
+        }
+    }
+
+    deinit {
+        // 确保释放AVSpeechSynthesizer资源
+        stopSpeaking()
+    }
+
     func speak(_ text: String) {
         let utterance = AVSpeechUtterance(string: text)
         utterance.voice = AVSpeechSynthesisVoice(language: "zh-CN")

@@ -28,16 +28,9 @@
 	<string>This app needs permission to update health data to track your fitness progress.</string>
 	<key>NSMotionUsageDescription</key>
 	<string>This app uses motion data to track your physical activities.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>TTS语音播报需要</string>
-
-	<!-- iOS 14+ File System Access Permissions -->
-	<key>NSDocumentsFolderUsageDescription</key>
-	<string>This app needs access to your Documents folder to read and save workout data files.</string>
-	<key>NSDesktopFolderUsageDescription</key>
-	<string>This app needs access to your Desktop folder to read and save workout data files.</string>
-	<key>NSDownloadsFolderUsageDescription</key>
-	<string>This app needs access to your Downloads folder to read workout plan files.</string>
+	<!-- Battery Monitoring Permission for Performance Optimization -->
+	<key>NSBatteryUsageDescription</key>
+	<string>This app monitors battery level to optimize performance and reduce battery consumption during workouts.</string>
 
 	<!-- iOS Keyboard Access for External Keyboard Support -->
 	<key>UIKeyboardRequiresUserInteraction</key>
@@ -81,8 +74,6 @@
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 	</array>
 	<key>UIFileSharingEnabled</key>
-	<true/>
-	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
 </dict>
 </plist>
