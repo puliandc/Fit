@@ -1,26 +1,10 @@
 # 训练日志 JSON 格式说明文档
 
-//created by Jason Lu on 10:00:00 10/14/2025
-
 ## 📋 文档概述
 
 ### 文档目的
 
 本文档详细说明了 Fit 应用训练日志系统的 JSON 数据格式，旨在为 AI 系统和技术人员提供清晰的数据结构说明，便于训练日志数据的解析、处理和分析。
-
-### 适用范围
-
-- AI 系统训练日志数据解析
-- 第三方应用数据集成
-- 数据分析和统计处理
-- 系统集成开发
-
-### 数据用途
-
-- 训练记录持久化存储
-- 训练进度跟踪和分析
-- 跨平台数据交换
-- 历史数据查询和统计
 
 ## 📊 JSON 结构示例
 
@@ -249,34 +233,7 @@
 
 ### AI 系统集成场景
 
-#### 1. 训练数据分析
-
-```python
-def analyze_workout_data(json_data):
-    """
-    分析训练数据，提取关键指标
-    """
-    workout = json.loads(json_data)
-
-    # 计算总训练量
-    total_volume = 0
-    completed_sets = 0
-
-    for entry in workout['entries']:
-        if 'value' in entry['actualWeight'] and 'value' in entry['actualReps']:
-            weight = entry['actualWeight']['value']
-            reps = entry['actualReps']['value']
-            total_volume += weight * reps
-            completed_sets += 1
-
-    return {
-        'total_volume': total_volume,
-        'completed_sets': completed_sets,
-        'completion_rate': completed_sets / len(workout['entries']) * 100
-    }
-```
-
-#### 2. 训练进度跟踪
+#### 1. 训练进度跟踪
 
 ```python
 def track_progress(current_workout, previous_workouts):
@@ -305,7 +262,7 @@ def track_progress(current_workout, previous_workouts):
     }
 ```
 
-#### 3. 数据验证和清理
+#### 2. 数据验证和清理
 
 ```python
 def validate_workout_json(json_data):
