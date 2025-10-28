@@ -35,6 +35,11 @@ class WorkoutViewModel: ObservableObject {
     private var hasAnnounced15Seconds = false
     private var hasAnnounced3Seconds = false
 
+    // 状态管理优化：防抖机制
+    private var uiUpdateWorkItem: DispatchWorkItem?
+    private var lastUIUpdateTime: CFTimeInterval = 0
+    private let uiUpdateDebounceInterval: CFTimeInterval = 0.1 // 100ms防抖
+
     // DEPRECATED: 简化数据结构，不再使用复杂的预建立系统
     // 直接使用workoutPlan和completedSets来跟踪进度
 
@@ -171,8 +176,8 @@ class WorkoutViewModel: ObservableObject {
         // 更新当前组数显示
         updateCurrentSetDisplay()
 
-        // 更新进度 - 触发UI刷新
-        objectWillChange.send()
+        // 更新进度 - 使用防抖机制触发UI刷新
+        debouncedUIUpdate()
 
         // 检查是否还有更多的组需要完成
         let totalSets = workoutPlan.exercises.count
@@ -298,8 +303,8 @@ class WorkoutViewModel: ObservableObject {
         // 更新当前组数显示
         updateCurrentSetDisplay()
 
-        // 更新进度 - 触发UI刷新
-        objectWillChange.send()
+        // 更新进度 - 使用防抖机制触发UI刷新
+        debouncedUIUpdate()
 
         // 找到下一个不同练习的索引
         var nextExerciseIndex = currentExerciseIndex + 1
@@ -405,8 +410,8 @@ class WorkoutViewModel: ObservableObject {
             }
         }
 
-        // 更新进度 - 触发UI刷新
-        objectWillChange.send()
+        // 更新进度 - 使用防抖机制触发UI刷新
+        debouncedUIUpdate()
 
         // 检查是否所有练习都已跳过（训练完成）
         if completedSets.count == workoutPlan.exercises.count {
