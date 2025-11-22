@@ -527,8 +527,9 @@ struct ModernButton: View {
     let fullWidth: Bool
 
     @State private var isPressed: Bool = false
-    @State private var shimmerOffset: CGFloat = -200 // 扫光动画偏移
+    @State private var shimmerActive: Bool = false // 控制扫光动画
     @Environment(\.colorScheme) var colorScheme: ColorScheme
+    @Environment(\.accessibilityReduceMotion) var reduceMotion
 
     enum ModernButtonStyle {
         case primary      // 绿色渐变 + 扫光动画 + h-14高度
@@ -581,13 +582,13 @@ struct ModernButton: View {
             isPressed = pressing
         }, perform: {})
         .onAppear {
-            // 启动扫光动画
-            Timer.scheduledTimer(withTimeInterval: 0.02, repeats: true) { timer in
-                shimmerOffset += 4
-                if shimmerOffset > 400 {
-                    shimmerOffset = -200
-                }
+            // 启动扫光动画（尊重减少动态设置）
+            if !reduceMotion {
+                shimmerActive = true
             }
+        }
+        .onDisappear {
+            shimmerActive = false
         }
     }
 
@@ -626,11 +627,12 @@ struct ModernButton: View {
                             endPoint: .trailing
                         )
                     )
-                    .offset(x: shimmerOffset)
+                    .offset(x: shimmerActive ? 400 : -200)
                     .animation(
-                        .linear(duration: 2)
-                        .repeatForever(autoreverses: false),
-                        value: shimmerOffset
+                        reduceMotion ? nil :
+                            .linear(duration: 2)
+                            .repeatForever(autoreverses: false),
+                        value: shimmerActive
                     )
                 )
             case .secondary:

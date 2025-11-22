@@ -363,6 +363,7 @@ struct ActionTimerView: View {
     @Binding var isVisible: Bool
     @State private var rotationAngle: Double = 0
     @Environment(\.colorScheme) var colorScheme: ColorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     // 时间格式化逻辑 - 复用CompactTimerView的实现
     private var formattedTime: String {
@@ -377,8 +378,11 @@ struct ActionTimerView: View {
             Image(systemName: "timer")
                 .font(.system(size: 20)) // w-5 h-5
                 .foregroundColor(.orange)
-                .rotationEffect(.degrees(rotationAngle))
-                .animation(.linear(duration: 2).repeatForever(autoreverses: false), value: rotationAngle)
+                .rotationEffect(.degrees(reduceMotion ? 0 : rotationAngle))
+                .animation(
+                    reduceMotion ? nil : .linear(duration: 2).repeatForever(autoreverses: false),
+                    value: rotationAngle
+                )
 
             VStack(spacing: 4) {
                 Text("动作时间")
@@ -417,15 +421,17 @@ struct ActionTimerView: View {
                         )
                 )
         )
-        .scaleEffect(isVisible ? 1.0 : 0.95) // 入场动画: scale: 0.95 → 1.0
-        .animation(.easeOut(duration: 0.3), value: isVisible) // 0.3s弹回正常大小
+        .scaleEffect(reduceMotion ? 1.0 : (isVisible ? 1.0 : 0.95)) // 入场动画: scale: 0.95 → 1.0
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.3), value: isVisible) // 0.3s弹回正常大小
         .onAppear {
             // 启动图标旋转动画
-            rotationAngle = 360
+            if !reduceMotion {
+                rotationAngle = 360
+            }
         }
         .onChange(of: elapsedTime) { oldValue, newValue in
             // 当时间重置为0或接近0时（通常表示新练习开始），重新触发微动画
-            if newValue <= 3 {
+            if newValue <= 3 && !reduceMotion {
                 withAnimation(.easeOut(duration: 0.3)) {
                     // 重新触发微妙的scale动画
                     rotationAngle = 360
@@ -465,6 +471,7 @@ struct CompactExerciseInfoCard: View {
 
     // 版本1.3: 从workoutViewModel获取当前练习的所有组数信息
     @EnvironmentObject var workoutViewModel: WorkoutViewModel
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var allExerciseSets: [ExerciseSet] {
         workoutViewModel.workoutPlan.exercises.filter { $0.exercise.name == exercise.name }
@@ -719,44 +726,58 @@ struct CompactExerciseInfoCard: View {
                                 startPoint: .leading,
                                 endPoint: .trailing
                             )
+                    )
+                    .mask(
+                        LinearGradient(
+                            colors: [
+                                Color.clear,
+                                Color.black,
+                                Color.clear
+                            ],
+                            startPoint: .leading,
+                            endPoint: .trailing
                         )
-                        .mask(
-                            LinearGradient(
-                                colors: [
-                                    Color.clear,
-                                    Color.black,
-                                    Color.clear
-                                ],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .offset(x: shimmerOffset)
-                        .animation(
+                    )
+                    .offset(x: shimmerOffset)
+                    .animation(
+                        reduceMotion ? nil :
                             .easeInOut(duration: 2.5)
                             .repeatForever(autoreverses: false),
-                            value: shimmerOffset
-                        )
+                        value: shimmerOffset
+                    )
                 )
                 .shadow(color: .appBackground.opacity(0.12), radius: 25, x: 0, y: 10)
         )
-        .scaleEffect(isVisible ? 1.0 : 0.95)
-        .opacity(isVisible ? 1.0 : 0)
-        .offset(y: isVisible ? 0 : 20)
-        .animation(.spring(response: 0.8, dampingFraction: 0.8).delay(0.2), value: isVisible)
+        .scaleEffect(reduceMotion ? 1.0 : (isVisible ? 1.0 : 0.95))
+        .opacity(reduceMotion ? 1.0 : (isVisible ? 1.0 : 0))
+        .offset(y: reduceMotion ? 0 : (isVisible ? 0 : 20))
+        .animation(
+            reduceMotion ? nil : .spring(response: 0.8, dampingFraction: 0.8).delay(0.2),
+            value: isVisible
+        )
         .onAppear {
-            withAnimation {
+            if reduceMotion {
                 isVisible = true
-                // 启动光泽动画
-                shimmerOffset = 200
+                shimmerOffset = 0
+            } else {
+                withAnimation {
+                    isVisible = true
+                    // 启动光泽动画
+                    shimmerOffset = 200
+                }
             }
         }
         .onChange(of: exercise.id) { oldValue, newValue in
             // 当练习切换时，重新触发入场动画
-            withAnimation(.spring(response: 0.8, dampingFraction: 0.8).delay(0.2)) {
+            if reduceMotion {
                 isVisible = true
-                // 重新启动光泽动画
-                shimmerOffset = 200
+                shimmerOffset = 0
+            } else {
+                withAnimation(.spring(response: 0.8, dampingFraction: 0.8).delay(0.2)) {
+                    isVisible = true
+                    // 重新启动光泽动画
+                    shimmerOffset = 200
+                }
             }
         }
         .onTapGesture {
@@ -781,6 +802,7 @@ struct CompactTimerView: View {
 
     @State private var isVisible: Bool = false
     @State private var shimmerOffset: CGFloat = -200
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var formattedTime: String {
         if isResting {
@@ -913,22 +935,31 @@ struct CompactTimerView: View {
                         )
                         .offset(x: shimmerOffset)
                         .animation(
-                            .easeInOut(duration: 2.5)
-                            .repeatForever(autoreverses: false),
+                            reduceMotion ? nil :
+                                .easeInOut(duration: 2.5)
+                                .repeatForever(autoreverses: false),
                             value: shimmerOffset
                         )
                 )
                 .shadow(color: .appBackground.opacity(0.12), radius: 25, x: 0, y: 10)
         )
-        .scaleEffect(isVisible ? 1.0 : 0.95)
-        .opacity(isVisible ? 1.0 : 0)
-        .offset(y: isVisible ? 0 : 20)
-        .animation(.spring(response: 0.8, dampingFraction: 0.8).delay(0.3), value: isVisible)
+        .scaleEffect(reduceMotion ? 1.0 : (isVisible ? 1.0 : 0.95))
+        .opacity(reduceMotion ? 1.0 : (isVisible ? 1.0 : 0))
+        .offset(y: reduceMotion ? 0 : (isVisible ? 0 : 20))
+        .animation(
+            reduceMotion ? nil : .spring(response: 0.8, dampingFraction: 0.8).delay(0.3),
+            value: isVisible
+        )
         .onAppear {
-            withAnimation {
+            if reduceMotion {
                 isVisible = true
-                // 启动光泽动画
-                shimmerOffset = 200
+                shimmerOffset = 0
+            } else {
+                withAnimation {
+                    isVisible = true
+                    // 启动光泽动画
+                    shimmerOffset = 200
+                }
             }
         }
         .onTapGesture {

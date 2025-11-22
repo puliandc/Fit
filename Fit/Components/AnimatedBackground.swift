@@ -15,6 +15,7 @@ struct AnimatedBackground: View {
     @State private var blob1Scale: CGFloat = 1.0
     @State private var isLowPowerMode: Bool = false
     @State private var isAnimationEnabled: Bool = true
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     // MARK: - Body
     var body: some View {
@@ -24,17 +25,28 @@ struct AnimatedBackground: View {
                 // 移除clipped()，让背景延伸到安全区域
 
             // 条件性显示动画模糊球层
-            if isAnimationEnabled && !isLowPowerMode {
+            if isAnimationEnabled && !isLowPowerMode && !reduceMotion {
                 animatedBlobLayer
                     // 移除clipped()，让动画效果延伸到安全区域
             }
         }
         .onAppear {
             checkBatteryLevel()
-            startAnimations()
+            if reduceMotion {
+                isAnimationEnabled = false
+            } else {
+                startAnimations()
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: UIDevice.batteryStateDidChangeNotification)) { _ in
             checkBatteryLevel()
+        }
+        .onChange(of: reduceMotion) { _, newValue in
+            if newValue {
+                isAnimationEnabled = false
+            } else {
+                startAnimations()
+            }
         }
     }
 
@@ -76,7 +88,7 @@ struct AnimatedBackground: View {
     // MARK: - Animation Control
     private func startAnimations() {
         // 智能动画控制：根据电池状态和设置决定是否启动动画
-        guard isAnimationEnabled && !isLowPowerMode else { return }
+        guard isAnimationEnabled && !isLowPowerMode && !reduceMotion else { return }
 
         // 简化的单球动画 (30秒周期，更慢的动画减少GPU负担)
         withAnimation(
@@ -110,7 +122,7 @@ struct AnimatedBackground: View {
     // MARK: - Public Animation Control
     func toggleAnimation() {
         isAnimationEnabled.toggle()
-        if isAnimationEnabled {
+        if isAnimationEnabled && !reduceMotion {
             checkBatteryLevel() // 重新检查电池状态
             startAnimations()
         }
