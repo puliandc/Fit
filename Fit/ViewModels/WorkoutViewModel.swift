@@ -277,6 +277,9 @@ class WorkoutViewModel: ObservableObject
     func startRest()
     {
         guard !workoutFinished else { return }
+        // 重置语音播报标记，确保每次休息都会重新播报倒计时
+        hasAnnounced15Seconds = false
+        hasAnnounced3Seconds = false
         // 确保在主线程上进行原子性状态更新
         DispatchQueue.main.async
         { [weak self] in
@@ -475,6 +478,9 @@ class WorkoutViewModel: ObservableObject
     {
         stopUnifiedTimer()
         isResting = false
+        // 重置语音播报标记，确保后续休息阶段能正常播报
+        hasAnnounced15Seconds = false
+        hasAnnounced3Seconds = false
         startExercise()
     }
 
