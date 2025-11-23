@@ -39,6 +39,12 @@ class WorkoutSessionManager: ObservableObject {
     func completeWorkout() -> Bool {
         // 保存训练日志
         if let viewModel = currentWorkoutViewModel {
+            // 防止未完成时误调用
+            guard viewModel.workoutFinished || viewModel.isWorkoutComplete else {
+                print("⚠️ Workout not marked complete yet, skipping log save")
+                return false
+            }
+
             let logSaved = viewModel.finishWorkoutAndSaveLog()
 
             if logSaved {
