@@ -5,11 +5,13 @@
 //  Created by Jason Lu on 15:10:00 10/14/2025.
 //
 
-import SwiftUI
 import Combine
+import SwiftUI
 
 // MARK: - Dialog Type Enum
-enum DialogType: Identifiable, Equatable {
+
+enum DialogType: Identifiable, Equatable
+{
     case editSet(Exercise, Int, WorkoutViewModel)
     case completion
     case quitWorkout
@@ -17,9 +19,11 @@ enum DialogType: Identifiable, Equatable {
     case quitRemainingExercises
     case workoutComplete
 
-    var id: String {
-        switch self {
-        case .editSet(let exercise, let setIndex, _):
+    var id: String
+    {
+        switch self
+        {
+        case let .editSet(exercise, setIndex, _):
             return "edit_set_\(exercise.id)_\(setIndex)"
         case .completion:
             return "completion"
@@ -34,13 +38,17 @@ enum DialogType: Identifiable, Equatable {
         }
     }
 
-    static func == (lhs: DialogType, rhs: DialogType) -> Bool {
-        switch (lhs, rhs) {
-        case (.editSet(let lhsExercise, let lhsSetIndex, let lhsViewModel),
-             .editSet(let rhsExercise, let rhsSetIndex, let rhsViewModel)):
+    static func == (lhs: DialogType, rhs: DialogType) -> Bool
+    {
+        switch (lhs, rhs)
+        {
+        case let (
+            .editSet(lhsExercise, lhsSetIndex, lhsViewModel),
+            .editSet(rhsExercise, rhsSetIndex, rhsViewModel)
+        ):
             return lhsExercise.id == rhsExercise.id &&
-                   lhsSetIndex == rhsSetIndex &&
-                   lhsViewModel.workoutPlan.id == rhsViewModel.workoutPlan.id
+                lhsSetIndex == rhsSetIndex &&
+                lhsViewModel.workoutPlan.id == rhsViewModel.workoutPlan.id
         case (.completion, .completion):
             return true
         case (.quitWorkout, .quitWorkout):
@@ -58,23 +66,31 @@ enum DialogType: Identifiable, Equatable {
 }
 
 // MARK: - Dialog Manager
+
 // 专门负责对话框状态管理，从NavigationManager中分离出来
-class DialogManager: ObservableObject {
+class DialogManager: ObservableObject
+{
     @Published var presentedDialog: DialogType?
 
-    init() {
+    init()
+    {
         print("🎯 DialogManager initialized")
     }
 
     // MARK: - Dialog Methods
-    func presentDialog(_ dialog: DialogType) {
-        withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+
+    func presentDialog(_ dialog: DialogType)
+    {
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.8))
+        {
             presentedDialog = dialog
         }
     }
 
-    func dismissDialog() {
-        withAnimation(.easeInOut(duration: 0.2)) {
+    func dismissDialog()
+    {
+        withAnimation(.easeInOut(duration: 0.2))
+        {
             presentedDialog = nil
         }
     }

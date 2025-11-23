@@ -10,14 +10,17 @@
 import SwiftUI
 
 // MARK: - Safe Area Background Component
-struct SafeAreaBackground: View {
-    var body: some View {
+
+struct SafeAreaBackground: View
+{
+    var body: some View
+    {
         // 使用与AnimatedBackground协调的基础渐变色
         LinearGradient(
             colors: [
                 Color(hex: "#FFF7ED"), // orange-50 - 与AnimatedBackground的主色调协调
                 Color(hex: "#FCE7F3"), // pink-50 - 提供温暖感
-                Color(hex: "#F3E8FF")  // purple-100 - 增加层次感
+                Color(hex: "#F3E8FF") // purple-100 - 增加层次感
             ],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
@@ -26,29 +29,36 @@ struct SafeAreaBackground: View {
 }
 
 // MARK: - Enhanced Safe Area Background with System Fallback
-struct EnhancedSafeAreaBackground: View {
+
+struct EnhancedSafeAreaBackground: View
+{
     @Environment(\.colorScheme) var colorScheme
 
-    var body: some View {
-        Group {
-            if colorScheme == .light {
+    var body: some View
+    {
+        Group
+        {
+            if colorScheme == .light
+            {
                 // 浅色模式：使用温暖的浅色调
                 LinearGradient(
                     colors: [
                         Color(hex: "#FFF7ED"), // orange-50
                         Color(hex: "#FCE7F3"), // pink-50
-                        Color(hex: "#F3E8FF")  // purple-100
+                        Color(hex: "#F3E8FF") // purple-100
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
-            } else {
+            }
+            else
+            {
                 // 深色模式：使用协调的深色调
                 LinearGradient(
                     colors: [
                         Color(hex: "#1C1917"), // stone-800
                         Color(hex: "#1E1B4B"), // indigo-950
-                        Color(hex: "#18181B")  // zinc-900
+                        Color(hex: "#18181B") // zinc-900
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
@@ -59,27 +69,35 @@ struct EnhancedSafeAreaBackground: View {
 }
 
 // MARK: - Header/Footer Safe Area Background
-struct ComponentSafeAreaBackground: View {
+
+struct ComponentSafeAreaBackground: View
+{
     let opacity: Double
     let useMaterial: Bool
     let extendToSafeArea: Bool
     let edge: Edge.Set
 
-    init(opacity: Double = 0.9, useMaterial: Bool = true, extendToSafeArea: Bool = false, edge: Edge.Set = []) {
+    init(opacity: Double = 0.9, useMaterial: Bool = true, extendToSafeArea: Bool = false, edge: Edge.Set = [])
+    {
         self.opacity = opacity
         self.useMaterial = useMaterial
         self.extendToSafeArea = extendToSafeArea
         self.edge = edge
     }
 
-    var body: some View {
+    var body: some View
+    {
         // 统一的白色半透明背景，用于Header和Footer组件
-        ZStack {
-            if useMaterial {
+        ZStack
+        {
+            if useMaterial
+            {
                 // 毛玻璃背景层
                 Color.white.opacity(opacity)
                     .background(.ultraThinMaterial)
-            } else {
+            }
+            else
+            {
                 // 纯色背景层
                 Color.white.opacity(opacity)
             }
@@ -89,24 +107,30 @@ struct ComponentSafeAreaBackground: View {
 }
 
 // MARK: - Extended Header Background (向上延伸到安全区域)
-struct ExtendedHeaderBackground: View {
+
+struct ExtendedHeaderBackground: View
+{
     let opacity: Double
     let useMaterial: Bool
     let showBottomBorder: Bool
 
-    init(opacity: Double = 0.9, useMaterial: Bool = true, showBottomBorder: Bool = true) {
+    init(opacity: Double = 0.9, useMaterial: Bool = true, showBottomBorder: Bool = true)
+    {
         self.opacity = opacity
         self.useMaterial = useMaterial
         self.showBottomBorder = showBottomBorder
     }
 
-    var body: some View {
-        ZStack {
+    var body: some View
+    {
+        ZStack
+        {
             // 白色半透明背景层
             Color.white.opacity(opacity)
                 .background(.ultraThinMaterial)
 
-            if showBottomBorder {
+            if showBottomBorder
+            {
                 // 延伸边框到整个宽度，避免视觉中断
                 Rectangle()
                     .fill(Color.glassBorder)
@@ -120,24 +144,30 @@ struct ExtendedHeaderBackground: View {
 }
 
 // MARK: - Extended Footer Background (向下延伸到安全区域)
-struct ExtendedFooterBackground: View {
+
+struct ExtendedFooterBackground: View
+{
     let opacity: Double
     let useMaterial: Bool
     let showTopBorder: Bool
 
-    init(opacity: Double = 0.9, useMaterial: Bool = true, showTopBorder: Bool = true) {
+    init(opacity: Double = 0.9, useMaterial: Bool = true, showTopBorder: Bool = true)
+    {
         self.opacity = opacity
         self.useMaterial = useMaterial
         self.showTopBorder = showTopBorder
     }
 
-    var body: some View {
-        ZStack {
+    var body: some View
+    {
+        ZStack
+        {
             // 白色半透明背景层
             Color.white.opacity(opacity)
                 .background(.ultraThinMaterial)
 
-            if showTopBorder {
+            if showTopBorder
+            {
                 // 延伸边框到整个宽度，避免视觉中断
                 Rectangle()
                     .fill(Color.glassBorder)
@@ -151,8 +181,11 @@ struct ExtendedFooterBackground: View {
 }
 
 // MARK: - Preview
-#Preview {
-    VStack(spacing: 20) {
+
+#Preview
+{
+    VStack(spacing: 20)
+    {
         // 基础安全区域背景
         SafeAreaBackground()
             .frame(height: 100)
@@ -169,13 +202,15 @@ struct ExtendedFooterBackground: View {
             .cornerRadius(12)
 
         // 扩展Header背景 - 显示安全区域延伸效果
-        VStack {
+        VStack
+        {
             Text("Header Background")
                 .font(.headline)
                 .foregroundColor(.primary)
                 .padding()
 
-            ZStack {
+            ZStack
+            {
                 // 模拟内容区域
                 RoundedRectangle(cornerRadius: 8)
                     .fill(Color.blue.opacity(0.2))
@@ -188,8 +223,10 @@ struct ExtendedFooterBackground: View {
         .cornerRadius(12)
 
         // 扩展Footer背景 - 显示安全区域延伸效果
-        VStack {
-            ZStack {
+        VStack
+        {
+            ZStack
+            {
                 // 模拟内容区域
                 RoundedRectangle(cornerRadius: 8)
                     .fill(Color.green.opacity(0.2))

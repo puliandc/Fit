@@ -9,24 +9,30 @@
 import SwiftUI
 
 // MARK: - App Colors (基于Figma设计规范)
-extension Color {
+
+extension Color
+{
     // MARK: - Primary Colors - 深色主题渐变系统
+
     static let appPrimary = Color(hex: "#6366F1") // Indigo-500
     static let appPrimaryLight = Color(hex: "#818CF8") // Indigo-400
     static let appPrimaryDark = Color(hex: "#4F46E5") // Indigo-600
 
     // MARK: - Accent Colors - 功能性色彩
+
     static let appAccent = Color(hex: "#F97316") // Orange-500
     static let appAccentLight = Color(hex: "#FB923C") // Orange-400
     static let appAccentDark = Color(hex: "#EA580C") // Orange-600
 
     // MARK: - Background Colors - 深色背景系统
+
     static let appBackground = Color(hex: "#09090B") // Zinc-950
     static let appSurface = Color(hex: "#18181B") // Zinc-900
     static let appSurfaceLight = Color(hex: "#27272A") // Zinc-800
     static let appSurfaceElevated = Color(hex: "#3F3F46") // Zinc-700
 
     // MARK: - Text Colors - 文本层级
+
     static let appText = Color(hex: "#FAFAFA") // Zinc-50
     static let appTextSecondary = Color(hex: "#A1A1AA") // Zinc-400
     static let appTextTertiary = Color(hex: "#71717A") // Zinc-500
@@ -34,12 +40,14 @@ extension Color {
     static let appTextDisabled = Color(hex: "#52525B") // Zinc-600
 
     // MARK: - Glass Effect Colors - 毛玻璃效果
+
     static let glassBackground = Color.white.opacity(0.08)
     static let glassBorder = Color.white.opacity(0.12)
     static let glassShadowEffect = Color.black.opacity(0.4)
     static let glassHighlight = Color.white.opacity(0.15)
 
     // MARK: - Status Colors - 状态色彩
+
     static let success = Color(hex: "#22C55E") // Green-500
     static let warning = Color(hex: "#F59E0B") // Amber-500
     static let warningDark = Color(hex: "#EA580C") // Orange-600 - 深色模式橘色
@@ -50,6 +58,7 @@ extension Color {
     static let info = Color(hex: "#3B82F6") // Blue-500
 
     // MARK: - Gradient Colors - 渐变系统
+
     static let primaryGradientStart = Color(hex: "#6366F1") // Indigo
     static let primaryGradientEnd = Color(hex: "#A855F7") // Purple
 
@@ -57,23 +66,29 @@ extension Color {
     static let accentGradientEnd = Color(hex: "#EC4899") // Pink
 
     // MARK: - Feature Colors - 功能特色色彩
+
     static let workoutColor = Color(hex: "#F97316") // Orange
     static let restColor = Color(hex: "#3B82F6") // Blue
     static let progressColor = Color(hex: "#A855F7") // Purple
 
     // MARK: - Animation Colors - 动画色彩
+
     static let pulseColor = Color(hex: "#A855F7") // Purple
     static let highlightColor = Color(hex: "#FCD34D") // Yellow
 }
 
 // MARK: - Color Initializer
-extension Color {
-    init(hex: String) {
+
+extension Color
+{
+    init(hex: String)
+    {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
         var int: UInt64 = 0
         Scanner(string: hex).scanHexInt64(&int)
         let a, r, g, b: UInt64
-        switch hex.count {
+        switch hex.count
+        {
         case 3: // RGB (12-bit)
             (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
         case 6: // RGB (24-bit)
@@ -88,14 +103,16 @@ extension Color {
             .sRGB,
             red: Double(r) / 255,
             green: Double(g) / 255,
-            blue:  Double(b) / 255,
+            blue: Double(b) / 255,
             opacity: Double(a) / 255
         )
     }
 }
 
 // MARK: - Gradient Extensions (基于Figma设计)
-extension LinearGradient {
+
+extension LinearGradient
+{
     // 主要渐变 - 用于重要元素
     static let primaryGradient = LinearGradient(
         colors: [.primaryGradientStart, .primaryGradientEnd],
@@ -110,7 +127,6 @@ extension LinearGradient {
         endPoint: .bottomTrailing
     )
 
-    
     // 训练渐变 - 运动相关
     static let workoutGradient = LinearGradient(
         colors: [.workoutColor, .accentGradientEnd],
@@ -152,7 +168,9 @@ extension LinearGradient {
 }
 
 // MARK: - Shadow Extensions
-extension Color {
+
+extension Color
+{
     static let softShadow = Color.black.opacity(0.1)
     static let mediumShadow = Color.black.opacity(0.2)
     static let hardShadow = Color.black.opacity(0.3)
@@ -162,16 +180,22 @@ extension Color {
 }
 
 // MARK: - Color Schemes
-extension Color {
-    static func adaptive(light: Color, dark: Color) -> Color {
-        Color(UIColor { traitCollection in
+
+extension Color
+{
+    static func adaptive(light: Color, dark: Color) -> Color
+    {
+        Color(UIColor
+        { traitCollection in
             traitCollection.userInterfaceStyle == .dark ? UIColor(dark) : UIColor(light)
         })
     }
 }
 
 // MARK: - Accessibility Colors
-extension Color {
+
+extension Color
+{
     static let accessibilityHighContrast = Color.black
     static let accessibilityReducedMotion = Color.gray
 }

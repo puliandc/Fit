@@ -5,28 +5,33 @@
 //  Created by 陆家贤 on 9/10/2025.
 //
 
-import SwiftUI
 import Foundation
+import SwiftUI
 
 // MARK: - Exercise Model
-struct Exercise: Identifiable, Codable, Hashable {
+
+struct Exercise: Identifiable, Codable, Hashable
+{
     let id: UUID
     let name: String
 
     init(
         id: UUID = UUID(),
         name: String
-    ) {
+    )
+    {
         self.id = id
         self.name = name
     }
 }
 
 // MARK: - Exercise Set Model
-struct ExerciseSet: Identifiable, Codable, Hashable {
+
+struct ExerciseSet: Identifiable, Codable, Hashable
+{
     let id: UUID
     let exercise: Exercise
-    let targetReps: Int  // Number of sets for this exercise
+    let targetReps: Int // Number of sets for this exercise
     let targetWeight: Double
     let restTime: Int // in seconds
     var notes: String?
@@ -38,7 +43,8 @@ struct ExerciseSet: Identifiable, Codable, Hashable {
         targetWeight: Double,
         restTime: Int = 60,
         notes: String? = nil
-    ) {
+    )
+    {
         self.id = id
         self.exercise = exercise
         self.targetReps = targetReps
@@ -49,7 +55,9 @@ struct ExerciseSet: Identifiable, Codable, Hashable {
 }
 
 // MARK: - Workout Plan Model
-struct WorkoutPlan: Identifiable, Codable, Hashable, Equatable {
+
+struct WorkoutPlan: Identifiable, Codable, Hashable, Equatable
+{
     let id: UUID
     let name: String
     let duration: Int // in minutes
@@ -60,7 +68,8 @@ struct WorkoutPlan: Identifiable, Codable, Hashable, Equatable {
         name: String,
         duration: Int,
         exercises: [ExerciseSet]
-    ) {
+    )
+    {
         self.id = id
         self.name = name
         self.duration = duration
@@ -69,29 +78,35 @@ struct WorkoutPlan: Identifiable, Codable, Hashable, Equatable {
 }
 
 // MARK: - Equatable Conformance
-extension WorkoutPlan {
-    static func == (lhs: WorkoutPlan, rhs: WorkoutPlan) -> Bool {
+
+extension WorkoutPlan
+{
+    static func == (lhs: WorkoutPlan, rhs: WorkoutPlan) -> Bool
+    {
         return lhs.id == rhs.id
     }
 }
 
-
-
 // MARK: - Mock Data Provider
-class MockDataProvider {
+
+class MockDataProvider
+{
     static let shared = MockDataProvider()
 
     // 修复循环依赖问题 - 延迟初始化
     private var _sampleExercises: [Exercise]?
     private var _sampleWorkoutPlans: [WorkoutPlan]?
 
-    private init() {
+    private init()
+    {
         initializeData()
     }
 
     // 延迟初始化的示例练习数据
-    var sampleExercises: [Exercise] {
-        if let exercises = _sampleExercises {
+    var sampleExercises: [Exercise]
+    {
+        if let exercises = _sampleExercises
+        {
             return exercises
         }
 
@@ -108,8 +123,10 @@ class MockDataProvider {
     }
 
     // 延迟初始化的示例训练计划数据
-    var sampleWorkoutPlans: [WorkoutPlan] {
-        if let plans = _sampleWorkoutPlans {
+    var sampleWorkoutPlans: [WorkoutPlan]
+    {
+        if let plans = _sampleWorkoutPlans
+        {
             return plans
         }
 
@@ -156,18 +173,22 @@ class MockDataProvider {
     }
 
     // 安全初始化方法
-    private func initializeData() {
+    private func initializeData()
+    {
         // 预先初始化数据以避免循环依赖
         _ = sampleExercises
         _ = sampleWorkoutPlans
     }
 
     // MARK: - Helper Methods
-    func getExercise(byName name: String) -> Exercise? {
+
+    func getExercise(byName name: String) -> Exercise?
+    {
         return sampleExercises.first { $0.name == name }
     }
 
-    func getWorkoutPlan(byName name: String) -> WorkoutPlan? {
+    func getWorkoutPlan(byName name: String) -> WorkoutPlan?
+    {
         return sampleWorkoutPlans.first { $0.name == name }
     }
 
@@ -177,16 +198,21 @@ class MockDataProvider {
 }
 
 // MARK: - Preview Helpers
-extension MockDataProvider {
-    static var previewWorkout: WorkoutPlan {
+
+extension MockDataProvider
+{
+    static var previewWorkout: WorkoutPlan
+    {
         return shared.sampleWorkoutPlans[0]
     }
 
-    static var previewExercises: [Exercise] {
+    static var previewExercises: [Exercise]
+    {
         return Array(shared.sampleExercises.prefix(3))
     }
 
-    static var previewExercise: Exercise {
+    static var previewExercise: Exercise
+    {
         return shared.sampleExercises[0]
     }
 }

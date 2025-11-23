@@ -1,34 +1,44 @@
-//created by Jason Lu on 09:46:00 10/13/2025
-//updated by Jason Lu on 15:45:00 10/15/2025 - 简化版JSON训练计划解析器
+// created by Jason Lu on 09:46:00 10/13/2025
+// updated by Jason Lu on 15:45:00 10/15/2025 - 简化版JSON训练计划解析器
 
 import Foundation
 
 // MARK: - JSON训练计划解析器
-class JSONWorkoutParser {
 
+class JSONWorkoutParser
+{
     // 解析器初始化
-    init() {
-    }
+    init()
+    { }
 
     // 解析JSON训练计划
-    func parseWorkoutPlan(from data: Data) throws -> WorkoutPlan {
+    func parseWorkoutPlan(from data: Data) throws -> WorkoutPlan
+    {
         // 1. JSON格式验证
-        guard basicJSONValidation(data) else {
+        guard basicJSONValidation(data)
+        else
+        {
             throw JSONParseError.invalidFormat
         }
 
         // 2. 解析JSON数据
-        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        else
+        {
             throw JSONParseError.invalidStructure
         }
 
         // 3. 提取训练计划名称
-        guard let planName = json["训练计划名称"] as? String else {
+        guard let planName = json["训练计划名称"] as? String
+        else
+        {
             throw JSONParseError.missingPlanName
         }
 
         // 4. 解析练习项目和组数配置
-        guard let exerciseItems = json["练习项目"] as? [[String: Any]] else {
+        guard let exerciseItems = json["练习项目"] as? [[String: Any]]
+        else
+        {
             throw JSONParseError.missingExercises
         }
 
@@ -42,40 +52,56 @@ class JSONWorkoutParser {
     }
 
     // JSON格式验证
-    func basicJSONValidation(_ data: Data) -> Bool {
+    func basicJSONValidation(_ data: Data) -> Bool
+    {
         // 检查数据是否为空
-        guard data.count > 0 else {
+        guard data.count > 0
+        else
+        {
             return false
         }
 
         // 尝试解析JSON格式
-        do {
+        do
+        {
             let json = try JSONSerialization.jsonObject(with: data)
-            guard let dict = json as? [String: Any] else {
+            guard let dict = json as? [String: Any]
+            else
+            {
                 return false
             }
 
             // 验证必要字段存在
-            guard dict["训练计划名称"] != nil else {
+            guard dict["训练计划名称"] != nil
+            else
+            {
                 return false
             }
 
-            guard dict["练习项目"] != nil else {
+            guard dict["练习项目"] != nil
+            else
+            {
                 return false
             }
 
             return true
-        } catch {
+        }
+        catch
+        {
             return false
         }
     }
 
     // 解析练习项目和组数配置
-    private func parseExerciseItems(_ exerciseItems: [[String: Any]]) throws -> [ExerciseSet] {
+    private func parseExerciseItems(_ exerciseItems: [[String: Any]]) throws -> [ExerciseSet]
+    {
         var exerciseSets: [ExerciseSet] = []
 
-        for (exerciseIndex, exerciseDict) in exerciseItems.enumerated() {
-            guard let exerciseName = exerciseDict["练习名称"] as? String else {
+        for (exerciseIndex, exerciseDict) in exerciseItems.enumerated()
+        {
+            guard let exerciseName = exerciseDict["练习名称"] as? String
+            else
+            {
                 throw JSONParseError.missingExerciseName(exerciseIndex + 1)
             }
 
@@ -83,18 +109,23 @@ class JSONWorkoutParser {
             let exercise = createExerciseFromName(exerciseName)
 
             // 解析组数设置
-            guard let setConfigs = exerciseDict["组数设置"] as? [[String: Any]] else {
+            guard let setConfigs = exerciseDict["组数设置"] as? [[String: Any]]
+            else
+            {
                 throw JSONParseError.missingSetConfig(exerciseName)
             }
 
             // 为每个组数设置创建ExerciseSet
-            for (setIndex, setConfig) in setConfigs.enumerated() {
-                if let exerciseSet = createExerciseSet(
-                    from: setConfig,
-                    exercise: exercise,
-                    exerciseName: exerciseName,
-                    setIndex: setIndex + 1
-                ) {
+            for (setIndex, setConfig) in setConfigs.enumerated()
+            {
+                if
+                    let exerciseSet = createExerciseSet(
+                        from: setConfig,
+                        exercise: exercise,
+                        exerciseName: exerciseName,
+                        setIndex: setIndex + 1
+                    )
+                {
                     exerciseSets.append(exerciseSet)
                 }
             }
@@ -104,7 +135,8 @@ class JSONWorkoutParser {
     }
 
     // 创建基础Exercise对象（简化版）
-    private func createExerciseFromName(_ exerciseName: String) -> Exercise {
+    private func createExerciseFromName(_ exerciseName: String) -> Exercise
+    {
         return Exercise(name: exerciseName)
     }
 
@@ -112,11 +144,15 @@ class JSONWorkoutParser {
     private func createExerciseSet(
         from setConfig: [String: Any],
         exercise: Exercise,
-        exerciseName: String,
-        setIndex: Int
-    ) -> ExerciseSet? {
-        guard let targetReps = setConfig["目标次数"] as? Int,
-              let targetWeight = setConfig["目标重量"] as? Double else {
+        exerciseName _: String,
+        setIndex _: Int
+    ) -> ExerciseSet?
+    {
+        guard
+            let targetReps = setConfig["目标次数"] as? Int,
+            let targetWeight = setConfig["目标重量"] as? Double
+        else
+        {
             return nil
         }
 
@@ -131,11 +167,14 @@ class JSONWorkoutParser {
     }
 
     // 创建WorkoutPlan对象（简化版）
-    private func createCompleteWorkoutPlan(name: String, exerciseSets: [ExerciseSet]) -> WorkoutPlan {
+    private func createCompleteWorkoutPlan(name: String, exerciseSets: [ExerciseSet]) -> WorkoutPlan
+    {
         // 计算训练时长 - 基于实际组数和休息时间
-        let totalEstimatedTime = exerciseSets.reduce(0) { total, set in
+        let totalEstimatedTime = exerciseSets.reduce(0)
+        { total, _ in
             total + 60 // 每组大约60秒
-        } + exerciseSets.dropLast().reduce(0) { total, set in
+        } + exerciseSets.dropLast().reduce(0)
+        { total, set in
             total + set.restTime // 休息时间
         }
 
@@ -149,9 +188,10 @@ class JSONWorkoutParser {
     }
 }
 
-
 // MARK: - 解析错误类型
-enum JSONParseError: LocalizedError {
+
+enum JSONParseError: LocalizedError
+{
     case invalidFormat
     case invalidStructure
     case missingPlanName
@@ -159,8 +199,10 @@ enum JSONParseError: LocalizedError {
     case missingExerciseName(Int)
     case missingSetConfig(String)
 
-    var errorDescription: String? {
-        switch self {
+    var errorDescription: String?
+    {
+        switch self
+        {
         case .invalidFormat:
             return "JSON格式无效，请检查文件格式"
         case .invalidStructure:
@@ -169,9 +211,9 @@ enum JSONParseError: LocalizedError {
             return "缺少训练计划名称字段"
         case .missingExercises:
             return "缺少练习项目字段"
-        case .missingExerciseName(let index):
+        case let .missingExerciseName(index):
             return "第\(index)个练习项目缺少练习名称字段"
-        case .missingSetConfig(let exerciseName):
+        case let .missingSetConfig(exerciseName):
             return "练习 '\(exerciseName)' 缺少组数设置字段"
         }
     }

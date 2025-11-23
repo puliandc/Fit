@@ -8,33 +8,46 @@
 import SwiftUI
 
 // MARK: - Weight Formatting Helper
-extension ContentView {
-    private func formatWeight(_ weight: Double) -> String {
-        if weight == 0 {
+
+extension ContentView
+{
+    private func formatWeight(_ weight: Double) -> String
+    {
+        if weight == 0
+        {
             return "自重"
-        } else if abs(weight.truncatingRemainder(dividingBy: 1)) < 0.0001 {
+        }
+        else if abs(weight.truncatingRemainder(dividingBy: 1)) < 0.0001
+        {
             return String(format: "%.0f", weight)
-        } else {
+        }
+        else
+        {
             return String(format: "%.1f", weight)
         }
     }
 }
 
-struct ContentView: View {
+struct ContentView: View
+{
     @EnvironmentObject var navigationManager: NavigationManager
     @EnvironmentObject var dialogManager: DialogManager
     @EnvironmentObject var workoutSessionManager: WorkoutSessionManager
 
     // Helper function to format time
-    private func formatTime(_ seconds: Int) -> String {
+    private func formatTime(_ seconds: Int) -> String
+    {
         let minutes = seconds / 60
         let secs = seconds % 60
         return String(format: "%d:%02d", minutes, secs)
     }
 
-    var body: some View {
-        ZStack {
-            switch navigationManager.currentScreen {
+    var body: some View
+    {
+        ZStack
+        {
+            switch navigationManager.currentScreen
+            {
             case .main:
                 MainScreen()
                     .transition(.asymmetric(
@@ -42,15 +55,18 @@ struct ContentView: View {
                         removal: .move(edge: .trailing)
                     ))
 
-            case .workout(let workoutPlan):
-                if let workoutViewModel = workoutSessionManager.currentWorkoutViewModel {
+            case let .workout(workoutPlan):
+                if let workoutViewModel = workoutSessionManager.currentWorkoutViewModel
+                {
                     WorkoutScreen(workoutPlan: workoutPlan)
                         .environmentObject(workoutViewModel)
                         .transition(.asymmetric(
                             insertion: .move(edge: .trailing),
                             removal: .move(edge: .leading)
                         ))
-                } else {
+                }
+                else
+                {
                     // Fallback if no WorkoutViewModel exists
                     Text("训练数据加载中...")
                         .foregroundColor(.appText)
@@ -74,10 +90,12 @@ struct ContentView: View {
             }
 
             // Dialog Overlay
-            if let dialog = dialogManager.presentedDialog {
+            if let dialog = dialogManager.presentedDialog
+            {
                 // Only show background overlay for non-workout dialogs
                 // Workout dialogs (quit, editSet, etc.) are handled by WorkoutScreen's CompactDialogOverlay
-                switch dialog {
+                switch dialog
+                {
                 case .quitWorkout, .quitCurrentExercise, .quitRemainingExercises, .editSet:
                     // 训练相关的对话框不显示遮罩，由WorkoutScreen自己处理
                     EmptyView()
@@ -85,13 +103,15 @@ struct ContentView: View {
                     // 其他对话框显示背景遮罩
                     Color.appBackground.opacity(0.4)
                         .ignoresSafeArea()
-                        .onTapGesture {
+                        .onTapGesture
+                        {
                             dialogManager.dismissDialog()
                         }
                 }
 
-                switch dialog {
-                case .editSet(_, _, let workoutViewModel):
+                switch dialog
+                {
+                case let .editSet(_, _, workoutViewModel):
                     let defaults = workoutViewModel.getDefaultParametersForCurrentExercise()
                     UniversalDialog(
                         type: .input(
@@ -100,16 +120,23 @@ struct ContentView: View {
                             defaultReps: String(defaults.reps),
                             defaultWeight: formatWeight(defaults.weight),
                             onConfirm: { reps, weight, notes in
-                                guard let actualReps = Int(reps) else {
+                                guard let actualReps = Int(reps)
+                                else
+                                {
                                     return
                                 }
 
                                 // 处理重量输入：如果是"自重"或空字符串，则设为0
                                 let actualWeight: Double
-                                if weight.lowercased() == "自重" || weight.isEmpty {
+                                if weight.lowercased() == "自重" || weight.isEmpty
+                                {
                                     actualWeight = 0.0
-                                } else {
-                                    guard let weightValue = Double(weight) else {
+                                }
+                                else
+                                {
+                                    guard let weightValue = Double(weight)
+                                    else
+                                    {
                                         return
                                     }
                                     actualWeight = weightValue
@@ -151,8 +178,10 @@ struct ContentView: View {
                     EmptyView()
 
                 case .workoutComplete:
-                    Group {
-                        if let workoutViewModel = workoutSessionManager.currentWorkoutViewModel {
+                    Group
+                    {
+                        if let workoutViewModel = workoutSessionManager.currentWorkoutViewModel
+                        {
                             UniversalDialog(
                                 type: .completion(
                                     title: "训练完成!",
@@ -169,7 +198,9 @@ struct ContentView: View {
                                     navigationManager.popToRoot()
                                 }
                             )
-                        } else {
+                        }
+                        else
+                        {
                             EmptyView()
                         }
                     }
@@ -182,24 +213,29 @@ struct ContentView: View {
         }
         .animation(.easeInOut(duration: 0.3), value: navigationManager.currentScreen)
         .animation(.easeInOut(duration: 0.3), value: dialogManager.presentedDialog)
-        .onAppear {
+        .onAppear
+        {
             // ContentView loaded successfully
         }
     }
 }
 
-struct SettingsScreen: View {
+struct SettingsScreen: View
+{
     @EnvironmentObject var navigationManager: NavigationManager
 
-    var body: some View {
-        VStack(spacing: 20) {
+    var body: some View
+    {
+        VStack(spacing: 20)
+        {
             Text("设置")
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .foregroundColor(.appText)
                 .padding(.top, 40)
 
-            Button("返回主页") {
+            Button("返回主页")
+            {
                 navigationManager.popToRoot()
             }
             .buttonStyle(SettingsButtonStyle())
@@ -211,18 +247,22 @@ struct SettingsScreen: View {
     }
 }
 
-struct HistoryScreen: View {
+struct HistoryScreen: View
+{
     @EnvironmentObject var navigationManager: NavigationManager
 
-    var body: some View {
-        VStack(spacing: 20) {
+    var body: some View
+    {
+        VStack(spacing: 20)
+        {
             Text("历史记录")
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .foregroundColor(.appText)
                 .padding(.top, 40)
 
-            Button("返回主页") {
+            Button("返回主页")
+            {
                 navigationManager.popToRoot()
             }
             .buttonStyle(SettingsButtonStyle())
@@ -235,8 +275,11 @@ struct HistoryScreen: View {
 }
 
 // MARK: - Settings Button Style
-struct SettingsButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
+
+struct SettingsButtonStyle: ButtonStyle
+{
+    func makeBody(configuration: Configuration) -> some View
+    {
         configuration.label
             .foregroundColor(.appText)
             .padding(.horizontal, 20)
@@ -251,7 +294,9 @@ struct SettingsButtonStyle: ButtonStyle {
 // NOTE: WorkoutCategory extension removed as WorkoutCategory enum was deleted during model refactoring
 
 // MARK: - Preview
-#Preview {
+
+#Preview
+{
     ContentView()
         .environmentObject(NavigationManager.preview)
         .preferredColorScheme(.dark)

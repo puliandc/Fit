@@ -9,23 +9,27 @@
 
 import SwiftUI
 
-struct WorkoutScreen: View {
+struct WorkoutScreen: View
+{
     @EnvironmentObject var navigationManager: NavigationManager
     @EnvironmentObject var dialogManager: DialogManager
     @EnvironmentObject var workoutSessionManager: WorkoutSessionManager
     @EnvironmentObject var workoutViewModel: WorkoutViewModel
     @State private var showContent: Bool = false
-    @State private var viewID: UUID = UUID() // 用于强制视图更新
+    @State private var viewID: UUID = .init() // 用于强制视图更新
     @State private var hasShownCompletionDialog: Bool = false // 防止重复弹出完成对话框
 
     // 保持init方法用于接收workoutPlan参数，但不创建WorkoutViewModel
-    init(workoutPlan: WorkoutPlan) {
+    init(workoutPlan _: WorkoutPlan)
+    {
         // 这个init方法现在只用于确保workoutPlan的有效性
         // WorkoutViewModel现在由环境提供
     }
 
-    var body: some View {
-        ZStack {
+    var body: some View
+    {
+        ZStack
+        {
             // 基础安全区域背景 - 使用与AnimatedBackground协调的颜色
             SafeAreaBackground()
                 .ignoresSafeArea(.all)
@@ -34,7 +38,8 @@ struct WorkoutScreen: View {
             AnimatedBackground()
                 .ignoresSafeArea(.all) // 移除clipped()，让背景延伸到安全区域
 
-            VStack(spacing: 0) {
+            VStack(spacing: 0)
+            {
                 // 顶部标题栏 - 基于Figma设计
                 CompactWorkoutHeader(
                     workoutPlan: workoutViewModel.workoutPlan,
@@ -45,29 +50,30 @@ struct WorkoutScreen: View {
                 )
 
                 // 主要内容区域 - 移除滚动属性
-                VStack(spacing: 16) {
+                VStack(spacing: 16)
+                {
                     // 统一时间模块显示（仅在休息时间显示，动作时间由ActionTimerView显示）
-                if workoutViewModel.isResting {
-                    CompactTimerView(
-                        isResting: workoutViewModel.isResting,
-                        elapsedTime: workoutViewModel.exerciseElapsedTime,
-                        timeLeft: workoutViewModel.timeLeft,
-                        isExerciseActive: workoutViewModel.isExerciseActive,
-                        onCompleteAction: {
-                            // 动作时间模式下点击"动作完成"（现在由底部按钮处理）
-                            dialogManager.presentDialog(.editSet(workoutViewModel.currentExercise, workoutViewModel.currentSet, workoutViewModel))
-                        },
-                        onSkipRest: {
-                            // 休息时间模式下点击"跳过休息"
-                            workoutViewModel.skipRest()
-                        }
-                    )
-                    .transition(.asymmetric(
-                        insertion: .scale.combined(with: .opacity),
-                        removal: .opacity
-                    ))
-                }
-
+                    if workoutViewModel.isResting
+                    {
+                        CompactTimerView(
+                            isResting: workoutViewModel.isResting,
+                            elapsedTime: workoutViewModel.exerciseElapsedTime,
+                            timeLeft: workoutViewModel.timeLeft,
+                            isExerciseActive: workoutViewModel.isExerciseActive,
+                            onCompleteAction: {
+                                // 动作时间模式下点击"动作完成"（现在由底部按钮处理）
+                                dialogManager.presentDialog(.editSet(workoutViewModel.currentExercise, workoutViewModel.currentSet, workoutViewModel))
+                            },
+                            onSkipRest: {
+                                // 休息时间模式下点击"跳过休息"
+                                workoutViewModel.skipRest()
+                            }
+                        )
+                        .transition(.asymmetric(
+                            insertion: .scale.combined(with: .opacity),
+                            removal: .opacity
+                        ))
+                    }
 
                     // 运动信息卡片 - 基于Figma设计，移除滚动和编辑按钮
                     CompactExerciseInfoCard(
@@ -86,9 +92,11 @@ struct WorkoutScreen: View {
                 Spacer()
 
                 // FooterBox容器 - 动作完成和放弃按钮
-                VStack(spacing: 10) { // space-y-2.5 ≈ 10pt
+                VStack(spacing: 10)
+                { // space-y-2.5 ≈ 10pt
                     // 动作完成按钮 - Primary样式，仅在非休息状态显示
-                    if !workoutViewModel.isResting {
+                    if !workoutViewModel.isResting
+                    {
                         ModernButton(
                             text: "动作完成",
                             action: {
@@ -128,14 +136,17 @@ struct WorkoutScreen: View {
             }
 
             // Dialog Overlay for workout-related dialogs
-            if let dialog = dialogManager.presentedDialog {
-                switch dialog {
+            if let dialog = dialogManager.presentedDialog
+            {
+                switch dialog
+                {
                 case .quitWorkout, .quitCurrentExercise, .quitRemainingExercises:
                     // Background overlay - 白色半透明现代化设计
                     Color.white.opacity(0.9)
                         .background(.ultraThinMaterial)
                         .ignoresSafeArea()
-                        .onTapGesture {
+                        .onTapGesture
+                        {
                             dialogManager.dismissDialog()
                         }
 
@@ -149,7 +160,8 @@ struct WorkoutScreen: View {
                             workoutViewModel.skipAllRemainingExercises()
                             dialogManager.dismissDialog()
                             // 延迟触发训练完成对话框，确保状态更新完成
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3)
+                            {
                                 _ = workoutSessionManager.completeWorkout()
                                 dialogManager.presentDialog(.workoutComplete)
                             }
@@ -164,12 +176,13 @@ struct WorkoutScreen: View {
                         removal: .opacity
                     ))
 
-                case .editSet(let exercise, let setIndex, let workoutViewModel):
+                case let .editSet(exercise, setIndex, workoutViewModel):
                     // Background overlay - 白色半透明现代化设计
                     Color.white.opacity(0.9)
                         .background(.ultraThinMaterial)
                         .ignoresSafeArea()
-                        .onTapGesture {
+                        .onTapGesture
+                        {
                             dialogManager.dismissDialog()
                         }
 
@@ -192,7 +205,8 @@ struct WorkoutScreen: View {
                     Color.white.opacity(0.9)
                         .background(.ultraThinMaterial)
                         .ignoresSafeArea()
-                        .onTapGesture {
+                        .onTapGesture
+                        {
                             dialogManager.dismissDialog()
                         }
 
@@ -214,9 +228,10 @@ struct WorkoutScreen: View {
                     EmptyView()
                 }
             }
-          }
+        }
         .animation(.easeInOut(duration: 0.3), value: dialogManager.presentedDialog)
-        .onAppear {
+        .onAppear
+        {
             // 安全检查
             guard !workoutViewModel.workoutPlan.exercises.isEmpty else { return }
 
@@ -224,66 +239,82 @@ struct WorkoutScreen: View {
             workoutViewModel.resetTimerIfNeeded()
             workoutViewModel.startExercise()
 
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.2)) {
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.2))
+            {
                 showContent = true
             }
         }
-        .onChange(of: workoutViewModel.currentExercise.id) { _, _ in
+        .onChange(of: workoutViewModel.currentExercise.id)
+        { _, _ in
             // 当练习切换时，重新触发内容动画
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.1)) {
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.1))
+            {
                 showContent = true
             }
         }
-        .onDisappear {
+        .onDisappear
+        {
             workoutViewModel.pauseExercise()
         }
-        .onReceive(NotificationCenter.default.publisher(for: .workoutCompleted)) { _ in
+        .onReceive(NotificationCenter.default.publisher(for: .workoutCompleted))
+        { _ in
             handleWorkoutComplete()
         }
-        .onChange(of: workoutViewModel.progress) {
+        .onChange(of: workoutViewModel.progress)
+        {
             // 保留原有的进度监听作为备用机制
-            if workoutViewModel.progress >= 1.0 {
+            if workoutViewModel.progress >= 1.0
+            {
                 handleWorkoutComplete()
             }
         }
     }
 
     // 统一处理训练完成弹窗，防止重复触发
-    private func handleWorkoutComplete() {
+    private func handleWorkoutComplete()
+    {
         guard !hasShownCompletionDialog else { return }
         hasShownCompletionDialog = true
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5)
+        {
             _ = workoutSessionManager.completeWorkout()
             dialogManager.presentDialog(.workoutComplete)
         }
     }
 }
 
-
 // MARK: - Compact Workout Header
-struct CompactWorkoutHeader: View {
+
+struct CompactWorkoutHeader: View
+{
     let workoutPlan: WorkoutPlan
     let progress: Double
     let onBack: () -> Void
 
     @Environment(\.colorScheme) var colorScheme: ColorScheme
 
-    private var progressTextColor: Color {
+    private var progressTextColor: Color
+    {
         colorScheme == .light ? .warningLight : .warningDark
     }
 
-    private var primaryTextColor: Color {
+    private var primaryTextColor: Color
+    {
         // 由于现在使用白色半透明背景，文本颜色应该始终为深色以确保可读性
         Color.appTextSecondary
     }
 
-    var body: some View {
-        VStack(spacing: 16) {
+    var body: some View
+    {
+        VStack(spacing: 16)
+        {
             // 顶部导航栏
-            HStack(spacing: 12) {
+            HStack(spacing: 12)
+            {
                 // 返回按钮
-                Button(action: onBack) {
+                Button(action: onBack)
+                {
                     RoundedRectangle(cornerRadius: 18) // w-9 h-9 = 36px rounded-full
                         .fill(Color.white.opacity(0.8))
                         .background(.ultraThinMaterial)
@@ -298,7 +329,8 @@ struct CompactWorkoutHeader: View {
                 .buttonStyle(PlainButtonStyle())
 
                 // 标题和百分比
-                HStack(spacing: 8) {
+                HStack(spacing: 8)
+                {
                     Text(workoutPlan.name)
                         .font(.system(size: 24, weight: .semibold))
                         .foregroundColor(primaryTextColor) // text-gray-900 dark:text-white
@@ -314,8 +346,10 @@ struct CompactWorkoutHeader: View {
             .frame(maxWidth: .infinity, alignment: .leading)
 
             // 简化的进度条
-            GeometryReader { geometry in
-                ZStack(alignment: .leading) {
+            GeometryReader
+            { geometry in
+                ZStack(alignment: .leading)
+                {
                     // 背景轨道
                     RoundedRectangle(cornerRadius: 4)
                         .fill(Color.appTextMuted.opacity(0.2))
@@ -328,7 +362,7 @@ struct CompactWorkoutHeader: View {
                                 gradient: Gradient(colors: [
                                     Color(red: 0.97, green: 0.45, blue: 0.09), // #f97316
                                     Color(red: 0.93, green: 0.28, blue: 0.60), // #ec4899
-                                    Color(red: 0.66, green: 0.33, blue: 0.97)  // #a855f7
+                                    Color(red: 0.66, green: 0.33, blue: 0.97) // #a855f7
                                 ]),
                                 startPoint: .leading,
                                 endPoint: .trailing
@@ -356,13 +390,13 @@ struct CompactWorkoutHeader: View {
                 .opacity(0.7)
                 .offset(x: -10, y: -10)
         )
-        }
     }
-
-
+}
 
 // MARK: - Action Timer View (新设计)
-struct ActionTimerView: View {
+
+struct ActionTimerView: View
+{
     let elapsedTime: Int
     @Binding var isVisible: Bool
     @State private var rotationAngle: Double = 0
@@ -370,14 +404,17 @@ struct ActionTimerView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     // 时间格式化逻辑 - 复用CompactTimerView的实现
-    private var formattedTime: String {
+    private var formattedTime: String
+    {
         let minutes = elapsedTime / 60
         let seconds = elapsedTime % 60
         return String(format: "%d:%02d", minutes, seconds)
     }
 
-    var body: some View {
-        HStack(spacing: 10) { // gap-2.5 ≈ 10pt
+    var body: some View
+    {
+        HStack(spacing: 10)
+        { // gap-2.5 ≈ 10pt
             // 旋转时钟图标
             Image(systemName: "timer")
                 .font(.system(size: 20)) // w-5 h-5
@@ -388,7 +425,8 @@ struct ActionTimerView: View {
                     value: rotationAngle
                 )
 
-            VStack(spacing: 4) {
+            VStack(spacing: 4)
+            {
                 Text("动作时间")
                     .font(.system(size: 12, weight: .medium)) // text-xs font-medium
                     .foregroundColor(colorScheme == .light ? Color.gray.opacity(0.7) : Color.gray.opacity(0.3)) // gray-700 / gray-300
@@ -427,16 +465,21 @@ struct ActionTimerView: View {
         )
         .scaleEffect(reduceMotion ? 1.0 : (isVisible ? 1.0 : 0.95)) // 入场动画: scale: 0.95 → 1.0
         .animation(reduceMotion ? nil : .easeOut(duration: 0.3), value: isVisible) // 0.3s弹回正常大小
-        .onAppear {
+        .onAppear
+        {
             // 启动图标旋转动画
-            if !reduceMotion {
+            if !reduceMotion
+            {
                 rotationAngle = 360
             }
         }
-        .onChange(of: elapsedTime) { oldValue, newValue in
+        .onChange(of: elapsedTime)
+        { _, newValue in
             // 当时间重置为0或接近0时（通常表示新练习开始），重新触发微动画
-            if newValue <= 3 && !reduceMotion {
-                withAnimation(.easeOut(duration: 0.3)) {
+            if newValue <= 3 && !reduceMotion
+            {
+                withAnimation(.easeOut(duration: 0.3))
+                {
                     // 重新触发微妙的scale动画
                     rotationAngle = 360
                 }
@@ -445,9 +488,10 @@ struct ActionTimerView: View {
     }
 }
 
-
 // MARK: - Compact Exercise Info Card (版本1.3增强)
-struct CompactExerciseInfoCard: View {
+
+struct CompactExerciseInfoCard: View
+{
     let exercise: Exercise
     let currentSet: Int
     let totalSets: Int
@@ -459,14 +503,16 @@ struct CompactExerciseInfoCard: View {
     @State private var isVisible: Bool = false
     @State private var shimmerOffset: CGFloat = -200
 
-    private var formattedTime: String {
+    private var formattedTime: String
+    {
         let minutes = elapsedTime / 60
         let seconds = elapsedTime % 60
         return String(format: "%d:%02d", minutes, seconds)
     }
 
     // 版本1.3: 计算整个训练计划的总时长
-    private var formattedTotalTime: String {
+    private var formattedTotalTime: String
+    {
         let totalTime = workoutViewModel.totalWorkoutTime
         let minutes = totalTime / 60
         let seconds = totalTime % 60
@@ -477,29 +523,39 @@ struct CompactExerciseInfoCard: View {
     @EnvironmentObject var workoutViewModel: WorkoutViewModel
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    private var allExerciseSets: [ExerciseSet] {
+    private var allExerciseSets: [ExerciseSet]
+    {
         workoutViewModel.workoutPlan.exercises.filter { $0.exercise.name == exercise.name }
     }
 
     // 统一的重量格式化函数
-    private func formatWeight(_ weight: Double) -> String {
-        if weight == 0 {
+    private func formatWeight(_ weight: Double) -> String
+    {
+        if weight == 0
+        {
             return "自重"
-        } else if weight.truncatingRemainder(dividingBy: 1) == 0 {
+        }
+        else if weight.truncatingRemainder(dividingBy: 1) == 0
+        {
             return String(format: "%.0f", weight)
-        } else {
+        }
+        else
+        {
             return String(format: "%.1f", weight)
         }
     }
 
-    private var nextSetInfo: String? {
+    private var nextSetInfo: String?
+    {
         // 使用ViewModel的当前状态，确保数据一致性
         let currentExerciseIndex = workoutViewModel.currentExerciseIndex
-        let _ = workoutViewModel.currentSet
+        _ = workoutViewModel.currentSet
         let allExercises = workoutViewModel.workoutPlan.exercises
 
         // 确保索引有效
-        guard currentExerciseIndex < allExercises.count else {
+        guard currentExerciseIndex < allExercises.count
+        else
+        {
             return nil
         }
 
@@ -507,12 +563,15 @@ struct CompactExerciseInfoCard: View {
         let exerciseSets = allExercises.filter { $0.exercise.id == currentExercise.id }
 
         // 找到当前ExerciseSet在相同练习中的位置
-        guard let currentPositionInExercise = exerciseSets.firstIndex(where: { $0.id == allExercises[currentExerciseIndex].id }) else {
+        guard let currentPositionInExercise = exerciseSets.firstIndex(where: { $0.id == allExercises[currentExerciseIndex].id })
+        else
+        {
             return nil
         }
 
         // 检查是否还有下一组（相同练习）
-        if currentPositionInExercise < exerciseSets.count - 1 {
+        if currentPositionInExercise < exerciseSets.count - 1
+        {
             let nextSet = exerciseSets[currentPositionInExercise + 1]
             let weightText = formatWeight(nextSet.targetWeight)
             return "下一组: \(currentExercise.name) \(nextSet.targetReps)次 * \(weightText)公斤"
@@ -521,9 +580,11 @@ struct CompactExerciseInfoCard: View {
         // 检查是否还有下一个练习
         // 找到下一个不同练习的第一个ExerciseSet
         var nextIndex = currentExerciseIndex + 1
-        while nextIndex < allExercises.count {
+        while nextIndex < allExercises.count
+        {
             let nextExerciseSet = allExercises[nextIndex]
-            if nextExerciseSet.exercise.id != currentExercise.id {
+            if nextExerciseSet.exercise.id != currentExercise.id
+            {
                 let weightText = formatWeight(nextExerciseSet.targetWeight)
                 return "下一组: \(nextExerciseSet.exercise.name) \(nextExerciseSet.targetReps)次 * \(weightText)公斤"
             }
@@ -533,8 +594,10 @@ struct CompactExerciseInfoCard: View {
         return nil
     }
 
-    var body: some View {
-        VStack(spacing: 12) { // space-y-3 ≈ 12pt
+    var body: some View
+    {
+        VStack(spacing: 12)
+        { // space-y-3 ≈ 12pt
             // 运动名称
             Text(exercise.name)
                 .font(.system(size: 32, weight: .bold)) // text-2xl font-bold
@@ -549,7 +612,8 @@ struct CompactExerciseInfoCard: View {
                 .multilineTextAlignment(.center) // 居中对齐
 
             // 动作时间计时器 - 根据isResting状态决定是否显示
-            if !isResting {
+            if !isResting
+            {
                 ActionTimerView(
                     elapsedTime: elapsedTime,
                     isVisible: $isVisible
@@ -560,9 +624,11 @@ struct CompactExerciseInfoCard: View {
             }
 
             // 组数、次数和重量模块 - 增强版本
-            VStack(spacing: 12) {
+            VStack(spacing: 12)
+            {
                 // 当前组数模块 - 蓝色背景
-                HStack {
+                HStack
+                {
                     Image(systemName: "number")
                         .font(.system(size: 20, weight: .medium))
                         .foregroundColor(.appPrimary)
@@ -598,10 +664,13 @@ struct CompactExerciseInfoCard: View {
                 )
 
                 // 次数和重量模块 - 水平排列，基于Figma设计
-                HStack(spacing: 12) {
+                HStack(spacing: 12)
+                {
                     // 次数模块 - 绿色主题
-                    VStack(spacing: 8) {
-                        HStack(spacing: 6) {
+                    VStack(spacing: 8)
+                    {
+                        HStack(spacing: 6)
+                        {
                             Image(systemName: "target")
                                 .font(.system(size: 18, weight: .medium))
                                 .foregroundColor(.success)
@@ -627,8 +696,10 @@ struct CompactExerciseInfoCard: View {
                     )
 
                     // 重量模块 - 紫色主题
-                    VStack(spacing: 8) {
-                        HStack(spacing: 6) {
+                    VStack(spacing: 8)
+                    {
+                        HStack(spacing: 6)
+                        {
                             Image(systemName: "scalemass.fill")
                                 .font(.system(size: 20, weight: .medium))
                                 .foregroundColor(.info)
@@ -656,8 +727,10 @@ struct CompactExerciseInfoCard: View {
                 }
 
                 // 版本1.3: 下一组提示
-                if let nextInfo = nextSetInfo {
-                    HStack {
+                if let nextInfo = nextSetInfo
+                {
+                    HStack
+                    {
                         Image(systemName: "arrow.right.circle.fill")
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(.info)
@@ -675,7 +748,8 @@ struct CompactExerciseInfoCard: View {
             }
 
             // 版本1.3: 训练计时
-            HStack {
+            HStack
+            {
                 Image(systemName: "clock")
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.appTextSecondary)
@@ -730,25 +804,25 @@ struct CompactExerciseInfoCard: View {
                                 startPoint: .leading,
                                 endPoint: .trailing
                             )
-                    )
-                    .mask(
-                        LinearGradient(
-                            colors: [
-                                Color.clear,
-                                Color.black,
-                                Color.clear
-                            ],
-                            startPoint: .leading,
-                            endPoint: .trailing
                         )
-                    )
-                    .offset(x: shimmerOffset)
-                    .animation(
-                        reduceMotion ? nil :
-                            .easeInOut(duration: 2.5)
-                            .repeatForever(autoreverses: false),
-                        value: shimmerOffset
-                    )
+                        .mask(
+                            LinearGradient(
+                                colors: [
+                                    Color.clear,
+                                    Color.black,
+                                    Color.clear
+                                ],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .offset(x: shimmerOffset)
+                        .animation(
+                            reduceMotion ? nil :
+                                .easeInOut(duration: 2.5)
+                                .repeatForever(autoreverses: false),
+                            value: shimmerOffset
+                        )
                 )
                 .shadow(color: .appBackground.opacity(0.12), radius: 25, x: 0, y: 10)
         )
@@ -759,32 +833,43 @@ struct CompactExerciseInfoCard: View {
             reduceMotion ? nil : .spring(response: 0.8, dampingFraction: 0.8).delay(0.2),
             value: isVisible
         )
-        .onAppear {
-            if reduceMotion {
+        .onAppear
+        {
+            if reduceMotion
+            {
                 isVisible = true
                 shimmerOffset = 0
-            } else {
-                withAnimation {
+            }
+            else
+            {
+                withAnimation
+                {
                     isVisible = true
                     // 启动光泽动画
                     shimmerOffset = 200
                 }
             }
         }
-        .onChange(of: exercise.id) { oldValue, newValue in
+        .onChange(of: exercise.id)
+        { _, _ in
             // 当练习切换时，重新触发入场动画
-            if reduceMotion {
+            if reduceMotion
+            {
                 isVisible = true
                 shimmerOffset = 0
-            } else {
-                withAnimation(.spring(response: 0.8, dampingFraction: 0.8).delay(0.2)) {
+            }
+            else
+            {
+                withAnimation(.spring(response: 0.8, dampingFraction: 0.8).delay(0.2))
+                {
                     isVisible = true
                     // 重新启动光泽动画
                     shimmerOffset = 200
                 }
             }
         }
-        .onTapGesture {
+        .onTapGesture
+        {
             // 添加触觉反馈
             let impactFeedback = UIImpactFeedbackGenerator(style: .light)
             impactFeedback.impactOccurred()
@@ -794,9 +879,10 @@ struct CompactExerciseInfoCard: View {
 
 // MARK: - Compact Complete Button
 
-
 // MARK: - Compact Timer View (Unified Time Module)
-struct CompactTimerView: View {
+
+struct CompactTimerView: View
+{
     let isResting: Bool
     let elapsedTime: Int
     let timeLeft: Int
@@ -808,13 +894,17 @@ struct CompactTimerView: View {
     @State private var shimmerOffset: CGFloat = -200
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    private var formattedTime: String {
-        if isResting {
+    private var formattedTime: String
+    {
+        if isResting
+        {
             // 休息时间：显示倒计时
             let minutes = timeLeft / 60
             let seconds = timeLeft % 60
             return String(format: "%d:%02d", minutes, seconds)
-        } else {
+        }
+        else
+        {
             // 动作时间：显示正计时
             let minutes = elapsedTime / 60
             let seconds = elapsedTime % 60
@@ -822,20 +912,27 @@ struct CompactTimerView: View {
         }
     }
 
-    
-    private var buttonTitle: String {
-        if isResting {
+    private var buttonTitle: String
+    {
+        if isResting
+        {
             return "跳过休息"
-        } else {
+        }
+        else
+        {
             return "动作完成"
         }
     }
 
-    var body: some View {
-        VStack(spacing: 16) {
+    var body: some View
+    {
+        VStack(spacing: 16)
+        {
             // 标题区域 - 固定高度
-            HStack {
-                if isResting {
+            HStack
+            {
+                if isResting
+                {
                     Image(systemName: "bed.double.fill")
                         .font(.system(size: 18))
                         .foregroundColor(.appPrimary)
@@ -843,7 +940,9 @@ struct CompactTimerView: View {
                     Text("休息时间")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(.appPrimary)
-                } else {
+                }
+                else
+                {
                     Image(systemName: "figure.run")
                         .font(.system(size: 18))
                         .foregroundColor(.success)
@@ -867,10 +966,13 @@ struct CompactTimerView: View {
             ModernButton(
                 text: buttonTitle,
                 action: {
-                    if isResting {
+                    if isResting
+                    {
                         print("🔚 DEBUG: User clicked skip rest - timeLeft: \(timeLeft)")
                         onSkipRest()
-                    } else {
+                    }
+                    else
+                    {
                         print("✅ DEBUG: User clicked complete exercise - elapsedTime: \(elapsedTime)")
                         onCompleteAction()
                     }
@@ -954,19 +1056,25 @@ struct CompactTimerView: View {
             reduceMotion ? nil : .spring(response: 0.8, dampingFraction: 0.8).delay(0.3),
             value: isVisible
         )
-        .onAppear {
-            if reduceMotion {
+        .onAppear
+        {
+            if reduceMotion
+            {
                 isVisible = true
                 shimmerOffset = 0
-            } else {
-                withAnimation {
+            }
+            else
+            {
+                withAnimation
+                {
                     isVisible = true
                     // 启动光泽动画
                     shimmerOffset = 200
                 }
             }
         }
-        .onTapGesture {
+        .onTapGesture
+        {
             // 添加触觉反馈
             let impactFeedback = UIImpactFeedbackGenerator(style: .light)
             impactFeedback.impactOccurred()
@@ -977,7 +1085,9 @@ struct CompactTimerView: View {
 }
 
 // MARK: - Preview
-#Preview {
+
+#Preview
+{
     WorkoutScreen(workoutPlan: MockDataProvider.previewWorkout)
         .environmentObject(NavigationManager.preview)
         .environmentObject(WorkoutViewModel(workoutPlan: MockDataProvider.previewWorkout))

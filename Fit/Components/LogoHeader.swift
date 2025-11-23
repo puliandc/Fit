@@ -10,8 +10,11 @@
 import SwiftUI
 
 // MARK: - Logo Header Component
-struct LogoHeader: View {
+
+struct LogoHeader: View
+{
     // MARK: - Animation State Properties
+
     @State private var glowScale: CGFloat = 1.0
     @State private var glowOpacity: Double = 0.8
     @State private var figureGlowScale: CGFloat = 1.0
@@ -19,9 +22,12 @@ struct LogoHeader: View {
     @State private var subtitleOpacity: Double = 0.0
 
     // MARK: - Body
-    var body: some View {
+
+    var body: some View
+    {
         // Header - 整体容器
-        VStack(spacing: 0) {
+        VStack(spacing: 0)
+        {
             // Logo图标容器
             logoIconContainer
 
@@ -35,25 +41,30 @@ struct LogoHeader: View {
         .padding(.bottom, 16)
         .padding(.horizontal, 24)
         .zIndex(10)
-        .onAppear {
+        .onAppear
+        {
             startAnimations()
         }
     }
 
     // MARK: - Logo Icon Container
-    private var logoIconContainer: some View {
-        VStack(spacing: 0) {
+
+    private var logoIconContainer: some View
+    {
+        VStack(spacing: 0)
+        {
             Spacer()
 
             // Logo圆形背景 + 图标
-            ZStack {
+            ZStack
+            {
                 // Logo圆形背景
                 Circle()
                     .fill(
                         LinearGradient(
                             colors: [
                                 Color(hex: "#F97316"), // orange-500
-                                Color(hex: "#EC4899")  // pink-500
+                                Color(hex: "#EC4899") // pink-500
                             ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
@@ -101,9 +112,10 @@ struct LogoHeader: View {
         }
     }
 
-    
     // MARK: - Main Title
-    private var mainTitle: some View {
+
+    private var mainTitle: some View
+    {
         Text("FIT")
             .font(.custom("Rounded Mplus 1c", size: 60))
             .fontWeight(.black) // 800 weight
@@ -115,7 +127,7 @@ struct LogoHeader: View {
                     colors: [
                         Color(hex: "#EA580C"), // orange-600
                         Color(hex: "#DB2777"), // pink-600
-                        Color(hex: "#9333EA")  // purple-600
+                        Color(hex: "#9333EA") // purple-600
                     ],
                     startPoint: .leading,
                     endPoint: .trailing
@@ -125,7 +137,9 @@ struct LogoHeader: View {
     }
 
     // MARK: - Subtitle
-    private var subtitle: some View {
+
+    private var subtitle: some View
+    {
         Text("今天的燃动开始了")
             .font(.custom("PingFang SC", size: 16))
             .fontWeight(.semibold) // 600 weight
@@ -136,7 +150,7 @@ struct LogoHeader: View {
                     colors: [
                         Color(hex: "#F97316"), // orange-500
                         Color(hex: "#EC4899"), // pink-500
-                        Color(hex: "#A855F7")  // purple-500
+                        Color(hex: "#A855F7") // purple-500
                     ],
                     startPoint: .leading,
                     endPoint: .trailing
@@ -146,29 +160,34 @@ struct LogoHeader: View {
     }
 
     // MARK: - Animation Control
-    private func startAnimations() {
+
+    private func startAnimations()
+    {
         // Logo圆形光晕动画 (立即开始)
         withAnimation(
             .easeInOut(duration: 1.0)
                 .repeatForever(autoreverses: true)
-        ) {
+        )
+        {
             glowScale = 1.5
             glowOpacity = 0.0
         }
-
 
         // 小人图标光晕动画 (立即开始)
         withAnimation(
             .easeInOut(duration: 1.0)
                 .repeatForever(autoreverses: true)
-        ) {
+        )
+        {
             figureGlowScale = 1.5
             figureGlowOpacity = 0.0
         }
 
         // 副标题使用淡入动画 (延迟1.0秒)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            withAnimation(.easeOut(duration: 2.0)) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0)
+        {
+            withAnimation(.easeOut(duration: 2.0))
+            {
                 subtitleOpacity = 1.0
             }
         }
@@ -176,10 +195,14 @@ struct LogoHeader: View {
 }
 
 // MARK: - Font Extensions for Custom Fonts
-extension Font {
-    static func custom(_ name: String, size: CGFloat) -> Font {
+
+extension Font
+{
+    static func custom(_ name: String, size: CGFloat) -> Font
+    {
         // 字体优先级：Rounded Mplus 1c → Nunito → SF Pro Rounded → system
-        switch name {
+        switch name
+        {
         case "Rounded Mplus 1c":
             return .system(size: size, weight: .black, design: .rounded)
         case "PingFang SC":
@@ -191,8 +214,11 @@ extension Font {
 }
 
 // MARK: - Preview
-#Preview {
-    VStack {
+
+#Preview
+{
+    VStack
+    {
         Spacer()
         LogoHeader()
         Spacer()

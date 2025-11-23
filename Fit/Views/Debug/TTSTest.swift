@@ -9,18 +9,24 @@
 import SwiftUI
 
 // MARK: - TTS功能测试视图
-struct TTSTestView: View {
+
+struct TTSTestView: View
+{
     @State private var testResults: [String] = []
 
-    var body: some View {
-        VStack(spacing: 20) {
+    var body: some View
+    {
+        VStack(spacing: 20)
+        {
             Text("TTS功能测试")
                 .font(.title)
                 .padding()
 
-            VStack(spacing: 15) {
+            VStack(spacing: 15)
+            {
                 // 测试下一组播报
-                Button("测试下一组播报") {
+                Button("测试下一组播报")
+                {
                     testNextSetAnnouncement()
                 }
                 .padding()
@@ -29,7 +35,8 @@ struct TTSTestView: View {
                 .cornerRadius(10)
 
                 // 测试休息倒计时播报
-                Button("测试休息倒计时播报") {
+                Button("测试休息倒计时播报")
+                {
                     testRestCountdownAnnouncement()
                 }
                 .padding()
@@ -38,7 +45,8 @@ struct TTSTestView: View {
                 .cornerRadius(10)
 
                 // 测试重量格式化
-                Button("测试重量格式化") {
+                Button("测试重量格式化")
+                {
                     testWeightFormatting()
                 }
                 .padding()
@@ -47,7 +55,8 @@ struct TTSTestView: View {
                 .cornerRadius(10)
 
                 // 清空测试结果
-                Button("清空测试结果") {
+                Button("清空测试结果")
+                {
                     testResults.removeAll()
                 }
                 .padding()
@@ -57,14 +66,19 @@ struct TTSTestView: View {
             }
 
             // 显示测试结果
-            if !testResults.isEmpty {
-                VStack(alignment: .leading, spacing: 5) {
+            if !testResults.isEmpty
+            {
+                VStack(alignment: .leading, spacing: 5)
+                {
                     Text("测试结果:")
                         .font(.headline)
 
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 5) {
-                            ForEach(testResults, id: \.self) { result in
+                    ScrollView
+                    {
+                        VStack(alignment: .leading, spacing: 5)
+                        {
+                            ForEach(testResults, id: \.self)
+                            { result in
                                 Text("• \(result)")
                                     .font(.body)
                                     .foregroundColor(.secondary)
@@ -85,7 +99,8 @@ struct TTSTestView: View {
 
     // MARK: - 测试方法
 
-    private func testNextSetAnnouncement() {
+    private func testNextSetAnnouncement()
+    {
         testResults.append("开始测试下一组播报...")
 
         // 测试不同重量的格式
@@ -96,7 +111,8 @@ struct TTSTestView: View {
             ("引体向上", 0.0, 6)
         ]
 
-        for (exerciseName, weight, reps) in testCases {
+        for (exerciseName, weight, reps) in testCases
+        {
             VoiceManager.shared.announceNextSet(
                 exerciseName: exerciseName,
                 weight: weight,
@@ -114,13 +130,15 @@ struct TTSTestView: View {
         testResults.append("下一组播报测试完成!")
     }
 
-    private func testRestCountdownAnnouncement() {
+    private func testRestCountdownAnnouncement()
+    {
         testResults.append("开始测试休息倒计时播报...")
 
         // 测试不同的倒计时
         let countdownTimes = [15, 30, 10, 5]
 
-        for seconds in countdownTimes {
+        for seconds in countdownTimes
+        {
             VoiceManager.shared.announceRestCountdown(seconds: seconds)
             let result = "播报: 休息还有\(seconds)秒"
             testResults.append(result)
@@ -132,13 +150,15 @@ struct TTSTestView: View {
         testResults.append("休息倒计时播报测试完成!")
     }
 
-    private func testWeightFormatting() {
+    private func testWeightFormatting()
+    {
         testResults.append("开始测试重量格式化...")
 
         // 这里我们只能通过播报来测试格式化
         let testWeights = [0.0, 10.0, 15.5, 20.0, 22.5]
 
-        for weight in testWeights {
+        for weight in testWeights
+        {
             VoiceManager.shared.announceNextSet(
                 exerciseName: "测试动作",
                 weight: weight,
@@ -158,6 +178,8 @@ struct TTSTestView: View {
 }
 
 // MARK: - Preview
-#Preview {
+
+#Preview
+{
     TTSTestView()
 }

@@ -1,13 +1,15 @@
-//created by Jason Lu on 09:47:00 10/13/2025
+// created by Jason Lu on 09:47:00 10/13/2025
 // FIT应用文件安全验证器 - 版本1.0基础结构
 
 import Foundation
 
 // MARK: - 文件安全验证器
-class FileSecurityValidator {
 
+class FileSecurityValidator
+{
     // 文件验证结果
-    enum FileValidationResult {
+    enum FileValidationResult
+    {
         case valid
         case invalidType
         case tooLarge
@@ -17,12 +19,14 @@ class FileSecurityValidator {
     }
 
     // 验证器初始化
-    init() {
+    init()
+    {
         print("🔒 FileSecurityValidator初始化完成 - 版本1.0基础结构")
     }
 
     // 基础文件验证（将在版本1.1中实现具体逻辑）
-    func validateFile(_ url: URL) -> FileValidationResult {
+    func validateFile(_ url: URL) -> FileValidationResult
+    {
         print("🔍 版本1.0: 文件验证器准备就绪")
         print("📍 验证文件: \(url.lastPathComponent)")
 
@@ -31,7 +35,8 @@ class FileSecurityValidator {
     }
 
     // 基础的文件类型检查（将在版本1.1中完善）
-    func checkFileType(_ url: URL) -> Bool {
+    func checkFileType(_ url: URL) -> Bool
+    {
         print("📁 版本1.0: 文件类型检查")
 
         // 版本1.0暂时只检查扩展名
@@ -39,7 +44,8 @@ class FileSecurityValidator {
     }
 
     // 基础的文件大小检查（将在版本1.4中完善）
-    func checkFileSize(_ url: URL) -> Bool {
+    func checkFileSize(_: URL) -> Bool
+    {
         print("📊 版本1.0: 文件大小检查")
 
         // 版本1.0暂时返回true
@@ -48,9 +54,13 @@ class FileSecurityValidator {
 }
 
 // MARK: - 验证结果描述
-extension FileSecurityValidator.FileValidationResult: CustomStringConvertible {
-    var description: String {
-        switch self {
+
+extension FileSecurityValidator.FileValidationResult: CustomStringConvertible
+{
+    var description: String
+    {
+        switch self
+        {
         case .valid:
             return "文件有效"
         case .invalidType:

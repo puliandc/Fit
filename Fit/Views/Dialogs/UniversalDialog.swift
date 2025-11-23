@@ -8,7 +8,9 @@
 import SwiftUI
 
 // MARK: - Universal Dialog Type
-enum UniversalDialogType {
+
+enum UniversalDialogType
+{
     case input(
         title: String,
         subtitle: String,
@@ -36,7 +38,9 @@ enum UniversalDialogType {
 }
 
 // MARK: - Dialog Option
-struct DialogOption {
+
+struct DialogOption
+{
     let id = UUID()
     let title: String
     let description: String
@@ -46,8 +50,11 @@ struct DialogOption {
 }
 
 // MARK: - Focus Field Enumeration
-extension UniversalDialog {
-    enum Field: Hashable {
+
+extension UniversalDialog
+{
+    enum Field: Hashable
+    {
         case reps
         case weight
         case notes
@@ -55,7 +62,9 @@ extension UniversalDialog {
 }
 
 // MARK: - Universal Dialog
-struct UniversalDialog: View {
+
+struct UniversalDialog: View
+{
     let type: UniversalDialogType
     let onDismiss: () -> Void
 
@@ -65,8 +74,10 @@ struct UniversalDialog: View {
     @State private var isKeyboardVisible: Bool = false
     @FocusState private var focusedField: Field?
 
-    private var dialogWidth: CGFloat {
-        switch type {
+    private var dialogWidth: CGFloat
+    {
+        switch type
+        {
         case .input: return 320
         case .confirmation: return 300
         case .options: return 360
@@ -74,26 +85,32 @@ struct UniversalDialog: View {
         }
     }
 
-    private var dialogIcon: String? {
-        switch type {
+    private var dialogIcon: String?
+    {
+        switch type
+        {
         case .input: return nil
-        case .confirmation(_, _, let icon, _, _): return icon
+        case let .confirmation(_, _, icon, _, _): return icon
         case .options: return "flag.checkered"
         case .completion: return "checkmark.circle.fill"
         }
     }
 
-    private var dialogIconColor: Color {
-        switch type {
+    private var dialogIconColor: Color
+    {
+        switch type
+        {
         case .input: return .clear
-        case .confirmation(_, _, _, let color, _): return color
+        case let .confirmation(_, _, _, color, _): return color
         case .options: return .appPrimary
         case .completion: return .success
         }
     }
 
-    var body: some View {
-        VStack(spacing: 0) {
+    var body: some View
+    {
+        VStack(spacing: 0)
+        {
             // Header
             headerSection
 
@@ -101,32 +118,41 @@ struct UniversalDialog: View {
             contentSection
 
             // Footer (if needed)
-            if case .input = type {
+            if case .input = type
+            {
                 footerSection
             }
         }
         .background(universalBackground)
         .shadow(color: .appBackground.opacity(0.2), radius: 20, x: 0, y: 10)
         .frame(maxWidth: dialogWidth)
-        .onAppear {
+        .onAppear
+        {
             loadDefaults()
         }
-        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification))
+        { _ in
             isKeyboardVisible = true
         }
-        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification))
+        { _ in
             isKeyboardVisible = false
         }
-        .onTapGesture {
+        .onTapGesture
+        {
             // 点击背景时关闭键盘
             focusedField = nil
         }
     }
 
     // MARK: - Header Section
-    private var headerSection: some View {
-        VStack(spacing: 8) {
-            if let icon = dialogIcon {
+
+    private var headerSection: some View
+    {
+        VStack(spacing: 8)
+        {
+            if let icon = dialogIcon
+            {
                 Image(systemName: icon)
                     .font(.system(size: 32, weight: .medium))
                     .foregroundColor(dialogIconColor)
@@ -142,16 +168,20 @@ struct UniversalDialog: View {
     }
 
     // MARK: - Content Section
-    private var contentSection: some View {
-        VStack(spacing: 16) {
-            switch type {
-            case .input(_, let subtitle, _, _, _):
+
+    private var contentSection: some View
+    {
+        VStack(spacing: 16)
+        {
+            switch type
+            {
+            case let .input(_, subtitle, _, _, _):
                 inputContent(subtitle: subtitle)
-            case .confirmation(_, let message, _, _, _):
+            case let .confirmation(_, message, _, _, _):
                 confirmationContent(message: message)
-            case .options(_, let message, let options):
+            case let .options(_, message, options):
                 optionsContent(message: message, options: options)
-            case .completion(_, let message, let stats):
+            case let .completion(_, message, stats):
                 completionContent(message: message, stats: stats)
             }
         }
@@ -160,14 +190,19 @@ struct UniversalDialog: View {
     }
 
     // MARK: - Footer Section
-    private var footerSection: some View {
-        HStack(spacing: 12) {
-            Button("取消") {
+
+    private var footerSection: some View
+    {
+        HStack(spacing: 12)
+        {
+            Button("取消")
+            {
                 onDismiss()
             }
             .buttonStyle(SecondaryButtonStyle())
 
-            Button("保存") {
+            Button("保存")
+            {
                 saveInput()
                 onDismiss()
             }
@@ -179,8 +214,10 @@ struct UniversalDialog: View {
 
     // MARK: - Content Types
 
-    private func inputContent(subtitle: String) -> some View {
-        VStack(spacing: 16) {
+    private func inputContent(subtitle: String) -> some View
+    {
+        VStack(spacing: 16)
+        {
             Text(subtitle)
                 .font(.system(size: 14, weight: .regular))
                 .foregroundColor(.appTextTertiary) // 深色文本适配白色背景
@@ -218,14 +255,17 @@ struct UniversalDialog: View {
         }
     }
 
-    private func confirmationContent(message: String) -> some View {
-        VStack(spacing: 16) {
+    private func confirmationContent(message: String) -> some View
+    {
+        VStack(spacing: 16)
+        {
             Text(message)
                 .font(.system(size: 14, weight: .regular))
                 .foregroundColor(.appTextTertiary) // 深色文本适配白色背景
                 .multilineTextAlignment(.center)
 
-            if case .confirmation(_, let warningMessage, _, _, _) = type {
+            if case let .confirmation(_, warningMessage, _, _, _) = type
+            {
                 Text(warningMessage)
                     .font(.system(size: 12, weight: .regular))
                     .foregroundColor(.error)
@@ -233,14 +273,18 @@ struct UniversalDialog: View {
             }
 
             // Confirmation Buttons
-            HStack(spacing: 12) {
-                Button("继续训练") {
+            HStack(spacing: 12)
+            {
+                Button("继续训练")
+                {
                     onDismiss()
                 }
                 .buttonStyle(SecondaryButtonStyle())
 
-                Button("放弃训练") {
-                    if case .confirmation(_, _, _, _, let onConfirm) = type {
+                Button("放弃训练")
+                {
+                    if case let .confirmation(_, _, _, _, onConfirm) = type
+                    {
                         onConfirm()
                     }
                 }
@@ -249,33 +293,42 @@ struct UniversalDialog: View {
         }
     }
 
-    private func optionsContent(message: String, options: [DialogOption]) -> some View {
-        VStack(spacing: 16) {
+    private func optionsContent(message: String, options: [DialogOption]) -> some View
+    {
+        VStack(spacing: 16)
+        {
             Text(message)
                 .font(.system(size: 14, weight: .regular))
                 .foregroundColor(.appTextTertiary) // 深色文本适配白色背景
                 .multilineTextAlignment(.center)
 
             // Options
-            VStack(spacing: 12) {
-                ForEach(options, id: \.id) { option in
+            VStack(spacing: 12)
+            {
+                ForEach(options, id: \.id)
+                { option in
                     optionCard(option: option)
                 }
             }
         }
     }
 
-    private func completionContent(message: String, stats: [(String, String)]) -> some View {
-        VStack(spacing: 16) {
+    private func completionContent(message: String, stats: [(String, String)]) -> some View
+    {
+        VStack(spacing: 16)
+        {
             Text(message)
                 .font(.system(size: 14, weight: .regular))
                 .foregroundColor(.appTextTertiary) // 深色文本适配白色背景
                 .multilineTextAlignment(.center)
 
             // Stats
-            VStack(spacing: 8) {
-                ForEach(stats, id: \.0) { stat in
-                    HStack {
+            VStack(spacing: 8)
+            {
+                ForEach(stats, id: \.0)
+                { stat in
+                    HStack
+                    {
                         Text(stat.0)
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(.appTextTertiary) // 深色文本适配白色背景
@@ -291,7 +344,8 @@ struct UniversalDialog: View {
             .background(Color.appTextMuted.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
 
             // Complete Button
-            Button("完成") {
+            Button("完成")
+            {
                 onDismiss()
             }
             .buttonStyle(PrimaryButtonStyle())
@@ -300,8 +354,10 @@ struct UniversalDialog: View {
 
     // MARK: - Helper Components
 
-    private func inputField(title: String, text: Binding<String>, placeholder: String, keyboardType: UIKeyboardType, color: Color, field: Field) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+    private func inputField(title: String, text: Binding<String>, placeholder: String, keyboardType: UIKeyboardType, color: Color, field: Field) -> some View
+    {
+        VStack(alignment: .leading, spacing: 8)
+        {
             Text(title)
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(.appTextSecondary) // 深色文本适配白色背景
@@ -322,12 +378,15 @@ struct UniversalDialog: View {
                 .disableAutocorrection(true)
                 .textInputAutocapitalization(.never)
                 .focused($focusedField, equals: field)
-                .onTapGesture {
+                .onTapGesture
+                {
                     focusedField = field
                 }
-                .onSubmit {
+                .onSubmit
+                {
                     // 提交时移动到下一个输入框或关闭键盘
-                    switch field {
+                    switch field
+                    {
                     case .reps:
                         focusedField = .weight
                     case .weight:
@@ -339,15 +398,19 @@ struct UniversalDialog: View {
         }
     }
 
-    private func optionCard(option: DialogOption) -> some View {
-        Button(action: option.action) {
-            HStack(spacing: 12) {
+    private func optionCard(option: DialogOption) -> some View
+    {
+        Button(action: option.action)
+        {
+            HStack(spacing: 12)
+            {
                 Image(systemName: option.icon)
                     .font(.system(size: 20, weight: .medium))
                     .foregroundColor(option.color)
                     .frame(width: 24, height: 24)
 
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 4)
+                {
                     Text(option.title)
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(.appTextSecondary) // 深色文本适配白色背景
@@ -375,23 +438,28 @@ struct UniversalDialog: View {
 
     // MARK: - Computed Properties
 
-    private var dialogTitle: String {
-        switch type {
-        case .input(let title, _, _, _, _): return title
-        case .confirmation(let title, _, _, _, _): return title
-        case .options(let title, _, _): return title
-        case .completion(let title, _, _): return title
+    private var dialogTitle: String
+    {
+        switch type
+        {
+        case let .input(title, _, _, _, _): return title
+        case let .confirmation(title, _, _, _, _): return title
+        case let .options(title, _, _): return title
+        case let .completion(title, _, _): return title
         }
     }
 
-    private var dialogTitleFont: CGFloat {
-        switch type {
+    private var dialogTitleFont: CGFloat
+    {
+        switch type
+        {
         case .completion: return 20 // Completion dialog has larger title
         default: return 18
         }
     }
 
-    private var universalBackground: some View {
+    private var universalBackground: some View
+    {
         RoundedRectangle(cornerRadius: 20)
             .fill(Color.white.opacity(0.9))
             .background(
@@ -402,24 +470,31 @@ struct UniversalDialog: View {
 
     // MARK: - Methods
 
-    private func loadDefaults() {
-        if case .input(_, _, let defaultReps, let defaultWeight, _) = type {
+    private func loadDefaults()
+    {
+        if case let .input(_, _, defaultReps, defaultWeight, _) = type
+        {
             reps = defaultReps
             weight = defaultWeight
             notes = ""
         }
     }
 
-    private func saveInput() {
-        if case .input(_, _, _, _, let onConfirm) = type {
+    private func saveInput()
+    {
+        if case let .input(_, _, _, _, onConfirm) = type
+        {
             onConfirm(reps, weight, notes)
         }
     }
 }
 
 // MARK: - Button Styles
-struct PrimaryButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
+
+struct PrimaryButtonStyle: ButtonStyle
+{
+    func makeBody(configuration: Configuration) -> some View
+    {
         configuration.label
             .font(.system(size: 17, weight: .semibold)) // 符合设计规范17pt
             .foregroundColor(.appText)
@@ -441,8 +516,10 @@ struct PrimaryButtonStyle: ButtonStyle {
     }
 }
 
-struct SecondaryButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
+struct SecondaryButtonStyle: ButtonStyle
+{
+    func makeBody(configuration: Configuration) -> some View
+    {
         configuration.label
             .font(.system(size: 16, weight: .semibold))
             .foregroundColor(.appTextSecondary) // 深色文本适配白色背景
@@ -461,8 +538,10 @@ struct SecondaryButtonStyle: ButtonStyle {
     }
 }
 
-struct DangerButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
+struct DangerButtonStyle: ButtonStyle
+{
+    func makeBody(configuration: Configuration) -> some View
+    {
         configuration.label
             .font(.system(size: 14, weight: .medium)) // 符合设计规范14pt
             .foregroundColor(.appText)
@@ -485,8 +564,11 @@ struct DangerButtonStyle: ButtonStyle {
 }
 
 // MARK: - Preview
-#Preview {
-    VStack(spacing: 20) {
+
+#Preview
+{
+    VStack(spacing: 20)
+    {
         // Input Dialog Preview
         UniversalDialog(
             type: .input(
@@ -496,7 +578,7 @@ struct DangerButtonStyle: ButtonStyle {
                 defaultWeight: "60",
                 onConfirm: { _, _, _ in }
             ),
-            onDismiss: {}
+            onDismiss: { }
         )
 
         // Confirmation Dialog Preview
@@ -506,9 +588,9 @@ struct DangerButtonStyle: ButtonStyle {
                 message: "确定要放弃当前训练吗？",
                 icon: "exclamationmark.triangle",
                 iconColor: .warning,
-                onConfirm: {}
+                onConfirm: { }
             ),
-            onDismiss: {}
+            onDismiss: { }
         )
 
         // Options Dialog Preview
@@ -522,18 +604,18 @@ struct DangerButtonStyle: ButtonStyle {
                         description: "跳过当前动作，继续下一个",
                         icon: "forward.end.fill",
                         color: .warning,
-                        action: {}
+                        action: { }
                     ),
                     DialogOption(
                         title: "继续训练",
                         description: "继续当前动作的训练",
                         icon: "play.circle.fill",
                         color: .success,
-                        action: {}
+                        action: { }
                     )
                 ]
             ),
-            onDismiss: {}
+            onDismiss: { }
         )
     }
     .padding()
