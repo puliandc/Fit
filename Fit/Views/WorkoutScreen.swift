@@ -16,6 +16,7 @@ struct WorkoutScreen: View {
     @EnvironmentObject var workoutViewModel: WorkoutViewModel
     @State private var showContent: Bool = false
     @State private var viewID: UUID = UUID() // 用于强制视图更新
+    @State private var hasShownCompletionDialog: Bool = false // 防止重复弹出完成对话框
 
     // 保持init方法用于接收workoutPlan参数，但不创建WorkoutViewModel
     init(workoutPlan: WorkoutPlan) {
@@ -237,22 +238,25 @@ struct WorkoutScreen: View {
             workoutViewModel.pauseExercise()
         }
         .onReceive(NotificationCenter.default.publisher(for: .workoutCompleted)) { _ in
-            // 监听训练完成通知
-            print("🎉 DEBUG: Workout completed notification received!")
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                _ = workoutSessionManager.completeWorkout()
-                dialogManager.presentDialog(.workoutComplete)
-            }
+            handleWorkoutComplete()
         }
         .onChange(of: workoutViewModel.progress) {
             // 保留原有的进度监听作为备用机制
             if workoutViewModel.progress >= 1.0 {
-                print("🎉 DEBUG: Workout completed! Progress reached 100%")
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    _ = workoutSessionManager.completeWorkout()
-                    dialogManager.presentDialog(.workoutComplete)
-                }
+                handleWorkoutComplete()
             }
+        }
+    }
+
+    // 统一处理训练完成弹窗，防止重复触发
+    private func handleWorkoutComplete() {
+        guard !hasShownCompletionDialog else { return }
+        hasShownCompletionDialog = true
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            _ = workoutSessionManager.completeWorkout()
+            dialogManager.presentDialog(.workoutComplete)
+        }
     }
 }
 
@@ -354,7 +358,7 @@ struct CompactWorkoutHeader: View {
         )
         }
     }
-}
+
 
 
 // MARK: - Action Timer View (新设计)

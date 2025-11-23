@@ -24,6 +24,7 @@ class WorkoutViewModel: ObservableObject {
     @Published var isResting: Bool = false
     @Published var timeLeft: Int = 0
     @Published var completedSets: [CompletedSet] = []
+    @Published var workoutFinished: Bool = false
 
     let workoutPlan: WorkoutPlan
     private var unifiedDisplayLink: CADisplayLink?
@@ -113,7 +114,10 @@ class WorkoutViewModel: ObservableObject {
 
     
     var isWorkoutComplete: Bool {
-        return currentExerciseIndex >= workoutPlan.exercises.count
+        if _needsRecalculation {
+            updateCachesIfNeeded()
+        }
+        return _completedSetsCount >= _totalExerciseSets
     }
 
     // 简化计时方案：实时计算训练总时长
@@ -125,6 +129,7 @@ class WorkoutViewModel: ObservableObject {
     // MARK: - Exercise Management
     func startExercise() {
         // 安全检查
+        guard !workoutFinished else { return }
         guard currentExerciseIndex < workoutPlan.exercises.count else {
             return
         }
@@ -186,6 +191,9 @@ class WorkoutViewModel: ObservableObject {
         )
         completedSets.append(completedSet)
 
+        // 缓存失效，确保进度和组数计算最新
+        invalidateCaches()
+
         // 更新当前组数显示
         updateCurrentSetDisplay()
 
@@ -202,15 +210,7 @@ class WorkoutViewModel: ObservableObject {
             // 进入休息状态，然后继续下一组/下一个动作
             startRest()
         } else {
-            // 训练完成
-            pauseExercise()
-
-            // 确保进度更新能触发UI刷新 - 使用立即更新机制处理关键状态变化
-            DispatchQueue.main.async {
-                self.immediateUIUpdate()
-                // 发送训练完成通知
-                NotificationCenter.default.post(name: .workoutCompleted, object: self)
-            }
+            completeWorkoutIfNeeded()
         }
     }
 
@@ -236,6 +236,7 @@ class WorkoutViewModel: ObservableObject {
 
     
     func startRest() {
+        guard !workoutFinished else { return }
         // 确保在主线程上进行原子性状态更新
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
@@ -334,6 +335,9 @@ class WorkoutViewModel: ObservableObject {
             completedSets.append(skippedSet)
         }
 
+        // 缓存失效，确保进度刷新
+        invalidateCaches()
+
         // 更新当前组数显示
         updateCurrentSetDisplay()
 
@@ -372,6 +376,7 @@ class WorkoutViewModel: ObservableObject {
             // 没有更多不同练习，完成训练
             DispatchQueue.main.async {
                 self.pauseExercise()
+                self.completeWorkoutIfNeeded()
             }
         }
     }
@@ -446,6 +451,9 @@ class WorkoutViewModel: ObservableObject {
             }
         }
 
+        // 缓存失效，确保进度刷新
+        invalidateCaches()
+
         // 更新进度 - 使用防抖机制触发UI刷新
         debouncedUIUpdate()
 
@@ -454,10 +462,7 @@ class WorkoutViewModel: ObservableObject {
             updateCachesIfNeeded()
         }
         if _completedSetsCount == _totalExerciseSets {
-            DispatchQueue.main.async {
-                // 发送训练完成通知
-                NotificationCenter.default.post(name: .workoutCompleted, object: self)
-            }
+            completeWorkoutIfNeeded()
         }
     }
 
@@ -530,9 +535,14 @@ class WorkoutViewModel: ObservableObject {
             // 休息结束，自动开始下一个动作
             if timeLeft == 0 {
                 isResting = false
-                // 延迟一帧开始下一个动作，确保状态更新完成
-                DispatchQueue.main.async {
-                    self.startExercise()
+                // 完成检查：若已完成则不再启动下一个动作
+                if self.isWorkoutComplete || self.workoutFinished {
+                    completeWorkoutIfNeeded()
+                } else {
+                    // 延迟一帧开始下一个动作，确保状态更新完成
+                    DispatchQueue.main.async {
+                        self.startExercise()
+                    }
                 }
             }
 
@@ -701,6 +711,25 @@ class WorkoutViewModel: ObservableObject {
     /// 手动触发缓存失效
     private func invalidateCaches() {
         _needsRecalculation = true
+    }
+
+    /// 统一处理训练完成逻辑，防止重复触发
+    private func completeWorkoutIfNeeded() {
+        guard !workoutFinished else { return }
+
+        if _needsRecalculation {
+            updateCachesIfNeeded()
+        }
+
+        guard _completedSetsCount >= _totalExerciseSets else { return }
+
+        workoutFinished = true
+        pauseExercise()
+
+        DispatchQueue.main.async {
+            self.immediateUIUpdate()
+            NotificationCenter.default.post(name: .workoutCompleted, object: self)
+        }
     }
 
     // MARK: - Cleanup
