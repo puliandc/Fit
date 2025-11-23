@@ -8,35 +8,43 @@
 import Foundation
 
 // MARK: - Workout Log Entry
-struct WorkoutLogEntry: Codable {
-    let exercise: String          // 动作名称
-    let setOrder: Int             // 组序
-    let targetWeight: Double      // 目标重量
-    let actualWeight: WorkoutValue  // 实际重量
-    let targetReps: Int           // 目标次数
-    let actualReps: WorkoutValue   // 实际次数
+
+struct WorkoutLogEntry: Codable
+{
+    let exercise: String // 动作名称
+    let setOrder: Int // 组序
+    let targetWeight: Double // 目标重量
+    let actualWeight: WorkoutValue // 实际重量
+    let targetReps: Int // 目标次数
+    let actualReps: WorkoutValue // 实际次数
     let trainingDuration: WorkoutValue // 训练时长
-    let restTime: Double          // 组间休息
-    let notes: String             // 备注
+    let restTime: Double // 组间休息
+    let notes: String // 备注
 }
 
 // MARK: - WorkoutValue (处理实际值或N/A)
-enum WorkoutValue: Codable {
+
+enum WorkoutValue: Codable
+{
     case value(Double)
     case na(String)
 
-    var stringValue: String {
-        switch self {
-        case .value(let double):
+    var stringValue: String
+    {
+        switch self
+        {
+        case let .value(double):
             return String(format: "%.1f", double)
-        case .na(let string):
+        case let .na(string):
             return string
         }
     }
 
-    var doubleValue: Double? {
-        switch self {
-        case .value(let double):
+    var doubleValue: Double?
+    {
+        switch self
+        {
+        case let .value(double):
             return double
         case .na:
             return nil
@@ -45,24 +53,30 @@ enum WorkoutValue: Codable {
 }
 
 // MARK: - Complete Workout Log
-struct WorkoutLog: Codable {
-    let workoutName: String         // 训练名称
-    let workoutDate: String         // 训练日期
-    let startTime: String           // 开始时间
-    let endTime: String             // 结束时间
-    let totalDuration: String       // 总训练时长
-    let entries: [WorkoutLogEntry]   // 训练条目列表
+
+struct WorkoutLog: Codable
+{
+    let workoutName: String // 训练名称
+    let workoutDate: String // 训练日期
+    let startTime: String // 开始时间
+    let endTime: String // 结束时间
+    let totalDuration: String // 总训练时长
+    let entries: [WorkoutLogEntry] // 训练条目列表
 
     // JSON导出方法
-    func toJSON() -> String? {
+    func toJSON() -> String?
+    {
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
         encoder.dateEncodingStrategy = .iso8601
 
-        do {
+        do
+        {
             let data = try encoder.encode(self)
             return String(data: data, encoding: .utf8)
-        } catch {
+        }
+        catch
+        {
             print("Failed to encode workout log: \(error)")
             return nil
         }
@@ -70,11 +84,14 @@ struct WorkoutLog: Codable {
 }
 
 // MARK: - Enhanced Workout Log File Manager
-class EnhancedWorkoutLogFileManager {
+
+class EnhancedWorkoutLogFileManager
+{
     private let fileManager = FileManager.default
 
     // 获取Fit应用根目录（直接在Fit根目录下存储日志）
-    var workoutLogsDirectoryURL: URL {
+    var workoutLogsDirectoryURL: URL
+    {
         let documentsPath = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
 
         // Fit应用的根目录就是Documents目录
@@ -84,7 +101,8 @@ class EnhancedWorkoutLogFileManager {
     }
 
     // 生成更友好的文件名
-    func generateLogFileName() -> String {
+    func generateLogFileName() -> String
+    {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd_HH-mm"
         let dateStr = formatter.string(from: Date())
@@ -92,31 +110,40 @@ class EnhancedWorkoutLogFileManager {
     }
 
     // 获取完整的文件路径
-    func getLogFileURL() -> URL {
+    func getLogFileURL() -> URL
+    {
         let fileName = generateLogFileName()
         return workoutLogsDirectoryURL.appendingPathComponent(fileName)
     }
 
     // 保存日志文件
-    func saveWorkoutLog(_ workoutLog: WorkoutLog) -> Bool {
+    func saveWorkoutLog(_ workoutLog: WorkoutLog) -> Bool
+    {
         let fileURL = getLogFileURL()
 
-        guard let jsonString = workoutLog.toJSON() else {
+        guard let jsonString = workoutLog.toJSON()
+        else
+        {
             print("Failed to convert workout log to JSON")
             return false
         }
 
-        do {
+        do
+        {
             try jsonString.write(to: fileURL, atomically: true, encoding: .utf8)
             return true
-        } catch {
+        }
+        catch
+        {
             return false
         }
     }
 
     // 获取所有日志文件
-    func getAllLogFiles() -> [URL] {
-        do {
+    func getAllLogFiles() -> [URL]
+    {
+        do
+        {
             let logFiles = try fileManager.contentsOfDirectory(
                 at: workoutLogsDirectoryURL,
                 includingPropertiesForKeys: [.creationDateKey],
@@ -124,28 +151,35 @@ class EnhancedWorkoutLogFileManager {
             ).filter { $0.pathExtension == "json" }
 
             // 按创建时间排序（最新的在前）
-            return logFiles.sorted { url1, url2 in
+            return logFiles.sorted
+            { url1, url2 in
                 let date1 = (try? url1.resourceValues(forKeys: [.creationDateKey]))?.creationDate ?? Date.distantPast
                 let date2 = (try? url2.resourceValues(forKeys: [.creationDateKey]))?.creationDate ?? Date.distantPast
                 return date1 > date2
             }
-        } catch {
+        }
+        catch
+        {
             return []
         }
     }
 
     // 清理旧日志文件（可选功能）
-    func organizeLogFiles() {
+    func organizeLogFiles()
+    {
         let logFiles = getAllLogFiles()
         _ = Calendar.current // 标记为已使用
 
         // 按月份分组
         var monthlyGroups: [String: [URL]] = [:]
 
-        for fileURL in logFiles {
-            if let creationDate = (try? fileURL.resourceValues(forKeys: [.creationDateKey]))?.creationDate {
+        for fileURL in logFiles
+        {
+            if let creationDate = (try? fileURL.resourceValues(forKeys: [.creationDateKey]))?.creationDate
+            {
                 let monthKey = DateFormatter.monthYear.string(from: creationDate)
-                if monthlyGroups[monthKey] == nil {
+                if monthlyGroups[monthKey] == nil
+                {
                     monthlyGroups[monthKey] = []
                 }
                 monthlyGroups[monthKey]?.append(fileURL)
@@ -158,7 +192,9 @@ class EnhancedWorkoutLogFileManager {
 }
 
 // MARK: - DateFormatter Extensions
-extension DateFormatter {
+
+extension DateFormatter
+{
     static let monthYear: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM"

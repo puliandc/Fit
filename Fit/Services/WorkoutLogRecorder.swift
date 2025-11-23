@@ -8,7 +8,9 @@
 import Foundation
 
 // MARK: - Workout Log Recorder
-class WorkoutLogRecorder {
+
+class WorkoutLogRecorder
+{
     private let fileManager = EnhancedWorkoutLogFileManager()
     private var workoutStartTime: Date?
     private var currentExerciseStartTime: Date?
@@ -18,7 +20,8 @@ class WorkoutLogRecorder {
     private var lastExerciseName: String = ""
 
     // 开始训练记录
-    func startWorkout(workoutPlan: WorkoutPlan) {
+    func startWorkout(workoutPlan: WorkoutPlan)
+    {
         workoutStartTime = Date()
         currentExerciseSetOrder = 1
         logEntries.removeAll()
@@ -28,9 +31,11 @@ class WorkoutLogRecorder {
     }
 
     // 开始新动作
-    func startExercise(exercise: Exercise) {
+    func startExercise(exercise: Exercise)
+    {
         // 检查是否是新的动作，如果是新动作则重置组序
-        if exercise.name != lastExerciseName {
+        if exercise.name != lastExerciseName
+        {
             currentExerciseSetOrder = 1
             print("📝 New exercise detected: \(exercise.name), resetting set order to 1")
         }
@@ -48,8 +53,11 @@ class WorkoutLogRecorder {
         actualReps: Int,
         actualWeight: Double,
         notes: String = ""
-    ) {
-        guard let startTime = currentExerciseStartTime else {
+    )
+    {
+        guard let startTime = currentExerciseStartTime
+        else
+        {
             print("⚠️ Warning: Exercise start time not recorded")
             return
         }
@@ -75,7 +83,8 @@ class WorkoutLogRecorder {
     }
 
     // 记录跳过的训练组
-    func recordSkippedSet(exerciseSet: ExerciseSet) {
+    func recordSkippedSet(exerciseSet: ExerciseSet)
+    {
         let entry = WorkoutLogEntry(
             exercise: currentExerciseName,
             setOrder: currentExerciseSetOrder,
@@ -95,8 +104,11 @@ class WorkoutLogRecorder {
     }
 
     // 完成训练并保存日志
-    func finishWorkout(workoutPlan: WorkoutPlan) -> Bool {
-        guard let startTime = workoutStartTime else {
+    func finishWorkout(workoutPlan: WorkoutPlan) -> Bool
+    {
+        guard let startTime = workoutStartTime
+        else
+        {
             print("⚠️ Warning: Workout start time not recorded")
             return false
         }
@@ -119,9 +131,12 @@ class WorkoutLogRecorder {
 
         let success = fileManager.saveWorkoutLog(workoutLog)
 
-        if success {
+        if success
+        {
             print("✅ Workout log saved successfully")
-        } else {
+        }
+        else
+        {
             print("❌ Failed to save workout log")
         }
 
@@ -132,7 +147,8 @@ class WorkoutLogRecorder {
     }
 
     // 重置记录器状态
-    private func reset() {
+    private func reset()
+    {
         workoutStartTime = nil
         currentExerciseStartTime = nil
         logEntries.removeAll()
@@ -142,25 +158,31 @@ class WorkoutLogRecorder {
     }
 
     // 格式化时长显示
-    private func formatDuration(_ duration: TimeInterval) -> String {
+    private func formatDuration(_ duration: TimeInterval) -> String
+    {
         let hours = Int(duration) / 3600
         let minutes = Int(duration) % 3600 / 60
         let seconds = Int(duration) % 60
 
-        if hours > 0 {
+        if hours > 0
+        {
             return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
-        } else {
+        }
+        else
+        {
             return String(format: "%02d:%02d", minutes, seconds)
         }
     }
 
     // 记录跳过的动作的所有组
-    func recordSkippedExercise(exercise: Exercise, exerciseSets: [ExerciseSet]) {
+    func recordSkippedExercise(exercise: Exercise, exerciseSets: [ExerciseSet])
+    {
         // 找到所有属于这个练习的组
         let exerciseSpecificSets = exerciseSets.filter { $0.exercise.id == exercise.id }
 
         // 记录所有这些组为跳过
-        for exerciseSet in exerciseSpecificSets {
+        for exerciseSet in exerciseSpecificSets
+        {
             recordSkippedSet(exerciseSet: exerciseSet)
         }
     }

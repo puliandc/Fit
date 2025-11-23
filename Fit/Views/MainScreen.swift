@@ -8,7 +8,8 @@
 
 import SwiftUI
 
-struct MainScreen: View {
+struct MainScreen: View
+{
     @EnvironmentObject var navigationManager: NavigationManager
     @EnvironmentObject var workoutSessionManager: WorkoutSessionManager
     @State private var hasWorkoutPlan: Bool = false
@@ -22,9 +23,10 @@ struct MainScreen: View {
     @State private var selectedFileURL: URL?
     @State private var fileSelectionError: String?
 
-  
-    var body: some View {
-        ZStack {
+    var body: some View
+    {
+        ZStack
+        {
             // 基础安全区域背景 - 确保与WorkoutScreen一致的背景架构
             SafeAreaBackground()
                 .ignoresSafeArea(.all)
@@ -33,8 +35,10 @@ struct MainScreen: View {
             AnimatedBackground()
                 .ignoresSafeArea(.all)
 
-            ScrollView {
-                VStack(spacing: 32) {
+            ScrollView
+            {
+                VStack(spacing: 32)
+                {
                     // 顶部安全区域间距
                     Color.clear.frame(height: 20)
 
@@ -42,9 +46,11 @@ struct MainScreen: View {
                     LogoHeader()
 
                     // 主要功能区域
-                    VStack(spacing: 24) {
+                    VStack(spacing: 24)
+                    {
                         // 开始训练卡片 - 仅在已加载训练计划时显示
-                        if hasWorkoutPlan {
+                        if hasWorkoutPlan
+                        {
                             FeatureCard(
                                 icon: "figure.run",
                                 title: "开始训练",
@@ -55,7 +61,9 @@ struct MainScreen: View {
                                 buttonText: "开始训练",
                                 buttonAction: {
                                     // 获取训练计划
-                                    guard let workoutPlan = externalTrainingService.currentWorkoutPlan else {
+                                    guard let workoutPlan = externalTrainingService.currentWorkoutPlan
+                                    else
+                                    {
                                         return
                                     }
 
@@ -69,7 +77,8 @@ struct MainScreen: View {
                         }
 
                         // 训练计划摘要卡片 - 显示已加载计划的详细信息
-                        if hasWorkoutPlan, let workoutPlan = externalTrainingService.currentWorkoutPlan {
+                        if hasWorkoutPlan, let workoutPlan = externalTrainingService.currentWorkoutPlan
+                        {
                             CompleteWorkoutPlanCard(workoutPlan: workoutPlan, delay: 0.3)
                         }
 
@@ -85,7 +94,8 @@ struct MainScreen: View {
                             isLoading: isReadingPlan,
                             buttonText: hasWorkoutPlan ? "重新读取" : "读取计划",
                             buttonAction: {
-                                if !isReadingPlan {
+                                if !isReadingPlan
+                                {
                                     readWorkoutPlan()
                                 }
                             },
@@ -100,7 +110,8 @@ struct MainScreen: View {
             }
         }
         // 文件选择器弹窗
-        .sheet(isPresented: $showFilePicker) {
+        .sheet(isPresented: $showFilePicker)
+        {
             FilePickerView(
                 isPresented: $showFilePicker,
                 onFileSelected: { url in
@@ -112,29 +123,35 @@ struct MainScreen: View {
             )
         }
         // 文件选择错误提示弹窗
-        .alert("文件选择错误", isPresented: .constant(fileSelectionError != nil)) {
-            Button("确定") {
+        .alert("文件选择错误", isPresented: .constant(fileSelectionError != nil))
+        {
+            Button("确定")
+            {
                 fileSelectionError = nil
             }
         } message: {
-            if let error = fileSelectionError {
+            if let error = fileSelectionError
+            {
                 Text(error)
             }
         }
         // JSON解析错误提示弹窗
-        .alert("JSON解析错误", isPresented: .constant(externalTrainingService.errorMessage != nil)) {
-            Button("确定") {
+        .alert("JSON解析错误", isPresented: .constant(externalTrainingService.errorMessage != nil))
+        {
+            Button("确定")
+            {
                 externalTrainingService.clearError()
             }
         } message: {
-            if let error = externalTrainingService.errorMessage {
+            if let error = externalTrainingService.errorMessage
+            {
                 Text(error)
             }
         }
     }
 
-  
-    private func readWorkoutPlan() {
+    private func readWorkoutPlan()
+    {
         print("📱 用户点击文件选择按钮")
         print("📂 正在从下载文件夹打开文档选择器")
 
@@ -143,7 +160,8 @@ struct MainScreen: View {
     }
 
     // 处理文件选择成功事件
-    private func handleFileSelection(_ url: URL) {
+    private func handleFileSelection(_ url: URL)
+    {
         print("👆 用户选择了文件: \(url.lastPathComponent)")
         print("📄 文件路径确认: \(url.path)")
 
@@ -151,15 +169,20 @@ struct MainScreen: View {
         isReadingPlan = true
 
         // 使用外部服务进行JSON文件解析
-        Task {
+        Task
+        {
             await externalTrainingService.loadWorkoutPlan(from: url)
 
             // 根据解析结果更新UI状态
-            DispatchQueue.main.async {
-                if externalTrainingService.currentWorkoutPlan != nil {
+            DispatchQueue.main.async
+            {
+                if externalTrainingService.currentWorkoutPlan != nil
+                {
                     hasWorkoutPlan = true
                     print("✅ JSON解析成功，训练计划已加载")
-                } else if let error = externalTrainingService.errorMessage {
+                }
+                else if let error = externalTrainingService.errorMessage
+                {
                     print("❌ JSON解析失败: \(error)")
                     // 错误处理已在服务中完成
                 }
@@ -170,7 +193,8 @@ struct MainScreen: View {
     }
 
     // 处理文件选择错误事件
-    private func handleFileSelectionError(_ error: String) {
+    private func handleFileSelectionError(_ error: String)
+    {
         print("❌ 文件选择出现错误: \(error)")
         fileSelectionError = error
         isReadingPlan = false
@@ -178,15 +202,19 @@ struct MainScreen: View {
 }
 
 // MARK: - Modern Background (动画背景组件)
-struct ModernBackground: View {
+
+struct ModernBackground: View
+{
     @State private var blob1Offset: CGSize = .zero
     @State private var blob1Scale: CGFloat = 1.0
     @State private var blob2Offset: CGSize = .zero
     @State private var blob2Scale: CGFloat = 1.0
     @State private var gradientRotation: Double = 0
 
-    var body: some View {
-        ZStack {
+    var body: some View
+    {
+        ZStack
+        {
             // 主背景渐变层
             LinearGradient.backgroundGradient
                 .ignoresSafeArea()
@@ -224,12 +252,12 @@ struct ModernBackground: View {
                 .blur(radius: 80)
                 .animation(
                     .easeInOut(duration: 25.0)
-                    .repeatForever(autoreverses: true),
+                        .repeatForever(autoreverses: true),
                     value: blob1Offset
                 )
                 .animation(
                     .easeInOut(duration: 20.0)
-                    .repeatForever(autoreverses: true),
+                        .repeatForever(autoreverses: true),
                     value: blob1Scale
                 )
 
@@ -249,12 +277,12 @@ struct ModernBackground: View {
                 .blur(radius: 70)
                 .animation(
                     .easeInOut(duration: 22.0)
-                    .repeatForever(autoreverses: true),
+                        .repeatForever(autoreverses: true),
                     value: blob2Offset
                 )
                 .animation(
                     .easeInOut(duration: 18.0)
-                    .repeatForever(autoreverses: true),
+                        .repeatForever(autoreverses: true),
                     value: blob2Scale
                 )
 
@@ -263,8 +291,10 @@ struct ModernBackground: View {
                 .opacity(0.03)
                 .ignoresSafeArea()
         }
-        .onAppear {
-            withAnimation {
+        .onAppear
+        {
+            withAnimation
+            {
                 blob1Offset = CGSize(width: 120, height: 100)
                 blob1Scale = 1.3
                 blob2Offset = CGSize(width: -100, height: 140)
@@ -276,16 +306,22 @@ struct ModernBackground: View {
 }
 
 // MARK: - Mesh Gradient Background
-struct MeshGradientBackground: View {
-    var body: some View {
+
+struct MeshGradientBackground: View
+{
+    var body: some View
+    {
         // 创建细微的网格纹理背景
-        Canvas { context, size in
+        Canvas
+        { context, size in
             let gridSize: CGFloat = 40
             let columns = Int(size.width / gridSize)
             let rows = Int(size.height / gridSize)
 
-            for i in 0..<columns {
-                for j in 0..<rows {
+            for i in 0 ..< columns
+            {
+                for j in 0 ..< rows
+                {
                     let x = CGFloat(i) * gridSize
                     let y = CGFloat(j) * gridSize
 
@@ -305,7 +341,9 @@ struct MeshGradientBackground: View {
 }
 
 // MARK: - Feature Card
-struct FeatureCard: View {
+
+struct FeatureCard: View
+{
     let icon: String
     let title: String
     let subtitle: String
@@ -322,12 +360,16 @@ struct FeatureCard: View {
     @State private var shimmerOffset: CGFloat = -200
     @State private var isHovered: Bool = false
 
-    var body: some View {
-        VStack(spacing: 20) {
+    var body: some View
+    {
+        VStack(spacing: 20)
+        {
             // 卡片头部 - 图标和标题
-            HStack(alignment: .top, spacing: 16) {
+            HStack(alignment: .top, spacing: 16)
+            {
                 // 图标容器
-                ZStack {
+                ZStack
+                {
                     RoundedRectangle(cornerRadius: 16)
                         .fill(
                             LinearGradient(
@@ -349,28 +391,29 @@ struct FeatureCard: View {
                 }
 
                 // 标题和副标题
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 4)
+                {
                     Text(title)
                         .font(.system(size: 20, weight: .bold))
                         .multilineTextAlignment(.leading)
                         .foregroundStyle(
                             title == "读取健身计划" ?
-                            LinearGradient(
-                                colors: [
-                                    Color(red: 0.22, green: 0.51, blue: 0.96), // blue-600
-                                    Color(red: 0.06, green: 0.75, blue: 0.82)  // cyan-600
-                                ],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            ) :
-                            LinearGradient(
-                                colors: [
-                                    Color(red: 0.95, green: 0.29, blue: 0.26), // orange-600 (开始训练)
-                                    Color(red: 0.91, green: 0.15, blue: 0.46)  // pink-600
-                                ],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
+                                LinearGradient(
+                                    colors: [
+                                        Color(red: 0.22, green: 0.51, blue: 0.96), // blue-600
+                                        Color(red: 0.06, green: 0.75, blue: 0.82) // cyan-600
+                                    ],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                ) :
+                                LinearGradient(
+                                    colors: [
+                                        Color(red: 0.95, green: 0.29, blue: 0.26), // orange-600 (开始训练)
+                                        Color(red: 0.91, green: 0.15, blue: 0.46) // pink-600
+                                    ],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
                         )
 
                     Text(subtitle)
@@ -378,8 +421,8 @@ struct FeatureCard: View {
                         .multilineTextAlignment(.leading)
                         .foregroundColor(
                             title == "读取健身计划" ?
-                            Color(red: 0.439, green: 0.447, blue: 0.498) : // gray-600
-                            .appTextSecondary
+                                Color(red: 0.439, green: 0.447, blue: 0.498) : // gray-600
+                                .appTextSecondary
                         )
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -388,8 +431,10 @@ struct FeatureCard: View {
             }
 
             // 状态显示区域
-            if hasContent {
-                HStack {
+            if hasContent
+            {
+                HStack
+                {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundColor(.success)
                         .font(.system(size: 16, weight: .semibold))
@@ -407,8 +452,10 @@ struct FeatureCard: View {
             }
 
             // 加载状态显示
-            if isLoading {
-                HStack {
+            if isLoading
+            {
+                HStack
+                {
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle(tint: .appTextSecondary))
                         .scaleEffect(0.8)
@@ -489,7 +536,7 @@ struct FeatureCard: View {
                         .offset(x: shimmerOffset)
                         .animation(
                             .easeInOut(duration: 2.5)
-                            .repeatForever(autoreverses: false),
+                                .repeatForever(autoreverses: false),
                             value: shimmerOffset
                         )
                 )
@@ -502,15 +549,18 @@ struct FeatureCard: View {
         .offset(y: isHovered ? -2 : 0) // 悬停时的轻微上移
         .animation(.spring(response: 0.8, dampingFraction: 0.8).delay(delay), value: isVisible)
         .animation(.easeInOut(duration: 0.2), value: isHovered)
-        .onAppear {
-            withAnimation {
+        .onAppear
+        {
+            withAnimation
+            {
                 isVisible = true
                 pulseScale = 1.1
                 // 启动光泽动画
                 shimmerOffset = 200
             }
         }
-        .onTapGesture {
+        .onTapGesture
+        {
             // 添加触觉反馈
             let impactFeedback = UIImpactFeedbackGenerator(style: .light)
             impactFeedback.impactOccurred()
@@ -519,7 +569,9 @@ struct FeatureCard: View {
 }
 
 // MARK: - Modern Button
-struct ModernButton: View {
+
+struct ModernButton: View
+{
     let text: String
     let action: () -> Void
     let style: ModernButtonStyle
@@ -531,22 +583,28 @@ struct ModernButton: View {
     @Environment(\.colorScheme) var colorScheme: ColorScheme
     @Environment(\.accessibilityReduceMotion) var reduceMotion
 
-    enum ModernButtonStyle {
-        case primary      // 绿色渐变 + 扫光动画 + h-14高度
-        case secondary    // 红色边框outline样式 + h-12高度
+    enum ModernButtonStyle
+    {
+        case primary // 绿色渐变 + 扫光动画 + h-14高度
+        case secondary // 红色边框outline样式 + h-12高度
         case disabled
         case readPlan // 读取计划专用样式
     }
 
-    var body: some View {
+    var body: some View
+    {
         Button(action: {
-            if !isDisabled {
+            if !isDisabled
+            {
                 action()
             }
-        }) {
-            HStack(spacing: 8) {
+        })
+        {
+            HStack(spacing: 8)
+            {
                 // 移除primary和secondary的内置图标，只保留readPlan的图标
-                if style == .readPlan {
+                if style == .readPlan
+                {
                     Image(systemName: "hourglass.circle.fill")
                         .font(.system(size: 18, weight: .semibold))
                 }
@@ -566,8 +624,10 @@ struct ModernButton: View {
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             .overlay(
                 // 为secondary样式添加红色边框
-                Group {
-                    if style == .secondary {
+                Group
+                {
+                    if style == .secondary
+                    {
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
                             .stroke(secondaryBorderColor, lineWidth: 1.5)
                     }
@@ -580,27 +640,33 @@ struct ModernButton: View {
         .scaleEffect(isPressed ? 0.98 : 1.0)
         .onLongPressGesture(minimumDuration: 0, maximumDistance: .infinity, pressing: { pressing in
             isPressed = pressing
-        }, perform: {})
-        .onAppear {
+        }, perform: { })
+        .onAppear
+        {
             // 启动扫光动画（尊重减少动态设置）
-            if !reduceMotion {
+            if !reduceMotion
+            {
                 shimmerActive = true
             }
         }
-        .onDisappear {
+        .onDisappear
+        {
             shimmerActive = false
         }
     }
 
-    private var buttonBackground: some View {
-        Group {
-            switch style {
+    private var buttonBackground: some View
+    {
+        Group
+        {
+            switch style
+            {
             case .primary:
                 // 绿色渐变背景: from-green-500 to green-600
                 LinearGradient(
                     colors: [
                         Color(red: 0.13, green: 0.69, blue: 0.29), // green-500
-                        Color(red: 0.05, green: 0.64, blue: 0.26)  // green-600
+                        Color(red: 0.05, green: 0.64, blue: 0.26) // green-600
                     ],
                     startPoint: .leading,
                     endPoint: .trailing
@@ -649,7 +715,7 @@ struct ModernButton: View {
                 LinearGradient(
                     colors: [
                         Color(red: 0.13, green: 0.59, blue: 0.95), // blue-500
-                        Color(red: 0.06, green: 0.75, blue: 0.82)  // cyan-600
+                        Color(red: 0.06, green: 0.75, blue: 0.82) // cyan-600
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
@@ -658,8 +724,10 @@ struct ModernButton: View {
         }
     }
 
-    private var buttonTextColor: Color {
-        switch style {
+    private var buttonTextColor: Color
+    {
+        switch style
+        {
         case .primary:
             return .white // 绿色渐变背景使用白色文字
         case .secondary:
@@ -671,16 +739,22 @@ struct ModernButton: View {
         }
     }
 
-    private var secondaryBorderColor: Color {
-        if colorScheme == .light {
+    private var secondaryBorderColor: Color
+    {
+        if colorScheme == .light
+        {
             return Color.errorDark.opacity(0.3)
-        } else {
+        }
+        else
+        {
             return Color.errorLight.opacity(0.3)
         }
     }
 
-    private var buttonShadowColor: Color {
-        switch style {
+    private var buttonShadowColor: Color
+    {
+        switch style
+        {
         case .primary:
             // 橙色光晕效果 - 暂时注释掉测试
             // return .accentGradientStart.opacity(0.4)
@@ -695,9 +769,10 @@ struct ModernButton: View {
     }
 }
 
-
 // MARK: - Complete Workout Plan Card
-struct CompleteWorkoutPlanCard: View {
+
+struct CompleteWorkoutPlanCard: View
+{
     let workoutPlan: WorkoutPlan
     let delay: Double
 
@@ -707,24 +782,29 @@ struct CompleteWorkoutPlanCard: View {
     @State private var isHovered: Bool = false
 
     // 计算动作数量（按不同的练习名称统计）
-    private var exerciseCount: Int {
+    private var exerciseCount: Int
+    {
         let uniqueExerciseNames = Set(workoutPlan.exercises.map { $0.exercise.name })
         return uniqueExerciseNames.count
     }
 
     // 计算总组数（所有ExerciseSet的数量）
-    private var totalSets: Int {
+    private var totalSets: Int
+    {
         workoutPlan.exercises.count
     }
 
     // 按动作名称分组汇总（保持原始顺序）
-    private var groupedExercises: [(name: String, sets: Int, reps: Int)] {
+    private var groupedExercises: [(name: String, sets: Int, reps: Int)]
+    {
         var seenNames: Set<String> = []
         var result: [(name: String, sets: Int, reps: Int)] = []
 
-        for exercise in workoutPlan.exercises {
+        for exercise in workoutPlan.exercises
+        {
             let name = exercise.exercise.name
-            if !seenNames.contains(name) {
+            if !seenNames.contains(name)
+            {
                 seenNames.insert(name)
                 let allSetsForExercise = workoutPlan.exercises.filter { $0.exercise.name == name }
                 let sets = allSetsForExercise.count
@@ -736,12 +816,16 @@ struct CompleteWorkoutPlanCard: View {
         return result
     }
 
-    var body: some View {
-        VStack(spacing: 20) {
+    var body: some View
+    {
+        VStack(spacing: 20)
+        {
             // 卡片头部 - 图标和标题
-            HStack(alignment: .top, spacing: 16) {
+            HStack(alignment: .top, spacing: 16)
+            {
                 // 图标容器
-                ZStack {
+                ZStack
+                {
                     RoundedRectangle(cornerRadius: 16)
                         .fill(
                             LinearGradient(
@@ -758,7 +842,8 @@ struct CompleteWorkoutPlanCard: View {
                 }
 
                 // 标题和计划名称
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 4)
+                {
                     Text("训练计划")
                         .font(.system(size: 20, weight: .bold))
                         .multilineTextAlignment(.leading)
@@ -766,7 +851,7 @@ struct CompleteWorkoutPlanCard: View {
                             LinearGradient(
                                 colors: [
                                     Color(red: 0.05, green: 0.62, blue: 0.34), // green-600
-                                    Color(red: 0.05, green: 0.75, blue: 0.41)  // emerald-600
+                                    Color(red: 0.05, green: 0.75, blue: 0.41) // emerald-600
                                 ],
                                 startPoint: .leading,
                                 endPoint: .trailing
@@ -784,8 +869,10 @@ struct CompleteWorkoutPlanCard: View {
             }
 
             // 训练统计信息
-            VStack(spacing: 12) {
-                HStack(spacing: 16) {
+            VStack(spacing: 12)
+            {
+                HStack(spacing: 16)
+                {
                     // 动作数量
                     StatItem(
                         icon: "dumbbell.fill",
@@ -814,8 +901,10 @@ struct CompleteWorkoutPlanCard: View {
             }
 
             // 练习项目列表
-            VStack(spacing: 12) {
-                HStack {
+            VStack(spacing: 12)
+            {
+                HStack
+                {
                     Text("练习项目")
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(.appText)
@@ -824,11 +913,14 @@ struct CompleteWorkoutPlanCard: View {
 
                     // 展开/收起按钮
                     Button(action: {
-                        withAnimation(.easeInOut(duration: 0.3)) {
+                        withAnimation(.easeInOut(duration: 0.3))
+                        {
                             showAllExercises.toggle()
                         }
-                    }) {
-                        HStack(spacing: 4) {
+                    })
+                    {
+                        HStack(spacing: 4)
+                        {
                             Text(showAllExercises ? "收起" : "展开")
                                 .font(.system(size: 12, weight: .medium))
                                 .foregroundColor(.appPrimary)
@@ -841,13 +933,18 @@ struct CompleteWorkoutPlanCard: View {
                     .buttonStyle(PlainButtonStyle())
                 }
 
-                if showAllExercises {
+                if showAllExercises
+                {
                     // 显示按动作分组的汇总列表
-                    VStack(spacing: 6) {
-                        ForEach(Array(groupedExercises.enumerated()), id: \.offset) { index, exercise in
-                            HStack(spacing: 8) {
+                    VStack(spacing: 6)
+                    {
+                        ForEach(Array(groupedExercises.enumerated()), id: \.offset)
+                        { index, exercise in
+                            HStack(spacing: 8)
+                            {
                                 // 序号圆圈
-                                ZStack {
+                                ZStack
+                                {
                                     RoundedRectangle(cornerRadius: 4)
                                         .fill(Color(red: 0, green: 0.79, blue: 0.32))
                                         .frame(width: 24, height: 24)
@@ -938,7 +1035,7 @@ struct CompleteWorkoutPlanCard: View {
                         .offset(x: shimmerOffset)
                         .animation(
                             .easeInOut(duration: 2.5)
-                            .repeatForever(autoreverses: false),
+                                .repeatForever(autoreverses: false),
                             value: shimmerOffset
                         )
                 )
@@ -951,14 +1048,17 @@ struct CompleteWorkoutPlanCard: View {
         .offset(y: isHovered ? -2 : 0) // 悬停时的轻微上移
         .animation(.spring(response: 0.8, dampingFraction: 0.8).delay(delay), value: isVisible)
         .animation(.easeInOut(duration: 0.2), value: isHovered)
-        .onAppear {
-            withAnimation {
+        .onAppear
+        {
+            withAnimation
+            {
                 isVisible = true
                 // 启动光泽动画
                 shimmerOffset = 200
             }
         }
-        .onTapGesture {
+        .onTapGesture
+        {
             // 添加触觉反馈
             let impactFeedback = UIImpactFeedbackGenerator(style: .light)
             impactFeedback.impactOccurred()
@@ -967,7 +1067,9 @@ struct CompleteWorkoutPlanCard: View {
 }
 
 // MARK: - Stat Item
-struct StatItem: View {
+
+struct StatItem: View
+{
     let icon: String
     let value: String
     let label: String
@@ -975,8 +1077,10 @@ struct StatItem: View {
 
     @State private var isVisible: Bool = false
 
-    var body: some View {
-        VStack(spacing: 6) {
+    var body: some View
+    {
+        VStack(spacing: 6)
+        {
             Image(systemName: icon)
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundColor(color)
@@ -993,8 +1097,10 @@ struct StatItem: View {
         .scaleEffect(isVisible ? 1.0 : 0.8)
         .opacity(isVisible ? 1.0 : 0)
         .animation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.1), value: isVisible)
-        .onAppear {
-            withAnimation {
+        .onAppear
+        {
+            withAnimation
+            {
                 isVisible = true
             }
         }
@@ -1002,14 +1108,19 @@ struct StatItem: View {
 }
 
 // MARK: - Exercise Row
-struct ExerciseRow: View {
+
+struct ExerciseRow: View
+{
     let exerciseSet: ExerciseSet
     let index: Int
 
-    var body: some View {
-        HStack(spacing: 8) {
+    var body: some View
+    {
+        HStack(spacing: 8)
+        {
             // 序号圆圈
-            ZStack {
+            ZStack
+            {
                 RoundedRectangle(cornerRadius: 4)
                     .fill(Color(red: 0, green: 0.79, blue: 0.32))
                     .frame(width: 24, height: 24)
@@ -1041,7 +1152,9 @@ struct ExerciseRow: View {
 }
 
 // MARK: - Preview
-#Preview {
+
+#Preview
+{
     MainScreen()
         .environmentObject(NavigationManager.preview)
         .preferredColorScheme(.dark)

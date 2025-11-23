@@ -4,15 +4,12 @@
 --allman true
 --selfrequired
 --semicolons never
---wraparguments on
---wrapconditions on
+--wraparguments before-first
+--wrapconditions before-first
 --commas never
 --exponentcase lowercase
 --hexgrouping 4,8
 --binarygrouping 4,8
 --octalgrouping 4,8
 --decimalgrouping 3,6
---typeproperties sorted
---emptybraces fast
---organizeimports
---importgrouping testable-bottom
+--emptybraces spaced

@@ -9,14 +9,17 @@
 import SwiftUI
 
 // MARK: - Edit Set Dialog (Legacy Wrapper)
+
 // DEPRECATED: This component should be replaced by direct UniversalDialog usage
-struct EditSetDialog: View {
+struct EditSetDialog: View
+{
     let exercise: Exercise
     let setIndex: Int
     let onDismiss: () -> Void
     let workoutViewModel: WorkoutViewModel
 
-    var body: some View {
+    var body: some View
+    {
         let defaults = workoutViewModel.getDefaultParametersForCurrentExercise()
         return UniversalDialog(
             type: .input(
@@ -33,27 +36,41 @@ struct EditSetDialog: View {
     }
 
     // 统一的重量格式化函数
-    private func formatWeight(_ weight: Double) -> String {
-        if weight == 0 {
+    private func formatWeight(_ weight: Double) -> String
+    {
+        if weight == 0
+        {
             return "自重"
-        } else if abs(weight.truncatingRemainder(dividingBy: 1)) < 0.0001 {
+        }
+        else if abs(weight.truncatingRemainder(dividingBy: 1)) < 0.0001
+        {
             return String(format: "%.0f", weight)
-        } else {
+        }
+        else
+        {
             return String(format: "%.1f", weight)
         }
     }
 
-    private func saveChanges(reps: String, weight: String, notes: String) {
-        guard let actualReps = Int(reps) else {
+    private func saveChanges(reps: String, weight: String, notes: String)
+    {
+        guard let actualReps = Int(reps)
+        else
+        {
             return
         }
 
         // 处理重量输入：如果是"自重"或空字符串，则设为0
         let actualWeight: Double
-        if weight.lowercased() == "自重" || weight.isEmpty {
+        if weight.lowercased() == "自重" || weight.isEmpty
+        {
             actualWeight = 0.0
-        } else {
-            guard let weightValue = Double(weight) else {
+        }
+        else
+        {
+            guard let weightValue = Double(weight)
+            else
+            {
                 return
             }
             actualWeight = weightValue
@@ -65,11 +82,14 @@ struct EditSetDialog: View {
 }
 
 // MARK: - Completion Dialog (Legacy Wrapper)
+
 // DEPRECATED: This component should be replaced by direct UniversalDialog usage
-struct CompletionDialog: View {
+struct CompletionDialog: View
+{
     let onDismiss: () -> Void
 
-    var body: some View {
+    var body: some View
+    {
         UniversalDialog(
             type: .input(
                 title: "完成记录",
@@ -84,18 +104,22 @@ struct CompletionDialog: View {
         )
     }
 
-    private func saveCompletion(reps: String, weight: String) {
+    private func saveCompletion(reps _: String, weight _: String)
+    {
         // 功能保留但标记为过时，建议直接使用UniversalDialog
     }
 }
 
 // MARK: - Quit Dialog (Legacy Wrapper)
+
 // DEPRECATED: This component should be replaced by direct UniversalDialog usage
-struct QuitDialog: View {
+struct QuitDialog: View
+{
     let onConfirm: () -> Void
     let onCancel: () -> Void
 
-    var body: some View {
+    var body: some View
+    {
         UniversalDialog(
             type: .confirmation(
                 title: "放弃训练",
@@ -110,14 +134,17 @@ struct QuitDialog: View {
 }
 
 // MARK: - Enhanced Quit Dialog (Legacy Wrapper)
+
 // DEPRECATED: This component should be replaced by direct UniversalDialog usage
-struct EnhancedQuitDialog: View {
+struct EnhancedQuitDialog: View
+{
     let onQuitCurrentExercise: () -> Void
     let onQuitAll: () -> Void
     let onCancel: () -> Void
     let currentExerciseName: String
 
-    var body: some View {
+    var body: some View
+    {
         UniversalDialog(
             type: .options(
                 title: "放弃动作",
@@ -155,12 +182,15 @@ struct EnhancedQuitDialog: View {
 // Use UniversalDialog with .options type instead
 
 // MARK: - Workout Complete Dialog (Legacy Wrapper)
+
 // DEPRECATED: This component should be replaced by direct UniversalDialog usage
-struct WorkoutCompleteDialog: View {
+struct WorkoutCompleteDialog: View
+{
     let onDismiss: () -> Void
     let workoutViewModel: WorkoutViewModel
 
-    var body: some View {
+    var body: some View
+    {
         UniversalDialog(
             type: .completion(
                 title: "训练完成!",
@@ -175,7 +205,8 @@ struct WorkoutCompleteDialog: View {
     }
 
     // Helper function to format time
-    private func formatTime(_ seconds: Int) -> String {
+    private func formatTime(_ seconds: Int) -> String
+    {
         let minutes = seconds / 60
         let secs = seconds % 60
         return String(format: "%d:%02d", minutes, secs)
@@ -183,7 +214,9 @@ struct WorkoutCompleteDialog: View {
 }
 
 // MARK: - Preview
-#Preview {
+
+#Preview
+{
     UniversalDialog(
         type: .input(
             title: "动作完成",
@@ -192,7 +225,7 @@ struct WorkoutCompleteDialog: View {
             defaultWeight: "60",
             onConfirm: { _, _, _ in }
         ),
-        onDismiss: {}
+        onDismiss: { }
     )
     .preferredColorScheme(.dark)
 }

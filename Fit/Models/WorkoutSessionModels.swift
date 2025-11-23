@@ -8,8 +8,10 @@
 import Foundation
 
 // MARK: - Completed Set (for backward compatibility)
+
 // 简化的完成组记录，用于WorkoutViewModel的completedSets数组
-struct CompletedSet: Identifiable, Codable {
+struct CompletedSet: Identifiable, Codable
+{
     let id: UUID
     let exerciseSetId: UUID
     let actualReps: Int
@@ -24,7 +26,8 @@ struct CompletedSet: Identifiable, Codable {
         actualWeight: Double,
         completedAt: Date = Date(),
         notes: String? = nil
-    ) {
+    )
+    {
         self.id = id
         self.exerciseSetId = exerciseSetId
         self.actualReps = actualReps
@@ -35,48 +38,59 @@ struct CompletedSet: Identifiable, Codable {
 }
 
 // MARK: - Prebuilt Workout Session Data Structure
+
 // 预建立的训练会话数据结构，包含完整的训练信息
-class PrebuiltWorkoutSession {
+class PrebuiltWorkoutSession
+{
     let id: UUID
     let workoutPlan: WorkoutPlan
     let sessionDate: Date
     var exerciseSessions: [ExerciseSession]
 
     // 计算属性
-    var totalSets: Int {
+    var totalSets: Int
+    {
         exerciseSessions.reduce(0) { $0 + $1.sets.count }
     }
 
-    var completedSets: Int {
+    var completedSets: Int
+    {
         exerciseSessions.reduce(0) { $0 + $1.sets.filter { $0.isCompleted }.count }
     }
 
-    var currentExerciseSession: ExerciseSession? {
+    var currentExerciseSession: ExerciseSession?
+    {
         exerciseSessions.first { !$0.isFullyCompleted }
     }
 
-    init(workoutPlan: WorkoutPlan) {
-        self.id = UUID()
+    init(workoutPlan: WorkoutPlan)
+    {
+        id = UUID()
         self.workoutPlan = workoutPlan
-        self.sessionDate = Date()
-        self.exerciseSessions = []
+        sessionDate = Date()
+        exerciseSessions = []
     }
 }
 
 // MARK: - Exercise Session
+
 // 单个练习的会话数据，包含该练习的所有组
-class ExerciseSession {
+class ExerciseSession
+{
     let id: UUID
     let exercise: Exercise
     var sets: [WorkoutSet]
-    var isFullyCompleted: Bool {
+    var isFullyCompleted: Bool
+    {
         sets.allSatisfy { $0.isCompleted }
     }
 
-    init(exercise: Exercise, exerciseSets: [ExerciseSet]) {
-        self.id = UUID()
+    init(exercise: Exercise, exerciseSets: [ExerciseSet])
+    {
+        id = UUID()
         self.exercise = exercise
-        self.sets = exerciseSets.enumerated().map { index, exerciseSet in
+        sets = exerciseSets.enumerated().map
+        { index, exerciseSet in
             WorkoutSet(
                 id: UUID(),
                 exerciseSet: exerciseSet,
@@ -96,8 +110,10 @@ class ExerciseSession {
 }
 
 // MARK: - Workout Set
+
 // 单个训练组的数据，包含所有必要字段
-struct WorkoutSet: Identifiable {
+struct WorkoutSet: Identifiable
+{
     let id: UUID
     let exerciseSet: ExerciseSet
     let setOrder: Int
@@ -114,41 +130,59 @@ struct WorkoutSet: Identifiable {
     var completedAt: Date?
 
     // 计算属性
-    var displayWeight: String {
-        if let actualWeight = actualWeight {
+    var displayWeight: String
+    {
+        if let actualWeight = actualWeight
+        {
             return actualWeight > 0 ? String(format: "%.1f", actualWeight) : "自重"
-        } else {
+        }
+        else
+        {
             return targetWeight > 0 ? String(format: "%.1f", targetWeight) : "自重"
         }
     }
 
-    var displayReps: String {
-        if let actualReps = actualReps {
+    var displayReps: String
+    {
+        if let actualReps = actualReps
+        {
             return String(actualReps)
-        } else {
+        }
+        else
+        {
             return String(targetReps)
         }
     }
 
-    var setStatus: SetStatus {
-        if isCompleted {
+    var setStatus: SetStatus
+    {
+        if isCompleted
+        {
             return .completed
-        } else if actualReps == 0 && actualWeight == 0 {
+        }
+        else if actualReps == 0 && actualWeight == 0
+        {
             return .skipped
-        } else {
+        }
+        else
+        {
             return .pending
         }
     }
 }
 
 // MARK: - Set Status
-enum SetStatus: String, CaseIterable {
+
+enum SetStatus: String, CaseIterable
+{
     case pending = "待完成"
     case completed = "已完成"
     case skipped = "已跳过"
 
-    var color: String {
-        switch self {
+    var color: String
+    {
+        switch self
+        {
         case .pending:
             return "gray"
         case .completed:
@@ -160,17 +194,20 @@ enum SetStatus: String, CaseIterable {
 }
 
 // MARK: - Prebuilt Workout Session Prebuilder
+
 // DEPRECATED: This class is overly complex and should be simplified
 // Consider using direct WorkoutSession creation instead
-class PrebuiltWorkoutSessionPrebuilder {
-
-    func buildSession(from workoutPlan: WorkoutPlan) -> PrebuiltWorkoutSession {
+class PrebuiltWorkoutSessionPrebuilder
+{
+    func buildSession(from workoutPlan: WorkoutPlan) -> PrebuiltWorkoutSession
+    {
         let session = PrebuiltWorkoutSession(workoutPlan: workoutPlan)
 
         // 按练习分组，为每个练习创建 ExerciseSession
         let groupedExercises = Dictionary(grouping: workoutPlan.exercises) { $0.exercise.id }
 
-        for (_, exerciseSets) in groupedExercises {
+        for (_, exerciseSets) in groupedExercises
+        {
             guard let firstSet = exerciseSets.first else { continue }
             let exercise = firstSet.exercise
 
@@ -183,7 +220,8 @@ class PrebuiltWorkoutSessionPrebuilder {
         }
 
         // 按照原始计划的顺序重新排序
-        session.exerciseSessions.sort { session1, session2 in
+        session.exerciseSessions.sort
+        { session1, session2 in
             let firstSet1 = workoutPlan.exercises.first { $0.exercise.id == session1.exercise.id }
             let firstSet2 = workoutPlan.exercises.first { $0.exercise.id == session2.exercise.id }
             guard let index1 = firstSet1?.id, let index2 = firstSet2?.id else { return false }
@@ -193,18 +231,25 @@ class PrebuiltWorkoutSessionPrebuilder {
         return session
     }
 
-    func validateSession(_ session: PrebuiltWorkoutSession) -> Bool {
-        guard !session.exerciseSessions.isEmpty else {
+    func validateSession(_ session: PrebuiltWorkoutSession) -> Bool
+    {
+        guard !session.exerciseSessions.isEmpty
+        else
+        {
             return false
         }
 
-        for exerciseSession in session.exerciseSessions {
-            if exerciseSession.sets.isEmpty {
+        for exerciseSession in session.exerciseSessions
+        {
+            if exerciseSession.sets.isEmpty
+            {
                 return false
             }
 
-            for (index, set) in exerciseSession.sets.enumerated() {
-                if set.setOrder != index + 1 {
+            for (index, set) in exerciseSession.sets.enumerated()
+            {
+                if set.setOrder != index + 1
+                {
                     return false
                 }
             }
@@ -215,20 +260,28 @@ class PrebuiltWorkoutSessionPrebuilder {
 }
 
 // MARK: - Prebuilt Workout Session Extensions
-extension PrebuiltWorkoutSession {
-    func getCurrentSet() -> WorkoutSet? {
+
+extension PrebuiltWorkoutSession
+{
+    func getCurrentSet() -> WorkoutSet?
+    {
         // 找到第一个未完成的练习的第一个未完成的组
-        for exerciseSession in exerciseSessions {
-            if let firstIncompleteSet = exerciseSession.sets.first(where: { !$0.isCompleted }) {
+        for exerciseSession in exerciseSessions
+        {
+            if let firstIncompleteSet = exerciseSession.sets.first(where: { !$0.isCompleted })
+            {
                 return firstIncompleteSet
             }
         }
         return nil
     }
 
-    func markSetCompleted(_ set: WorkoutSet, actualWeight: Double, actualReps: Int, notes: String = "") {
-        if let index = exerciseSessions.firstIndex(where: { $0.sets.contains(where: { $0.id == set.id }) }) {
-            if let setIndex = exerciseSessions[index].sets.firstIndex(where: { $0.id == set.id }) {
+    func markSetCompleted(_ set: WorkoutSet, actualWeight: Double, actualReps: Int, notes: String = "")
+    {
+        if let index = exerciseSessions.firstIndex(where: { $0.sets.contains(where: { $0.id == set.id }) })
+        {
+            if let setIndex = exerciseSessions[index].sets.firstIndex(where: { $0.id == set.id })
+            {
                 exerciseSessions[index].sets[setIndex].actualWeight = actualWeight
                 exerciseSessions[index].sets[setIndex].actualReps = actualReps
                 exerciseSessions[index].sets[setIndex].notes = notes
@@ -238,12 +291,16 @@ extension PrebuiltWorkoutSession {
         }
     }
 
-    func skipRemainingSetsInExercise(_ exercise: Exercise) {
-        if let exerciseSessionIndex = exerciseSessions.firstIndex(where: { $0.exercise.id == exercise.id }) {
+    func skipRemainingSetsInExercise(_ exercise: Exercise)
+    {
+        if let exerciseSessionIndex = exerciseSessions.firstIndex(where: { $0.exercise.id == exercise.id })
+        {
             let exerciseSession = exerciseSessions[exerciseSessionIndex]
 
-            for setIndex in exerciseSession.sets.indices {
-                if !exerciseSession.sets[setIndex].isCompleted {
+            for setIndex in exerciseSession.sets.indices
+            {
+                if !exerciseSession.sets[setIndex].isCompleted
+                {
                     exerciseSessions[exerciseSessionIndex].sets[setIndex].actualWeight = 0
                     exerciseSessions[exerciseSessionIndex].sets[setIndex].actualReps = 0
                     exerciseSessions[exerciseSessionIndex].sets[setIndex].notes = "跳过"

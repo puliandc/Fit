@@ -1,13 +1,15 @@
-//created by Jason Lu on 09:45:00 10/13/2025
+// created by Jason Lu on 09:45:00 10/13/2025
 // FIT应用外部训练计划服务 - 版本1.3完整训练计划解析实现
 
+import Combine
 import Foundation
 import SwiftUI
-import Combine
 
 // MARK: - 外部训练计划服务
+
 @MainActor
-class ExternalTrainingPlanService: ObservableObject {
+class ExternalTrainingPlanService: ObservableObject
+{
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var currentWorkoutPlan: WorkoutPlan?
@@ -20,7 +22,8 @@ class ExternalTrainingPlanService: ObservableObject {
     @Published var architectureReady = false
 
     // 服务初始化
-    init() {
+    init()
+    {
         print("🚀 版本1.3: ExternalTrainingPlanService完整训练计划解析服务初始化")
         print("📁 建立外部文件处理架构")
         print("🔒 文件验证器已集成")
@@ -34,12 +37,14 @@ class ExternalTrainingPlanService: ObservableObject {
     }
 
     // 版本1.3: 完整训练计划文件处理
-    func loadWorkoutPlan(from url: URL) async {
+    func loadWorkoutPlan(from url: URL) async
+    {
         print("🔄 版本1.3: 启动完整训练计划处理流程")
         print("📍 文件路径: \(url.lastPathComponent)")
         print("🏗️ 版本1.3: 完整训练计划解析阶段")
 
-        do {
+        do
+        {
             isLoading = true
             errorMessage = nil
 
@@ -74,26 +79,32 @@ class ExternalTrainingPlanService: ObservableObject {
             var currentExerciseName: String? = nil
             var exerciseGroupCount = 0
 
-            for (_, exerciseSet) in workoutPlan.exercises.enumerated() {
+            for (_, exerciseSet) in workoutPlan.exercises.enumerated()
+            {
                 let exerciseName = exerciseSet.exercise.name
 
-                if exerciseName != currentExerciseName {
+                if exerciseName != currentExerciseName
+                {
                     currentExerciseName = exerciseName
                     exerciseGroupCount = 1
                     print("  🏋️ 练习 \(exerciseName)")
-                } else {
+                }
+                else
+                {
                     exerciseGroupCount += 1
                 }
 
                 print("    📊 第\(exerciseGroupCount)组: \(exerciseSet.targetReps)次 × \(exerciseSet.targetWeight)kg，休息\(exerciseSet.restTime)秒")
             }
-
-        } catch {
+        }
+        catch
+        {
             errorMessage = "JSON解析失败 - \(error.localizedDescription)"
             print("❌ 完整训练计划解析过程中出现错误: \(error.localizedDescription)")
 
             // 版本1.3: 提供更详细的错误信息
-            if let parseError = error as? JSONParseError {
+            if let parseError = error as? JSONParseError
+            {
                 print("🚨 解析错误类型: \(parseError.localizedDescription)")
             }
         }
@@ -103,7 +114,8 @@ class ExternalTrainingPlanService: ObservableObject {
     }
 
     // 版本1.0: 模拟架构处理流程
-    private func simulateArchitectureProcessing() async {
+    private func simulateArchitectureProcessing() async
+    {
         print("🔄 模拟架构处理流程...")
 
         // 模拟处理时间
@@ -116,36 +128,44 @@ class ExternalTrainingPlanService: ObservableObject {
     }
 
     // 版本1.0: 获取MockData数据（保持现有数据源不变）
-    func getMockWorkoutPlan() -> WorkoutPlan? {
+    func getMockWorkoutPlan() -> WorkoutPlan?
+    {
         print("🔄 版本1.0: 返回MockData数据源")
         return MockDataProvider.shared.sampleWorkoutPlans.first
     }
 
     // 基础的错误处理（将在版本1.4中完善）
-    func clearError() {
+    func clearError()
+    {
         errorMessage = nil
         print("🧹 清除错误信息")
     }
 
     // 基础的重置功能
-    func resetWorkoutPlan() {
+    func resetWorkoutPlan()
+    {
         currentWorkoutPlan = nil
         errorMessage = nil
         print("🔄 重置训练计划状态")
     }
 
     // 版本1.0: 架构状态检查
-    func checkArchitectureStatus() -> Bool {
+    func checkArchitectureStatus() -> Bool
+    {
         return architectureReady
     }
 }
 
 // MARK: - 版本1.0基础错误类型（将在版本1.4中完善）
-enum ExternalTrainingPlanError: LocalizedError {
+
+enum ExternalTrainingPlanError: LocalizedError
+{
     case notImplemented
 
-    var errorDescription: String? {
-        switch self {
+    var errorDescription: String?
+    {
+        switch self
+        {
         case .notImplemented:
             return "功能正在开发中，将在后续版本中实现"
         }
@@ -153,12 +173,16 @@ enum ExternalTrainingPlanError: LocalizedError {
 }
 
 // MARK: - 服务状态
-extension ExternalTrainingPlanService {
-    var hasWorkoutPlan: Bool {
+
+extension ExternalTrainingPlanService
+{
+    var hasWorkoutPlan: Bool
+    {
         return currentWorkoutPlan != nil
     }
 
-    var isProcessing: Bool {
+    var isProcessing: Bool
+    {
         return isLoading
     }
 }

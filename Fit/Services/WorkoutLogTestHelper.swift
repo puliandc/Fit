@@ -8,10 +8,12 @@
 import Foundation
 
 // MARK: - Workout Log Test Helper
-class WorkoutLogTestHelper {
 
+class WorkoutLogTestHelper
+{
     // 测试文件系统访问性
-    static func testFileSystemAccess() {
+    static func testFileSystemAccess()
+    {
         print("🧪 开始测试文件系统访问性...")
 
         let fileManager = EnhancedWorkoutLogFileManager()
@@ -45,30 +47,37 @@ class WorkoutLogTestHelper {
         // 3. 测试文件保存
         let success = fileManager.saveWorkoutLog(testLog)
 
-        if success {
+        if success
+        {
             print("✅ 测试日志文件保存成功")
 
             // 4. 测试文件读取
             let logFiles = fileManager.getAllLogFiles()
             print("📊 找到 \(logFiles.count) 个日志文件")
 
-            for (index, fileURL) in logFiles.enumerated() {
+            for (index, fileURL) in logFiles.enumerated()
+            {
                 print("  \(index + 1). \(fileURL.lastPathComponent)")
 
                 // 读取文件内容验证
-                if let data = try? Data(contentsOf: fileURL),
-                   let _ = String(data: data, encoding: .utf8) {
+                if
+                    let data = try? Data(contentsOf: fileURL),
+                    let _ = String(data: data, encoding: .utf8)
+                {
                     print("    📄 文件大小: \(data.count) bytes")
                     print("    ✅ 文件可读性: 正常")
-                } else {
+                }
+                else
+                {
                     print("    ❌ 文件读取失败")
                 }
             }
 
             // 5. 测试文件管理
             fileManager.organizeLogFiles()
-
-        } else {
+        }
+        else
+        {
             print("❌ 测试日志文件保存失败")
         }
 
@@ -76,7 +85,8 @@ class WorkoutLogTestHelper {
     }
 
     // 创建示例训练日志用于演示
-    static func createDemoWorkoutLog() -> WorkoutLog {
+    static func createDemoWorkoutLog() -> WorkoutLog
+    {
         return WorkoutLog(
             workoutName: "A组卧推深蹲",
             workoutDate: DateFormatter.dateDisplay.string(from: Date()),
@@ -122,7 +132,8 @@ class WorkoutLogTestHelper {
     }
 
     // 验证用户是否可以通过文件App访问
-    static func verifyFileAppAccess() -> Bool {
+    static func verifyFileAppAccess() -> Bool
+    {
         print("🔍 验证文件App访问性...")
 
         let fileManager = EnhancedWorkoutLogFileManager()
@@ -131,12 +142,15 @@ class WorkoutLogTestHelper {
         // 保存示例日志
         let success = fileManager.saveWorkoutLog(demoLog)
 
-        if success {
+        if success
+        {
             print("✅ 示例日志已保存到 WorkoutLogs 文件夹")
             print("📱 请打开 '文件' App，浏览到 Fit 应用，查看 WorkoutLogs 文件夹")
             print("📁 文件路径: \(fileManager.workoutLogsDirectoryURL.path)")
             return true
-        } else {
+        }
+        else
+        {
             print("❌ 示例日志保存失败")
             return false
         }

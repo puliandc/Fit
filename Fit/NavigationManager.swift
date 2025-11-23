@@ -5,64 +5,84 @@
 //  Created by 陆家贤 on 9/10/2025.
 //
 
-import SwiftUI
 import Combine
+import SwiftUI
 
-class NavigationManager: ObservableObject {
+class NavigationManager: ObservableObject
+{
     @Published var currentScreen: AppScreen = .main
-    @Published var navigationStack: [AppScreen] = []  // iOS 15.0 compatible navigation stack
+    @Published var navigationStack: [AppScreen] = [] // iOS 15.0 compatible navigation stack
 
-    init() {
+    init()
+    {
         print("🎯 NavigationManager initialized with currentScreen: \(currentScreen)")
     }
 
     // MARK: - Navigation Methods (iOS 15.0+ Compatible)
-    func navigate(to screen: AppScreen) {
-        withAnimation(.easeInOut(duration: 0.3)) {
+
+    func navigate(to screen: AppScreen)
+    {
+        withAnimation(.easeInOut(duration: 0.3))
+        {
             currentScreen = screen
             navigationStack.append(screen)
         }
     }
 
-    func goBack() {
-        if !navigationStack.isEmpty {
+    func goBack()
+    {
+        if !navigationStack.isEmpty
+        {
             navigationStack.removeLast()
-            if let previousScreen = navigationStack.last {
+            if let previousScreen = navigationStack.last
+            {
                 currentScreen = previousScreen
-            } else {
+            }
+            else
+            {
                 currentScreen = .main
             }
-        } else {
+        }
+        else
+        {
             navigate(to: .main)
         }
     }
 
-    func popToRoot() {
+    func popToRoot()
+    {
         navigationStack.removeAll()
         currentScreen = .main
     }
 
     // MARK: - Removed Deprecated Methods
+
     // Dialog functionality has been moved to DialogManager
     // Workout session management has been moved to WorkoutSessionManager
 
     // MARK: - Simple Navigation Methods (推荐使用的纯导航功能)
-    func navigateToWorkout(plan: WorkoutPlan) {
+
+    func navigateToWorkout(plan: WorkoutPlan)
+    {
         // 纯导航功能，不管理训练状态
         navigate(to: .workout(plan))
         print("🎯 Navigating to workout screen for plan: \(plan.name)")
     }
 
     // MARK: - iOS 15.0+ Compatibility Methods
-    func canGoBack() -> Bool {
+
+    func canGoBack() -> Bool
+    {
         return !navigationStack.isEmpty
     }
 
-    func getNavigationDepth() -> Int {
+    func getNavigationDepth() -> Int
+    {
         return navigationStack.count
     }
 
-    func resetToMain() {
+    func resetToMain()
+    {
         navigationStack.removeAll()
         currentScreen = .main
         print("🎯 Reset navigation to main screen")
@@ -70,17 +90,21 @@ class NavigationManager: ObservableObject {
 }
 
 // MARK: - App Screen Enum
-enum AppScreen: Hashable, Codable {
+
+enum AppScreen: Hashable, Codable
+{
     case main
     case workout(WorkoutPlan)
     case settings
     case history
 
-    var id: String {
-        switch self {
+    var id: String
+    {
+        switch self
+        {
         case .main:
             return "main"
-        case .workout(let plan):
+        case let .workout(plan):
             return "workout_\(plan.id)"
         case .settings:
             return "settings"
@@ -89,8 +113,10 @@ enum AppScreen: Hashable, Codable {
         }
     }
 
-    var title: String {
-        switch self {
+    var title: String
+    {
+        switch self
+        {
         case .main:
             return "Fit"
         case .workout:
@@ -104,7 +130,9 @@ enum AppScreen: Hashable, Codable {
 }
 
 // MARK: - Workout State
-enum WorkoutState {
+
+enum WorkoutState
+{
     case notStarted
     case inProgress
     case paused
@@ -113,8 +141,11 @@ enum WorkoutState {
 }
 
 // MARK: - Navigation Manager Extension for Preview
-extension NavigationManager {
-    static var preview: NavigationManager {
+
+extension NavigationManager
+{
+    static var preview: NavigationManager
+    {
         let manager = NavigationManager()
         manager.currentScreen = .main
         return manager
