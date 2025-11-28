@@ -17,7 +17,8 @@ struct AnimatedBackground: View
     @State private var blob1Offset: CGSize = .zero
     @State private var blob1Scale: CGFloat = 1.0
     @State private var isLowPowerMode: Bool = false
-    @State private var isAnimationEnabled: Bool = true
+    // 默认关闭背景动画以降低 GPU 占用；如需可在未来按需开启
+    @State private var isAnimationEnabled: Bool = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     // MARK: - Body

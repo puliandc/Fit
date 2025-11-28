@@ -5,6 +5,8 @@ class VoiceManager: NSObject
 {
     static let shared = VoiceManager()
     private let synthesizer = AVSpeechSynthesizer()
+    private let audioSession = AVAudioSession.sharedInstance()
+    private var sessionActive = false
 
     override init()
     {
@@ -19,6 +21,7 @@ class VoiceManager: NSObject
         {
             synthesizer.stopSpeaking(at: .immediate)
         }
+        deactivateSessionIfNeeded()
     }
 
     deinit
@@ -29,6 +32,8 @@ class VoiceManager: NSObject
 
     func speak(_ text: String)
     {
+        activateSessionIfNeeded()
+
         let utterance = AVSpeechUtterance(string: text)
         utterance.voice = AVSpeechSynthesisVoice(language: "zh-CN")
         utterance.rate = 0.5
@@ -82,12 +87,53 @@ class VoiceManager: NSObject
             return String(format: "%.1f公斤", weight)
         }
     }
+
+    // MARK: - Audio Session Handling
+
+    private func activateSessionIfNeeded()
+    {
+        guard !sessionActive else { return }
+        do
+        {
+            try audioSession.setCategory(.playback, mode: .default)
+            try audioSession.setActive(true)
+            sessionActive = true
+        }
+        catch
+        {
+            #if DEBUG
+                print("音频会话激活失败: \(error)")
+            #endif
+        }
+    }
+
+    private func deactivateSessionIfNeeded()
+    {
+        guard sessionActive else { return }
+        do
+        {
+            try audioSession.setActive(false, options: [.notifyOthersOnDeactivation])
+            sessionActive = false
+        }
+        catch
+        {
+            #if DEBUG
+                print("音频会话停用失败: \(error)")
+            #endif
+        }
+    }
 }
 
 extension VoiceManager: AVSpeechSynthesizerDelegate
 {
     func speechSynthesizer(_: AVSpeechSynthesizer, didFinish _: AVSpeechUtterance)
     {
-        // 播放完成，无需处理
+        // 播放完成后关闭音频会话，避免长时间占用
+        deactivateSessionIfNeeded()
+    }
+
+    func speechSynthesizer(_: AVSpeechSynthesizer, didCancel _: AVSpeechUtterance)
+    {
+        deactivateSessionIfNeeded()
     }
 }
