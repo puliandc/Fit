@@ -237,82 +237,29 @@ fit-run
 1. **选择开发团队**：在 Xcode 项目设置中选择你的 Apple Developer Team
 2. **配置 Bundle Identifier**：确保 Bundle ID 唯一性
 3. **设置签名证书**：配置开发和发布证书
-4. **导入训练计划**：使用应用中的"读取健身计划"功能导入 `10202028.JSON`
+4. **导入训练计划**：使用应用中的"读取健身计划"功能导入示例 `11282025.json`
 
 ## 📁 项目结构
 
 ```
-Fit/
-├── README.md                      # 项目主文档
-├── 产品需求文档.md                 # 原始产品需求 (中文)
-├── .dev-aliases                   # 开发命令别名
-├── .swiftformat                   # Swift格式化配置
-├── .swiftlint.yml                 # Swift代码检查配置
-├── Dockerfile                     # Docker构建配置
-├── 10202028.JSON                  # 示例训练计划数据
-├── docs/                          # 文档目录
-│   ├── README.md                  # 文档索引
-│   ├── FUNCTIONAL_SPECS.md        # 功能规格说明书
-│   ├── UX_FLOWS.md                # 用户体验流程
-│   ├── UI_GUIDELINES.md           # 用户界面设计规范
-│   ├── api/                       # API文档目录 (待完善)
-│   ├── architecture/              # 架构文档目录 (待完善)
-│   └── components/                # 组件文档目录 (待完善)
-├── Fit/                           # iOS应用主目录
-│   ├── App/                       # 应用入口和主要配置
-│   │   ├── FitApp.swift           # 应用主入口
-│   │   └── ContentView.swift       # 根视图
-│   ├── Models/                    # 数据模型
-│   │   ├── WorkoutPlan.swift      # 训练计划模型
-│   │   ├── Exercise.swift         # 训练动作模型
-│   │   ├── ExerciseSet.swift      # 训练组数模型
-│   │   └── CompletedSet.swift     # 完成记录模型
-│   ├── Views/                     # SwiftUI 视图
-│   │   ├── MainScreen.swift       # 主界面
-│   │   ├── WorkoutScreen.swift    # 训练界面
-│   │   └── Components/            # 可复用组件
-│   │       ├── FeatureCard.swift          # 功能卡片
-│   │       ├── CompleteWorkoutPlanCard.swift # 完整训练计划卡片
-│   │       ├── CompactExerciseInfoCard.swift # 紧凑动作信息卡片
-│   │       ├── CompactTimerView.swift      # 紧凑计时器视图
-│   │       ├── ModernButton.swift          # 现代化按钮
-│   │       ├── LogoHeader.swift            # Logo头部组件
-│   │       ├── SafeAreaBackground.swift    # 安全区域背景
-│   │       ├── AnimatedBackground.swift    # 动态背景效果
-│   │       └── Dialogs/                   # 对话框组件
-│   │           ├── EnhancedQuitDialog.swift  # 放弃训练对话框
-│   │           ├── WorkoutCompleteDialog.swift # 训练完成对话框
-│   │           └── EditSetDialog.swift       # 编辑组数对话框
-│   ├── Services/                  # 业务逻辑服务
-│   │   ├── ExternalTrainingPlanService.swift # 外部训练计划服务
-│   │   ├── WorkoutSessionManager.swift      # 训练会话管理
-│   │   ├── VoiceManager.swift              # 语音播报服务
-│   │   └── NavigationManager.swift         # 导航管理服务
-│   ├── Managers/                  # 应用管理器
-│   │   ├── DialogManager.swift             # 对话框管理
-│   │   ├── WorkoutViewModel.swift          # 训练视图模型
-│   │   └── NavigationManager.swift         # 导航状态管理
-│   ├── DesignSystem/             # 设计系统
-│   │   ├── Colors.swift          # 颜色定义
-│   │   ├── Fonts.swift           # 字体定义
-│   │   ├── Spacing.swift         # 间距定义
-│   │   └── Extensions/           # 扩展方法
-│   │       ├── Color+Extensions.swift
-│   │       ├── Font+Extensions.swift
-│   │       └── View+Extensions.swift
-│   └── Resources/               # 资源文件
-│       ├── Assets.xcassets     # 图片资源
-│       └── Localizable.strings  # 本地化字符串
-├── FitTests/                    # 单元测试
-│   ├── Models/                  # 模型测试
-│   ├── Services/                # 服务测试
-│   └── Views/                   # 视图测试
-├── scripts/                     # 开发脚本
-│   ├── build.sh                 # 构建脚本
-│   ├── pre-build-check.sh       # 预构建检查
-│   └── deploy.sh               # 部署脚本
-└── ForAI/                       # AI相关配置
-    └── prompt-templates/        # 提示词模板
+Fit/                          # iOS 应用源码
+├── FitApp.swift              # 应用入口
+├── ContentView.swift         # 根视图与导航容器
+├── NavigationManager.swift   # 全局导航状态
+├── Components/               # 复用 UI 组件 (AnimatedBackground、LogoHeader、SafeAreaBackground)
+├── Views/                    # 业务界面 (MainScreen、WorkoutScreen、FilePickerView 等)
+├── Managers/                 # 状态管理 (DialogManager、WorkoutSessionManager)
+├── Services/                 # 业务服务 (ExternalTrainingPlanService、JSONWorkoutParser、VoiceManager、WorkoutLogRecorder、FileSecurityValidator)
+├── ViewModels/               # WorkoutViewModel
+├── Models/                   # WorkoutPlan/Exercise/ExerciseSet/CompletedSet 等数据模型
+├── DesignSystem/             # 设计系统扩展 (ColorExtensions.swift、FontExtensions.swift)
+├── Assets.xcassets           # 资源
+└── ...                       # 其余技术实验/示例目录 (Performance、Integrations 等)
+FitTests/                     # 单元测试 (DataValidationTests.swift、DebugModeTests.swift)
+ForAI/                        # AI 相关文档 (提示模板、数据结构说明)
+docs/                         # 项目文档 (功能规格、UX 流程、UI 规范等)
+scripts/                      # 构建/检查脚本
+11282025.json                 # 示例训练计划 (最新样例)
 ```
 
 ### 核心模块说明
@@ -329,14 +276,16 @@ Fit/
 - **Components**: 可复用UI组件库，包含卡片、按钮、计时器等
 
 #### Services (服务层)
-- **ExternalTrainingPlanService**: 解析JSON格式的训练计划文件
-- **WorkoutSessionManager**: 管理训练会话状态和数据保存
-- **VoiceManager**: 提供语音播报功能，减少屏幕交互
+- **ExternalTrainingPlanService**: 验证并解析 JSON 训练计划文件
+- **VoiceManager**: 提供语音播报功能
+- **WorkoutLogRecorder**: 记录训练日志到本地
+- **FileSecurityValidator**: 基础文件安全检查
 
 #### Managers (管理层)
+- **NavigationManager**: 全局导航状态
 - **DialogManager**: 统一管理应用中的对话框状态
-- **WorkoutViewModel**: 训练视图模型，处理训练相关的业务逻辑
-- **NavigationManager**: 导航状态管理，处理界面切换
+- **WorkoutSessionManager**: 创建/持有 `WorkoutViewModel` 并负责训练会话生命周期
+- **WorkoutViewModel**: 训练视图模型，处理训练流程与状态
 
 ## 🛠️ 开发指南
 
@@ -737,10 +686,10 @@ xcodebuild -project Fit.xcodeproj -scheme Fit clean
 **Q: 训练计划导入失败**
 ```bash
 # 验证 JSON 格式
-python3 -m json.tool 10202028.JSON
+python3 -m json.tool 11282025.json
 
 # 检查文件编码
-file 10202028.JSON
+file 11282025.json
 ```
 
 #### 日志收集

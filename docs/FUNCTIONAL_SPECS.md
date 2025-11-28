@@ -1,372 +1,93 @@
 # Fit 健身训练记录应用 - 功能规格说明书
 
-//created by Jason Lu on 14:15:00 10/21/2025
-
-## 📋 产品概述
-
-### 应用简介
-
-Fit 是一款专为个人用户设计的健身训练记录 iOS 应用，采用现代化的 SwiftUI 界面设计，提供简洁高效的训练数据记录和追踪体验。
-
-### 核心价值
-
-- **极简操作**：主界面提供快速开始训练功能，无需复杂设置
-- **专注训练**：训练过程中提供语音提示和倒计时，减少查看手机的频率
-- **数据记录**：自动记录训练数据，支持外部 JSON 格式训练计划导入
-
-## 🏗️ 技术架构
-
-### 核心技术栈
-
-- **开发框架**：SwiftUI + iOS 15.0+
-- **架构模式**：MVVM + Environment Object
-- **设计系统**：基于 Tailwind CSS 的现代化深色主题
-- **数据格式**：JSON 格式的训练计划文件
-
-### 应用架构图
-
-```
-Fit应用技术架构
-├── 📱 视图层 (SwiftUI Views)
-│   ├── MainScreen.swift - 主界面
-│   ├── WorkoutScreen.swift - 训练界面
-│   └── 组件库 (FeatureCard, CompleteWorkoutPlanCard等)
-├── 🔧 服务层 (Services)
-│   ├── ExternalTrainingPlanService - 外部训练计划读取
-│   ├── WorkoutSessionManager - 训练会话管理
-│   ├── VoiceManager - 语音播报服务
-│   └── NavigationManager - 导航管理
-├── 💾 数据层 (Data Models)
-│   ├── WorkoutPlan - 训练计划数据模型
-│   ├── Exercise - 训练动作数据模型
-│   └── WorkoutSession - 训练会话数据模型
-└── 🎨 环境管理 (Environment Objects)
-    ├── DialogManager - 对话框管理
-    ├── WorkoutViewModel - 训练视图模型
-    └── NavigationManager - 导航状态管理
-```
-
-## 📱 核心功能模块
-
-### 1. 主界面模块 (MainScreen.swift)
-
-#### 1.1 功能概述
-
-主界面提供训练计划的加载、展示和快速开始训练功能，采用现代化的卡片式设计。
-
-#### 1.2 详细功能规格
-
-**训练计划导入功能**
-
-- **功能描述**：支持从外部 JSON 文件导入训练计划
-- **实现方式**：通过文件选择器(`fileImporter`)让用户选择训练计划文件
-- **数据格式**：支持标准的训练计划 JSON 格式，包含训练名称、动作列表、组数设置等
-- **用户体验**：导入成功后自动在主界面展示训练计划详情
-
-**训练计划展示功能**
-
-- **组件名称**：`CompleteWorkoutPlanCard`
-- **展示内容**：
-  - 训练计划名称和总时长估算
-  - 动作数量和预计训练强度
-  - 开始训练按钮(通过`FeatureCard`组件实现)
-- **设计特点**：采用现代化的卡片设计，支持深色主题
-
-**快速开始训练功能**
-
-- **触发方式**：点击训练计划卡片上的"开始训练"按钮
-- **功能流程**：
-  1. 验证训练计划数据完整性
-  2. 创建新的训练会话
-  3. 导航至训练执行界面
-- **状态管理**：通过`WorkoutViewModel`管理训练状态
-
-#### 1.3 关键组件规格
-
-**ExternalTrainingPlanService**
-
-```swift
-职责：外部训练计划文件解析
-- 支持JSON格式训练计划文件读取
-- 数据验证和错误处理
-- 与WorkoutPlan数据模型集成
-```
-
-**FeatureCard 组件**
-
-```swift
-职责：通用功能卡片组件
-- 支持自定义图标和标题
-- 提供点击交互反馈
-- 现代化的视觉设计
-```
-
-**LogoHeader 组件**
-
-```swift
-职责：应用标识头部组件
-- 显示Fit应用Logo
-- 简洁的品牌展示
-```
-
-### 2. 训练执行模块 (WorkoutScreen.swift)
-
-#### 2.1 功能概述
-
-训练执行界面提供完整的训练流程管理，包括动作指导、组数记录、休息时间管理和语音提示。
-
-#### 2.2 详细功能规格
-
-**训练会话管理**
-
-- **管理组件**：`WorkoutSessionManager`
-- **核心功能**：
-  - 训练进度跟踪
-  - 当前动作和组数状态管理
-  - 训练数据实时保存
-  - 会话状态持久化
-
-**动作信息展示**
-
-- **组件名称**：`CompactExerciseInfoCard`
-- **展示内容**：
-  - 当前动作名称
-  - 目标组数和已完成组数
-  - 建议重量和次数范围
-
-**组数记录功能**
-
-- **对话框组件**：`EditSetDialog`
-- **记录内容**：
-
-  - 实际完成重量(支持小数输入)
-  - 实际完成次数(整数输入)
-
-- **用户体验**：
-  - 数字键盘优化输入
-  - 实时数据验证
-  - 快速保存和下一组
-
-**休息时间管理**
-
-- **主计时器**：`CompactTimerView`
-- **功能特性**：
-  - 可视化倒计时显示
-  - 暂停/继续功能
-  - 手动跳过休息时间
-  - 语音倒计时提醒(最后 3 秒)
-
-**动作计时器**
-
-- **辅助计时器**：`ActionTimerView`
-- **应用场景**：有持续时间要求的训练动作
-- **功能特性**：
-  - 正向计时显示
-  - 完成提醒功能
-  - 与主计时器协同工作
-
-#### 2.3 语音播报系统
-
-**VoiceManager 组件**
-
-```swift
-核心功能：
-- 休息时间语音提醒
-- 下一组准备提示
-- 动作切换语音播报
-- 训练完成语音祝贺
-```
-
-**语音播报内容**：
-
-- 应用启动语音："今天的燃动开始了"
-- 休息结束前 3 秒倒计时："休息完成，开始训练"
-- 下一组开始提示："接下来进行'[动作名称]'，'[重量]'，'[次数]次。"
-  示例："接下来进行'杠铃卧推'，'20 公斤'，'6 次。"
-
-### 3. 对话管理系统
-
-#### 3.1 DialogManager 功能
-
-统一管理应用中的所有对话框状态和交互逻辑。
-
-#### 3.2 对话框规格
-
-**EnhancedQuitDialog - 放弃训练对话框**
-
-- **触发条件**：用户点击训练界面的返回按钮
-- **功能选项**：
-  - 保存并退出训练
-  - 放弃训练(保存已完成部分的训练日志)
-  - 继续训练
-- **数据处理**：提供训练数据保存选项
-
-**WorkoutCompleteDialog - 训练完成对话框**
-
-- **触发条件**：完成所有训练动作和组数
-- **展示内容**：
-  - 训练总时长统计
-  - 完成动作和组数汇总
-  - 训练数据概览
-- **后续选项**：
-  - 返回主界面
-  - 查看详细训练数据
-
-**EditSetDialog - 编辑组数对话框**
-
-- **触发方式**：完成每组训练后自动弹出
-- **输入字段**：
-  - 重量输入(支持小数点后 1 位)
-  - 次数输入(整数)
-- **交互优化**：
-  - 自动弹出数字键盘
-  - 实时输入验证
-  - 快捷操作按钮
-
-### 4. 导航和环境管理
-
-#### 4.1 NavigationManager
-
-- **功能**：统一管理应用界面导航
-- **管理内容**：
-  - 主界面与训练界面切换
-  - 模态对话框展示
-  - 导航状态同步
-
-#### 4.2 视觉环境系统
-
-**SafeAreaBackground**
-
-- **功能**：提供安全区域背景处理
-- **特性**：适配不同 iPhone 机型的安全区域
-
-**AnimatedBackground**
-
-- **功能**：动态背景效果
-- **效果**：现代化的渐变动画背景
-
-**组件库系统**
-
-- **ModernButton**：现代化按钮组件
-- **FeatureCard**：功能卡片组件
-- **CompactTimerView**：紧凑计时器组件
-- **CompactExerciseInfoCard**：紧凑动作信息卡片
-
-## 🔄 数据流程
-
+// updated: 2025-10-30
+
+本说明书与当前 SwiftUI 代码保持一致，聚焦已有功能（训练计划导入、训练执行、语音提示与日志记录）。
+
+## 产品概述
+- **定位**：面向单一用户的离线训练记录工具，强调 30 秒内开始训练、语音提示与最少屏幕交互。
+- **平台**：iOS 15+，Swift 5.8+，SwiftUI。
+- **架构**：MVVM + EnvironmentObject，主要管理器和服务均在 `Fit/` 目录内实现。
+
+## 系统架构与模块
+
+### 视图层
+- **MainScreen**：主入口，包含训练计划导入（FilePickerView）、训练计划摘要卡片、开始训练按钮。
+- **WorkoutScreen**：训练执行界面，显示当前动作/组信息、计时器、完成/放弃操作，承载对话框蒙层。
+- **FilePickerView**：文件选择 Sheet，用于导入 JSON 训练计划。
+- **通用组件**：`AnimatedBackground`、`SafeAreaBackground`、`LogoHeader`、`ModernButton` 等在 `Components/` 与 `Views/MainScreen.swift` 内定义。
+
+### 状态管理
+- **NavigationManager**：全局导航状态（主界面 / 训练界面）。
+- **DialogManager**：统一管理当前弹窗状态。
+- **WorkoutSessionManager**：创建与持有 `WorkoutViewModel`，封装训练开始/完成/退出。
+- **WorkoutViewModel**：训练流程核心状态（当前动作、组序、休息状态、计时、完成记录）。
+
+### 服务与业务逻辑
+- **ExternalTrainingPlanService**：调用 `FileSecurityValidator` 校验文件，使用 `JSONWorkoutParser` 解析 JSON，产出 `WorkoutPlan`。
+- **JSONWorkoutParser**：基于中文字段的简化解析器；校验必填字段并生成 `WorkoutPlan`/`ExerciseSet`。
+- **VoiceManager**：集中播放语音提示（应用启动、训练播报等）。
+- **WorkoutLogRecorder**：负责开始/记录/结束训练日志，生成 JSON（`WorkoutLog`）。
+- **FileSecurityValidator**：检查扩展名、大小、基本结构安全。
+
+## 核心功能规格
+
+### 1. 训练计划导入（MainScreen + FilePickerView）
+- 触发：点击“读取健身计划”按钮，弹出文件选择器。
+- 文件校验：`FileSecurityValidator.validateFile(url)`，限制扩展名 json，大小 ≤10MB，非空。
+- 解析：`JSONWorkoutParser.parseWorkoutPlan(from:)`，失败时弹出“JSON解析错误”警告。
+- 成功结果：`ExternalTrainingPlanService.currentWorkoutPlan` 持有解析出的 `WorkoutPlan`，主界面显示摘要卡片与“开始训练”按钮。
+
+### 2. 训练执行（WorkoutScreen + WorkoutViewModel）
+- 导航：MainScreen 成功导入后，点击“开始训练”调用 `WorkoutSessionManager.startWorkout(plan)`，进入 WorkoutScreen。
+- 核心模块：
+  - **CompactWorkoutHeader**：显示计划名称与进度。
+  - **CompactExerciseInfoCard**：展示当前动作、组序、目标重量/次数。
+  - **CompactTimerView**：休息阶段显示倒计时，支持跳过休息。
+  - **ActionTimerView**（仅在需要时）：显示动作计时。
+  - **EditSetDialog**：录入实际次数/重量/备注；空或“自重”重量视为 0。
+  - **EnhancedQuitDialog**：放弃当前动作/全部动作；确认后调用 ViewModel 的跳过逻辑，并触发完成弹窗。
+- 完成流程：`WorkoutSessionManager.completeWorkout()` 仅在 ViewModel 标记完成后保存日志并展示完成对话框，再由 `cleanupAfterWorkoutComplete()` 清理会话。
+
+### 3. 语音提示（VoiceManager）
+- 应用启动：`FitApp` 调用 `voiceManager.speak("今天的燃动开始了")`。
+- 其他提示：由业务视需求触发（休息结束、完成等），保持简短明确。
+
+### 4. 日志记录（WorkoutLogRecorder）
+- `startWorkout(workoutPlan:)` 在训练开始时记录基准时间。
+- `startExercise(exercise:)` 重置组序并记录开始时间。
+- `recordCompletedSet` / `recordSkippedSet` 生成 `WorkoutLogEntry`，保存目标/实际数据与休息时间。
+- `finishWorkout` 生成 `WorkoutLog`，文件名 `训练日志_yyyy-MM-dd_HH-mm.json`，存储于用户文档目录。
+
+## 数据模型（实际代码）
+- **Exercise**：`id: UUID`，`name: String`
+- **ExerciseSet**：`id: UUID`，`exercise: Exercise`，`targetReps: Int`，`targetWeight: Double`，`restTime: Int`，`notes: String?`
+- **WorkoutPlan**：`id: UUID`，`name: String`，`duration: Int`（估算分钟） ，`exercises: [ExerciseSet]`
+- **CompletedSet**：`id: UUID`，`exerciseSetId: UUID`，`actualReps: Int`，`actualWeight: Double`，`completedAt: Date`，`notes: String?`
+- **WorkoutLogEntry / WorkoutLog**：见 `Fit/Models/WorkoutLogModels.swift`，含 `WorkoutValue` 枚举以支持 `value` / `na`。
+- **JSONParseError**：`invalidFormat`、`invalidStructure`、`missingPlanName`、`missingExercises`、`missingExerciseName(Int)`、`missingSetConfig(String)`。
+
+## 业务流程
 ### 训练计划导入流程
-
-1. 用户在主界面点击导入训练计划
-2. 文件选择器打开，用户选择 JSON 文件
-3. `ExternalTrainingPlanService`解析文件内容
-4. 数据验证通过后创建`WorkoutPlan`对象
-5. 主界面更新显示新的训练计划
+1) 用户在 MainScreen 点击“读取健身计划”  
+2) FilePickerView 返回文件 URL → ExternalTrainingPlanService  
+3) 验证文件 → 读取 Data → JSONWorkoutParser 解析 → 生成 WorkoutPlan  
+4) MainScreen 显示计划摘要卡片与“开始训练”按钮
 
 ### 训练执行流程
+1) 点击“开始训练” → WorkoutSessionManager 创建 WorkoutViewModel  
+2) WorkoutScreen 展示当前动作/组、计时/休息状态  
+3) 用户点击“动作完成” → EditSetDialog 输入实际数据 → 记录到 ViewModel & WorkoutLogRecorder  
+4) 休息阶段使用 CompactTimerView；可跳过休息  
+5) 所有组完成 → 弹出完成对话框 → `completeWorkout` 保存日志  
+6) 关闭完成弹窗后清理会话并返回主界面
 
-1. 用户点击开始训练按钮
-2. `WorkoutSessionManager`创建新的训练会话
-3. 导航至训练界面(`WorkoutScreen`)
-4. 显示第一个训练动作信息
-5. 用户完成训练并记录组数数据
-6. 休息时间自动开始倒计时
-7. 语音播报提供提醒
-8. 重复步骤 5-7 直到完成所有训练
-9. 显示训练完成对话框和训练统计
+## 非功能性要求
+- **离线优先**：核心功能不依赖网络。
+- **性能**：主界面/训练界面加载即时；动画可在低电量/减少动画时禁用。
+- **兼容性**：iOS 15+；深浅模式以浅色渐变为主，深色仅在局部背景需要时使用。
 
-## 📊 数据模型规格
-
-### Exercise 训练动作模型（重构后）
-
-```swift
-struct Exercise: Identifiable, Codable, Hashable {
-    let id: UUID
-    let name: String
-}
-```
-
-### ExerciseSet 训练组数模型
-
-```swift
-struct ExerciseSet: Identifiable, Codable, Hashable {
-    let id: UUID
-    let exercise: Exercise  // 关联的训练动作
-    let targetReps: Int  // 目标次数
-    let targetWeight: Double  // 目标重量
-    let restTime: Int  // 休息时间（秒）
-    var notes: String?  // 备注（可选）
-}
-```
-
-### WorkoutPlan 训练计划模型（重构后）
-
-```swift
-struct WorkoutPlan: Identifiable, Codable, Hashable, Equatable {
-    let id: UUID
-    let name: String
-    let duration: Int // 训练时长（分钟）
-    let exercises: [ExerciseSet]  // 训练动作组数列表
-}
-```
-
-### CompletedSet 完成组数记录模型（向后兼容）
-
-```swift
-struct CompletedSet: Identifiable, Codable {
-    let id: UUID
-    let exerciseSetId: UUID  // 关联的ExerciseSet ID
-    let actualReps: Int  // 实际完成次数
-    let actualWeight: Double  // 实际使用重量
-    let completedAt: Date  // 完成时间
-    var notes: String?  // 备注
-}
-```
-
-#### 🎯 模型重构说明
-
-**重构目的**：简化数据模型结构，提高代码可维护性，减少冗余字段
-
-**主要变更**：
-- **Exercise模型**：从12个字段简化为2个核心字段（id, name）
-- **WorkoutPlan模型**：从9个字段简化为4个核心字段（id, name, duration, exercises）
-- **删除的枚举类型**：ExerciseCategory, MuscleGroup, Equipment, Difficulty, WorkoutCategory, WorkoutStatus
-- **保留的模型**：ExerciseSet和CompletedSet保持原有结构，确保训练记录功能完整性
-
-**设计原则**：
-- 专注核心功能，去除过度设计的复杂性
-- 保持向后兼容性，确保现有功能正常运行
-- 简化JSON导入格式，降低外部训练计划创建门槛
-
-## 🎯 用户体验规格
-
-### 响应性能要求
-
-- 界面切换响应时间：< 200ms
-- 数据保存响应时间：< 100ms
-- 语音播报延迟：< 500ms
-
-### 可用性要求
-
-- 支持 iPhone 8 及以上机型
-- 支持 iOS 15.0 及以上版本
-- 支持暗黑模式自动切换
-- 支持 VoiceOver 无障碍访问
-
-### 数据安全要求
-
-- 所有训练数据仅存储在用户设备本地
-- 不收集用户个人身份信息
-- 不向第三方分享用户数据
-- 支持用户手动导出训练数据
-
-## 🔗 相关文档
-
-### 产品文档
-- [产品需求文档](产品需求文档.md) - 产品需求和用户故事
-- [用户界面设计规范](用户界面设计规范.md) - UI/UX设计指导
-- [用户体验流程](用户体验流程.md) - 完整的用户旅程地图
-
-### 技术实现
-- [MainScreen.swift](Fit/Views/MainScreen.swift) - 主界面实现代码
-- [WorkoutScreen.swift](Fit/Views/WorkoutScreen.swift) - 训练界面实现代码
-- [MockData.swift](Fit/Models/MockData.swift) - 数据模型定义
+## 测试与验证
+- 单元测试：`FitTests/DataValidationTests.swift`、`FitTests/DebugModeTests.swift`。
+- 建议命令：`fit-test`（或 `xcodebuild test -project Fit.xcodeproj -scheme Fit -destination 'platform=iOS Simulator,name=iPhone 17'`）。
+- 手动验证：导入示例 `11282025.json`，完成至少一组训练，确认日志文件生成且 JSON 结构与 `WorkoutLogModels` 定义一致。
