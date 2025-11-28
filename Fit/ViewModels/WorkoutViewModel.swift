@@ -653,7 +653,7 @@ class WorkoutViewModel: ObservableObject
         {
             debouncedUIUpdate()
         }
-        else if !isExerciseActive && !isResting
+        else if !isExerciseActive, !isResting
         {
             // 没有计时需求时停止计时器，避免空转
             stopUnifiedTimer()
