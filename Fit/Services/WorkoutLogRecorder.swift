@@ -27,7 +27,9 @@ class WorkoutLogRecorder
         logEntries.removeAll()
         lastExerciseName = ""
 
-        print("📝 Workout logging started for: \(workoutPlan.name)")
+        #if DEBUG
+            print("📝 Workout logging started for: \(workoutPlan.name)")
+        #endif
     }
 
     // 开始新动作
@@ -37,14 +39,18 @@ class WorkoutLogRecorder
         if exercise.name != lastExerciseName
         {
             currentExerciseSetOrder = 1
-            print("📝 New exercise detected: \(exercise.name), resetting set order to 1")
+            #if DEBUG
+                print("📝 New exercise detected: \(exercise.name), resetting set order to 1")
+            #endif
         }
 
         currentExerciseName = exercise.name
         currentExerciseStartTime = Date()
         lastExerciseName = exercise.name
 
-        print("📝 Started logging exercise: \(exercise.name), set order: \(currentExerciseSetOrder)")
+        #if DEBUG
+            print("📝 Started logging exercise: \(exercise.name), set order: \(currentExerciseSetOrder)")
+        #endif
     }
 
     // 记录完成的训练组
@@ -58,7 +64,9 @@ class WorkoutLogRecorder
         guard let startTime = currentExerciseStartTime
         else
         {
-            print("⚠️ Warning: Exercise start time not recorded")
+            #if DEBUG
+                print("⚠️ Warning: Exercise start time not recorded")
+            #endif
             return
         }
 
@@ -79,7 +87,9 @@ class WorkoutLogRecorder
         logEntries.append(entry)
         currentExerciseSetOrder += 1
 
-        print("📝 Recorded set: \(currentExerciseName) Set \(currentExerciseSetOrder - 1)")
+        #if DEBUG
+            print("📝 Recorded set: \(currentExerciseName) Set \(currentExerciseSetOrder - 1)")
+        #endif
     }
 
     // 记录跳过的训练组
@@ -100,7 +110,9 @@ class WorkoutLogRecorder
         logEntries.append(entry)
         currentExerciseSetOrder += 1
 
-        print("📝 Recorded skipped set: \(currentExerciseName) Set \(currentExerciseSetOrder - 1)")
+        #if DEBUG
+            print("📝 Recorded skipped set: \(currentExerciseName) Set \(currentExerciseSetOrder - 1)")
+        #endif
     }
 
     // 完成训练并保存日志
@@ -109,7 +121,9 @@ class WorkoutLogRecorder
         guard let startTime = workoutStartTime
         else
         {
-            print("⚠️ Warning: Workout start time not recorded")
+            #if DEBUG
+                print("⚠️ Warning: Workout start time not recorded")
+            #endif
             return false
         }
 
@@ -131,14 +145,16 @@ class WorkoutLogRecorder
 
         let success = fileManager.saveWorkoutLog(workoutLog)
 
-        if success
-        {
-            print("✅ Workout log saved successfully")
-        }
-        else
-        {
-            print("❌ Failed to save workout log")
-        }
+        #if DEBUG
+            if success
+            {
+                print("✅ Workout log saved successfully")
+            }
+            else
+            {
+                print("❌ Failed to save workout log")
+            }
+        #endif
 
         // 重置状态
         reset()

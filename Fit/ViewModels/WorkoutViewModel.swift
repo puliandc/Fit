@@ -569,6 +569,9 @@ class WorkoutViewModel: ObservableObject
         // 停止之前的计时器
         stopUnifiedTimer()
 
+        // 无需计时则直接返回
+        guard isExerciseActive || isResting else { return }
+
         // 初始化时间戳
         lastUpdateTime = CACurrentMediaTime()
 
@@ -649,6 +652,11 @@ class WorkoutViewModel: ObservableObject
         if needsUIUpdate
         {
             debouncedUIUpdate()
+        }
+        else if !isExerciseActive && !isResting
+        {
+            // 没有计时需求时停止计时器，避免空转
+            stopUnifiedTimer()
         }
     }
 

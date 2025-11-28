@@ -26,22 +26,8 @@ struct FitApp: App
                 .environmentObject(workoutSessionManager)
                 .onAppear
                 {
-                    setupAudioSession()
                     voiceManager.speak("今天的燃动开始了")
                 }
-        }
-    }
-
-    private func setupAudioSession()
-    {
-        do
-        {
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
-            try AVAudioSession.sharedInstance().setActive(true)
-        }
-        catch
-        {
-            print("音频会话设置失败: \(error)")
         }
     }
 }
