@@ -82,6 +82,7 @@ struct WorkoutScreen: View
                         totalSets: workoutViewModel.getCurrentExerciseTotalSets(),
                         targetReps: workoutViewModel.currentExerciseSet.targetReps,
                         targetWeight: workoutViewModel.currentExerciseSet.targetWeight,
+                        targetNotes: workoutViewModel.currentExerciseSet.notes,
                         elapsedTime: workoutViewModel.exerciseElapsedTime,
                         isResting: workoutViewModel.isResting
                     )
@@ -497,6 +498,7 @@ struct CompactExerciseInfoCard: View
     let totalSets: Int
     let targetReps: Int
     let targetWeight: Double
+    let targetNotes: String?
     let elapsedTime: Int
     let isResting: Bool
 
@@ -592,6 +594,18 @@ struct CompactExerciseInfoCard: View
         }
 
         return nil
+    }
+
+    private var displayNotes: String?
+    {
+        guard let targetNotes = targetNotes
+        else
+        {
+            return nil
+        }
+
+        let trimmedNotes = targetNotes.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmedNotes.isEmpty ? nil : trimmedNotes
     }
 
     var body: some View
@@ -744,6 +758,26 @@ struct CompactExerciseInfoCard: View
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
                     .background(Color.info.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
+                }
+
+                if let notes = displayNotes
+                {
+                    HStack(alignment: .top, spacing: 8)
+                    {
+                        Image(systemName: "text.bubble.fill")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.warning)
+                            .padding(.top, 1)
+
+                        Text(notes)
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.appTextSecondary)
+                            .multilineTextAlignment(.leading)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 10)
+                    .background(Color.warning.opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
                 }
             }
 

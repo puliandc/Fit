@@ -25,7 +25,7 @@
 
 ### 服务与业务逻辑
 - **ExternalTrainingPlanService**：调用 `FileSecurityValidator` 校验文件，使用 `JSONWorkoutParser` 解析 JSON，产出 `WorkoutPlan`。
-- **JSONWorkoutParser**：基于中文字段的简化解析器；校验必填字段并生成 `WorkoutPlan`/`ExerciseSet`。
+- **JSONWorkoutParser**：基于中文字段的解析器；支持 `目标重量` 整数/小数、组级 `备注` 入模，并对任一组配置异常执行整份导入失败。
 - **VoiceManager**：集中播放语音提示（应用启动、训练播报等）。
 - **WorkoutLogRecorder**：负责开始/记录/结束训练日志，生成 JSON（`WorkoutLog`）。
 - **FileSecurityValidator**：检查扩展名、大小、基本结构安全。
@@ -36,16 +36,20 @@
 - 触发：点击“读取健身计划”按钮，弹出文件选择器。
 - 文件校验：`FileSecurityValidator.validateFile(url)`，限制扩展名 json，大小 ≤10MB，非空。
 - 解析：`JSONWorkoutParser.parseWorkoutPlan(from:)`，失败时弹出“JSON解析错误”警告。
+- 组配置规则：
+  - `目标重量` 支持整数与小数（如 `40`、`17.5`）。
+  - 每组 `备注` 可选，解析后写入 `ExerciseSet.notes`。
+  - 任一组字段类型或结构异常（如重量非数字）会导致整份计划导入失败，不做静默跳过。
 - 成功结果：`ExternalTrainingPlanService.currentWorkoutPlan` 持有解析出的 `WorkoutPlan`，主界面显示摘要卡片与“开始训练”按钮。
 
 ### 2. 训练执行（WorkoutScreen + WorkoutViewModel）
 - 导航：MainScreen 成功导入后，点击“开始训练”调用 `WorkoutSessionManager.startWorkout(plan)`，进入 WorkoutScreen。
 - 核心模块：
   - **CompactWorkoutHeader**：显示计划名称与进度。
-  - **CompactExerciseInfoCard**：展示当前动作、组序、目标重量/次数。
-  - **CompactTimerView**：休息阶段显示倒计时，支持跳过休息。
+  - **CompactExerciseInfoCard**：展示当前动作、组序、目标重量/次数，并显示当前组的计划备注（若存在）。
+  - **CompactTimerView**：休息阶段显示倒计时，支持跳过休息（当组间休息时间为 0 时可无缝衔接下一组）。
   - **ActionTimerView**（仅在需要时）：显示动作计时。
-  - **EditSetDialog**：录入实际次数/重量/备注；空或“自重”重量视为 0。
+  - **EditSetDialog**：录入实际次数/重量/备注；默认备注来自计划组备注，用户可编辑；空或“自重”重量视为 0。
   - **EnhancedQuitDialog**：放弃当前动作/全部动作；确认后调用 ViewModel 的跳过逻辑，并触发完成弹窗。
 - 完成流程：`WorkoutSessionManager.completeWorkout()` 仅在 ViewModel 标记完成后保存日志并展示完成对话框，再由 `cleanupAfterWorkoutComplete()` 清理会话。
 
@@ -57,6 +61,7 @@
 - `startWorkout(workoutPlan:)` 在训练开始时记录基准时间。
 - `startExercise(exercise:)` 重置组序并记录开始时间。
 - `recordCompletedSet` / `recordSkippedSet` 生成 `WorkoutLogEntry`，保存目标/实际数据与休息时间。
+- 备注策略：日志条目 `notes` 合并“计划组备注 + 用户输入备注”；若任一侧为空，仅保留非空侧。
 - `finishWorkout` 生成 `WorkoutLog`，文件名 `训练日志_yyyy-MM-dd_HH-mm.json`，存储于用户文档目录。
 
 ## 数据模型（实际代码）
@@ -65,7 +70,7 @@
 - **WorkoutPlan**：`id: UUID`，`name: String`，`duration: Int`（估算分钟） ，`exercises: [ExerciseSet]`
 - **CompletedSet**：`id: UUID`，`exerciseSetId: UUID`，`actualReps: Int`，`actualWeight: Double`，`completedAt: Date`，`notes: String?`
 - **WorkoutLogEntry / WorkoutLog**：见 `Fit/Models/WorkoutLogModels.swift`，含 `WorkoutValue` 枚举以支持 `value` / `na`。
-- **JSONParseError**：`invalidFormat`、`invalidStructure`、`missingPlanName`、`missingExercises`、`missingExerciseName(Int)`、`missingSetConfig(String)`。
+- **JSONParseError**：`invalidFormat`、`invalidStructure`、`missingPlanName`、`missingExercises`、`missingExerciseName(Int)`、`missingSetConfig(String)`、`invalidSetConfig(exerciseName:setIndex:reason:)`。
 
 ## 业务流程
 ### 训练计划导入流程

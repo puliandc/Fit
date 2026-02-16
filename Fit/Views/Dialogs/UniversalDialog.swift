@@ -16,6 +16,7 @@ enum UniversalDialogType
         subtitle: String,
         defaultReps: String,
         defaultWeight: String,
+        defaultNotes: String,
         onConfirm: (String, String, String) -> Void
     )
     case confirmation(
@@ -175,7 +176,7 @@ struct UniversalDialog: View
         {
             switch type
             {
-            case let .input(_, subtitle, _, _, _):
+            case let .input(_, subtitle, _, _, _, _):
                 inputContent(subtitle: subtitle)
             case let .confirmation(_, message, _, _, _):
                 confirmationContent(message: message)
@@ -442,7 +443,7 @@ struct UniversalDialog: View
     {
         switch type
         {
-        case let .input(title, _, _, _, _): return title
+        case let .input(title, _, _, _, _, _): return title
         case let .confirmation(title, _, _, _, _): return title
         case let .options(title, _, _): return title
         case let .completion(title, _, _): return title
@@ -472,17 +473,17 @@ struct UniversalDialog: View
 
     private func loadDefaults()
     {
-        if case let .input(_, _, defaultReps, defaultWeight, _) = type
+        if case let .input(_, _, defaultReps, defaultWeight, defaultNotes, _) = type
         {
             reps = defaultReps
             weight = defaultWeight
-            notes = ""
+            notes = defaultNotes
         }
     }
 
     private func saveInput()
     {
-        if case let .input(_, _, _, _, onConfirm) = type
+        if case let .input(_, _, _, _, _, onConfirm) = type
         {
             onConfirm(reps, weight, notes)
         }
@@ -576,6 +577,7 @@ struct DangerButtonStyle: ButtonStyle
                 subtitle: "请输入实际完成次数和重量",
                 defaultReps: "8",
                 defaultWeight: "60",
+                defaultNotes: "下放速度控制稳定",
                 onConfirm: { _, _, _ in }
             ),
             onDismiss: { }
