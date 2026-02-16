@@ -608,196 +608,211 @@ struct CompactExerciseInfoCard: View
         return trimmedNotes.isEmpty ? nil : trimmedNotes
     }
 
+    // 限制卡片最大高度，超出后在卡片内部滚动
+    private var cardMaxHeight: CGFloat
+    {
+        let screenHeight = UIScreen.main.bounds.height
+        let heightRatio: CGFloat = isResting ? 0.50 : 0.62
+        return max(320, screenHeight * heightRatio)
+    }
+
     var body: some View
     {
-        VStack(spacing: 12)
-        { // space-y-3 ≈ 12pt
-            // 运动名称
-            Text(exercise.name)
-                .font(.system(size: 32, weight: .bold)) // text-2xl font-bold
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [Color.warning, Color.appAccent],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                )
-                .frame(maxWidth: .infinity)
-                .multilineTextAlignment(.center) // 居中对齐
-
-            // 动作时间计时器 - 根据isResting状态决定是否显示
-            if !isResting
-            {
-                ActionTimerView(
-                    elapsedTime: elapsedTime,
-                    isVisible: $isVisible
-                )
-                .id("action-timer-\(elapsedTime)") // 强制更新ID
-                .scaleEffect(isVisible ? 1.0 : 0.95) // 入场动画
-                .animation(.easeOut(duration: 0.3), value: isVisible)
-            }
-
-            // 组数、次数和重量模块 - 增强版本
+        ScrollView(.vertical, showsIndicators: true)
+        {
             VStack(spacing: 12)
-            {
-                // 当前组数模块 - 蓝色背景
-                HStack
-                {
-                    Image(systemName: "number")
-                        .font(.system(size: 20, weight: .medium))
-                        .foregroundColor(.appPrimary)
-
-                    Text("当前组数：")
-                        .font(.system(size: 14))
-                        .foregroundColor(.appTextSecondary)
-
-                    Text("\(currentSet) / \(totalSets)")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.appPrimary)
-
-                    Spacer()
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 14)
-                        .fill(
-                            LinearGradient(
-                                colors: [
-                                    Color(red: 0.94, green: 0.96, blue: 1.0),
-                                    Color(red: 0.93, green: 1.0, blue: 1.0)
-                                ],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
+            { // space-y-3 ≈ 12pt
+                // 运动名称
+                Text(exercise.name)
+                    .font(.system(size: 32, weight: .bold)) // text-2xl font-bold
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [Color.warning, Color.appAccent],
+                            startPoint: .leading,
+                            endPoint: .trailing
                         )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 14)
-                                .stroke(Color.appPrimary.opacity(0.3), lineWidth: 1)
-                        )
-                )
+                    )
+                    .frame(maxWidth: .infinity)
+                    .multilineTextAlignment(.center) // 居中对齐
 
-                // 次数和重量模块 - 水平排列，基于Figma设计
-                HStack(spacing: 12)
+                // 动作时间计时器 - 根据isResting状态决定是否显示
+                if !isResting
                 {
-                    // 次数模块 - 绿色主题
-                    VStack(spacing: 8)
-                    {
-                        HStack(spacing: 6)
-                        {
-                            Image(systemName: "target")
-                                .font(.system(size: 18, weight: .medium))
-                                .foregroundColor(.success)
-                        }
-
-                        Text("目标次数")
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.appTextSecondary)
-
-                        Text("\(targetReps)")
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.success)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 17)
-                    .background(
-                        RoundedRectangle(cornerRadius: 14)
-                            .fill(Color.success.opacity(0.1))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 14)
-                                    .stroke(Color.success.opacity(0.3), lineWidth: 1)
-                            )
+                    ActionTimerView(
+                        elapsedTime: elapsedTime,
+                        isVisible: $isVisible
                     )
-
-                    // 重量模块 - 紫色主题
-                    VStack(spacing: 8)
-                    {
-                        HStack(spacing: 6)
-                        {
-                            Image(systemName: "scalemass.fill")
-                                .font(.system(size: 20, weight: .medium))
-                                .foregroundColor(.info)
-                        }
-
-                        Text("目标重量 (kg)")
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.appTextSecondary)
-
-                        // 使用统一的重量格式化函数
-                        Text(formatWeight(targetWeight))
-                            .font(.system(size: targetWeight == 0 ? 16 : 20, weight: .bold))
-                            .foregroundColor(.info)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 17)
-                    .background(
-                        RoundedRectangle(cornerRadius: 14)
-                            .fill(Color.info.opacity(0.1))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 14)
-                                    .stroke(Color.info.opacity(0.3), lineWidth: 1)
-                            )
-                    )
+                    .id("action-timer-\(elapsedTime)") // 强制更新ID
+                    .scaleEffect(isVisible ? 1.0 : 0.95) // 入场动画
+                    .animation(.easeOut(duration: 0.3), value: isVisible)
                 }
 
-                // 版本1.3: 下一组提示
-                if let nextInfo = nextSetInfo
+                // 组数、次数和重量模块 - 增强版本
+                VStack(spacing: 12)
                 {
+                    // 当前组数模块 - 蓝色背景
                     HStack
                     {
-                        Image(systemName: "arrow.right.circle.fill")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.info)
+                        Image(systemName: "number")
+                            .font(.system(size: 20, weight: .medium))
+                            .foregroundColor(.appPrimary)
 
-                        Text(nextInfo)
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.info)
+                        Text("当前组数：")
+                            .font(.system(size: 14))
+                            .foregroundColor(.appTextSecondary)
+
+                        Text("\(currentSet) / \(totalSets)")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.appPrimary)
 
                         Spacer()
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(Color.info.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
-                }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 14)
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        Color(red: 0.94, green: 0.96, blue: 1.0),
+                                        Color(red: 0.93, green: 1.0, blue: 1.0)
+                                    ],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 14)
+                                    .stroke(Color.appPrimary.opacity(0.3), lineWidth: 1)
+                            )
+                    )
 
-                if let notes = displayNotes
-                {
-                    HStack(alignment: .top, spacing: 8)
+                    // 次数和重量模块 - 水平排列，基于Figma设计
+                    HStack(spacing: 12)
                     {
-                        Image(systemName: "text.bubble.fill")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.warning)
-                            .padding(.top, 1)
+                        // 次数模块 - 绿色主题
+                        VStack(spacing: 8)
+                        {
+                            HStack(spacing: 6)
+                            {
+                                Image(systemName: "target")
+                                    .font(.system(size: 18, weight: .medium))
+                                    .foregroundColor(.success)
+                            }
 
-                        Text(notes)
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.appTextSecondary)
-                            .multilineTextAlignment(.leading)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                            Text("目标次数")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(.appTextSecondary)
+
+                            Text("\(targetReps)")
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundColor(.success)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 17)
+                        .background(
+                            RoundedRectangle(cornerRadius: 14)
+                                .fill(Color.success.opacity(0.1))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 14)
+                                        .stroke(Color.success.opacity(0.3), lineWidth: 1)
+                                )
+                        )
+
+                        // 重量模块 - 紫色主题
+                        VStack(spacing: 8)
+                        {
+                            HStack(spacing: 6)
+                            {
+                                Image(systemName: "scalemass.fill")
+                                    .font(.system(size: 20, weight: .medium))
+                                    .foregroundColor(.info)
+                            }
+
+                            Text("目标重量 (kg)")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(.appTextSecondary)
+
+                            // 使用统一的重量格式化函数
+                            Text(formatWeight(targetWeight))
+                                .font(.system(size: targetWeight == 0 ? 16 : 20, weight: .bold))
+                                .foregroundColor(.info)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 17)
+                        .background(
+                            RoundedRectangle(cornerRadius: 14)
+                                .fill(Color.info.opacity(0.1))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 14)
+                                        .stroke(Color.info.opacity(0.3), lineWidth: 1)
+                                )
+                        )
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 10)
-                    .background(Color.warning.opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
+
+                    // 版本1.3: 下一组提示
+                    if let nextInfo = nextSetInfo
+                    {
+                        HStack
+                        {
+                            Image(systemName: "arrow.right.circle.fill")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.info)
+
+                            Text(nextInfo)
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(.info)
+
+                            Spacer()
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(Color.info.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
+                    }
+
+                    if let notes = displayNotes
+                    {
+                        HStack(alignment: .top, spacing: 8)
+                        {
+                            Image(systemName: "text.bubble.fill")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.warning)
+                                .padding(.top, 1)
+
+                            Text(notes)
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(.appTextSecondary)
+                                .lineLimit(nil)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .multilineTextAlignment(.leading)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 10)
+                        .background(Color.warning.opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
+                    }
                 }
+
+                // 版本1.3: 训练计时
+                HStack
+                {
+                    Image(systemName: "clock")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.appTextSecondary)
+
+                    Text("训练总计时: \(formattedTotalTime)")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.appTextSecondary)
+
+                    Spacer()
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
             }
-
-            // 版本1.3: 训练计时
-            HStack
-            {
-                Image(systemName: "clock")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.appTextSecondary)
-
-                Text("训练总计时: \(formattedTotalTime)")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.appTextSecondary)
-
-                Spacer()
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
+            .padding(24)
+            .frame(maxWidth: .infinity, alignment: .top)
         }
-        .padding(24)
+        .frame(maxHeight: cardMaxHeight, alignment: .top)
         .background(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
                 .fill(
