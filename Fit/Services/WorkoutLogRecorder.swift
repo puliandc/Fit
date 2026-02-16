@@ -71,6 +71,10 @@ class WorkoutLogRecorder
         }
 
         let trainingDuration = Date().timeIntervalSince(startTime)
+        let mergedNotes = mergeNotes(
+            planNotes: exerciseSet.notes,
+            userNotes: notes
+        )
 
         let entry = WorkoutLogEntry(
             exercise: currentExerciseName,
@@ -81,7 +85,7 @@ class WorkoutLogRecorder
             actualReps: .value(Double(actualReps)),
             trainingDuration: .value(trainingDuration),
             restTime: Double(exerciseSet.restTime),
-            notes: notes
+            notes: mergedNotes
         )
 
         logEntries.append(entry)
@@ -95,6 +99,11 @@ class WorkoutLogRecorder
     // 记录跳过的训练组
     func recordSkippedSet(exerciseSet: ExerciseSet)
     {
+        let mergedNotes = mergeNotes(
+            planNotes: exerciseSet.notes,
+            userNotes: "放弃"
+        )
+
         let entry = WorkoutLogEntry(
             exercise: currentExerciseName,
             setOrder: currentExerciseSetOrder,
@@ -104,7 +113,7 @@ class WorkoutLogRecorder
             actualReps: .na("N/A"),
             trainingDuration: .na("N/A"),
             restTime: Double(exerciseSet.restTime),
-            notes: "放弃"
+            notes: mergedNotes
         )
 
         logEntries.append(entry)
@@ -188,6 +197,34 @@ class WorkoutLogRecorder
         {
             return String(format: "%02d:%02d", minutes, seconds)
         }
+    }
+
+    private func mergeNotes(planNotes: String?, userNotes: String) -> String
+    {
+        let normalizedPlanNotes = planNotes?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let normalizedUserNotes = userNotes.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if normalizedPlanNotes.isEmpty && normalizedUserNotes.isEmpty
+        {
+            return ""
+        }
+
+        if normalizedPlanNotes.isEmpty
+        {
+            return normalizedUserNotes
+        }
+
+        if normalizedUserNotes.isEmpty
+        {
+            return normalizedPlanNotes
+        }
+
+        if normalizedPlanNotes == normalizedUserNotes
+        {
+            return normalizedUserNotes
+        }
+
+        return "\(normalizedPlanNotes) | \(normalizedUserNotes)"
     }
 
     // 记录跳过的动作的所有组

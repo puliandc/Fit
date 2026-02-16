@@ -221,7 +221,8 @@ class WorkoutViewModel: ObservableObject
             exerciseSetId: currentExerciseSet.id,
             actualReps: actualReps,
             actualWeight: actualWeight,
-            completedAt: Date()
+            completedAt: Date(),
+            notes: notes.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : notes
         )
         completedSets.append(completedSet)
 
