@@ -115,19 +115,26 @@ class JSONWorkoutParser
                 throw JSONParseError.missingSetConfig(exerciseName)
             }
 
+            guard !setConfigs.isEmpty
+            else
+            {
+                throw JSONParseError.invalidSetConfig(
+                    exerciseName: exerciseName,
+                    setIndex: 0,
+                    reason: "组数设置不能为空"
+                )
+            }
+
             // 为每个组数设置创建ExerciseSet
             for (setIndex, setConfig) in setConfigs.enumerated()
             {
-                if
-                    let exerciseSet = createExerciseSet(
-                        from: setConfig,
-                        exercise: exercise,
-                        exerciseName: exerciseName,
-                        setIndex: setIndex + 1
-                    )
-                {
-                    exerciseSets.append(exerciseSet)
-                }
+                let exerciseSet = try createExerciseSet(
+                    from: setConfig,
+                    exercise: exercise,
+                    exerciseName: exerciseName,
+                    setIndex: setIndex + 1
+                )
+                exerciseSets.append(exerciseSet)
             }
         }
 
@@ -144,26 +151,117 @@ class JSONWorkoutParser
     private func createExerciseSet(
         from setConfig: [String: Any],
         exercise: Exercise,
-        exerciseName _: String,
-        setIndex _: Int
-    ) -> ExerciseSet?
+        exerciseName: String,
+        setIndex: Int
+    ) throws -> ExerciseSet
     {
-        guard
-            let targetReps = setConfig["目标次数"] as? Int,
-            let targetWeight = setConfig["目标重量"] as? Double
+        guard let targetReps = setConfig["目标次数"] as? Int
         else
         {
-            return nil
+            throw JSONParseError.invalidSetConfig(
+                exerciseName: exerciseName,
+                setIndex: setIndex,
+                reason: "目标次数必须是整数"
+            )
         }
 
-        let restTime = setConfig["休息时间"] as? Int ?? 90 // 默认90秒休息
+        let targetWeight = try parseTargetWeight(
+            from: setConfig,
+            exerciseName: exerciseName,
+            setIndex: setIndex
+        )
+
+        let restTime: Int
+        if let rawRestTime = setConfig["休息时间"]
+        {
+            guard let parsedRestTime = rawRestTime as? Int
+            else
+            {
+                throw JSONParseError.invalidSetConfig(
+                    exerciseName: exerciseName,
+                    setIndex: setIndex,
+                    reason: "休息时间必须是整数"
+                )
+            }
+            restTime = parsedRestTime
+        }
+        else
+        {
+            restTime = 90
+        }
+
+        let notes = try parseNotes(
+            from: setConfig,
+            exerciseName: exerciseName,
+            setIndex: setIndex
+        )
 
         return ExerciseSet(
             exercise: exercise,
             targetReps: targetReps,
             targetWeight: targetWeight,
-            restTime: restTime
+            restTime: restTime,
+            notes: notes
         )
+    }
+
+    private func parseTargetWeight(
+        from setConfig: [String: Any],
+        exerciseName: String,
+        setIndex: Int
+    ) throws -> Double
+    {
+        guard let rawTargetWeight = setConfig["目标重量"]
+        else
+        {
+            throw JSONParseError.invalidSetConfig(
+                exerciseName: exerciseName,
+                setIndex: setIndex,
+                reason: "缺少目标重量字段"
+            )
+        }
+
+        if let targetWeight = rawTargetWeight as? Double
+        {
+            return targetWeight
+        }
+
+        if let targetWeight = rawTargetWeight as? Int
+        {
+            return Double(targetWeight)
+        }
+
+        throw JSONParseError.invalidSetConfig(
+            exerciseName: exerciseName,
+            setIndex: setIndex,
+            reason: "目标重量必须是数字（支持整数和小数）"
+        )
+    }
+
+    private func parseNotes(
+        from setConfig: [String: Any],
+        exerciseName: String,
+        setIndex: Int
+    ) throws -> String?
+    {
+        guard let rawNotes = setConfig["备注"]
+        else
+        {
+            return nil
+        }
+
+        guard let notes = rawNotes as? String
+        else
+        {
+            throw JSONParseError.invalidSetConfig(
+                exerciseName: exerciseName,
+                setIndex: setIndex,
+                reason: "备注必须是字符串"
+            )
+        }
+
+        let trimmedNotes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmedNotes.isEmpty ? nil : trimmedNotes
     }
 
     // 创建WorkoutPlan对象（简化版）
@@ -198,6 +296,7 @@ enum JSONParseError: LocalizedError
     case missingExercises
     case missingExerciseName(Int)
     case missingSetConfig(String)
+    case invalidSetConfig(exerciseName: String, setIndex: Int, reason: String)
 
     var errorDescription: String?
     {
@@ -215,6 +314,15 @@ enum JSONParseError: LocalizedError
             return "第\(index)个练习项目缺少练习名称字段"
         case let .missingSetConfig(exerciseName):
             return "练习 '\(exerciseName)' 缺少组数设置字段"
+        case let .invalidSetConfig(exerciseName, setIndex, reason):
+            if setIndex > 0
+            {
+                return "练习 '\(exerciseName)' 第\(setIndex)组配置错误：\(reason)"
+            }
+            else
+            {
+                return "练习 '\(exerciseName)' 组数配置错误：\(reason)"
+            }
         }
     }
 }

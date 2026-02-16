@@ -119,6 +119,7 @@ struct ContentView: View
                             subtitle: "请输入实际完成次数和重量",
                             defaultReps: String(defaults.reps),
                             defaultWeight: formatWeight(defaults.weight),
+                            defaultNotes: workoutViewModel.currentExerciseSet.notes ?? "",
                             onConfirm: { reps, weight, notes in
                                 guard let actualReps = Int(reps)
                                 else
@@ -161,6 +162,7 @@ struct ContentView: View
                             subtitle: "请输入您实际完成的次数和重量",
                             defaultReps: "",
                             defaultWeight: "",
+                            defaultNotes: "",
                             onConfirm: { _, _, _ in }
                         ),
                         onDismiss: {
