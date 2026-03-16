@@ -1,14 +1,8 @@
-# 训练日志 JSON 格式说明文档
+# 训练日志 JSON 格式说明
 
-## 📋 文档概述
+本文档基于当前 Fit 应用实际导出的日志结构编写，供 AI 系统和开发者解析训练日志使用。
 
-### 文档目的
-
-本文档详细说明了 Fit 应用训练日志系统的 JSON 数据格式，旨在为 AI 系统和技术人员提供清晰的数据结构说明，便于训练日志数据的解析、处理和分析。
-
-## 📊 JSON 结构示例
-
-### 完整 JSON 示例
+## 顶层结构
 
 ```json
 {
@@ -16,275 +10,141 @@
   "workoutDate": "2025年10月14日",
   "startTime": "10:31",
   "endTime": "11:20",
-  "totalDuration": "00:49:30",
+  "totalDuration": "49:30",
   "entries": [
     {
-      "exercise": "杠铃卧推",
+      "exercise": "超级组 A：胸背对抗 (连续做完A1+A2再休息)",
       "setOrder": 1,
-      "targetWeight": 45.0,
-      "actualWeight": {
-        "value": 45.0
-      },
-      "targetReps": 5,
-      "actualReps": {
-        "value": 5.0
-      },
-      "trainingDuration": {
-        "value": 35.5
-      },
-      "restTime": 90.0,
-      "notes": ""
+      "targetWeight": 17.5,
+      "actualWeight": { "value": 17.5 },
+      "targetReps": 10,
+      "actualReps": { "value": 10.0 },
+      "trainingDuration": { "value": 38.2 },
+      "restTime": 0.0,
+      "notes": "A1. 哑铃平板卧推 - 控制离心。 | 最后一组略晃"
     },
     {
-      "exercise": "杠铃卧推",
+      "exercise": "超级组 A：胸背对抗 (连续做完A1+A2再休息)",
       "setOrder": 2,
-      "targetWeight": 45.0,
-      "actualWeight": {
-        "value": 45.0
-      },
-      "targetReps": 5,
-      "actualReps": {
-        "value": 5.0
-      },
-      "trainingDuration": {
-        "value": 42.3
-      },
+      "targetWeight": 40.0,
+      "actualWeight": { "value": 40.0 },
+      "targetReps": 12,
+      "actualReps": { "value": 12.0 },
+      "trainingDuration": { "value": 41.7 },
       "restTime": 90.0,
-      "notes": ""
+      "notes": "A2. 坐姿划船 - 挤压背部。"
     },
     {
       "exercise": "杠铃深蹲",
       "setOrder": 1,
-      "targetWeight": 62.5,
-      "actualWeight": {
-        "na": "N/A"
-      },
+      "targetWeight": 80.0,
+      "actualWeight": { "na": "N/A" },
       "targetReps": 5,
-      "actualReps": {
-        "na": "N/A"
-      },
-      "trainingDuration": {
-        "na": "N/A"
-      },
+      "actualReps": { "na": "N/A" },
+      "trainingDuration": { "na": "N/A" },
       "restTime": 120.0,
-      "notes": "放弃"
+      "notes": "深蹲到底，控制节奏。 | 放弃"
     }
   ]
 }
 ```
 
-## 🔧 字段详细说明
+## 字段说明
 
-### 顶层对象 (WorkoutLog)
+### WorkoutLog
 
-| 字段名        | 类型   | 含义         | 格式要求                 | 示例值                | 必填 |
-| ------------- | ------ | ------------ | ------------------------ | --------------------- | ---- |
-| workoutName   | String | 训练计划名称 | UTF-8 字符串，长度 1-100 | "A 组卧推深蹲"        | ✅   |
-| workoutDate   | String | 训练日期     | "yyyy 年 M 月 d 日"格式  | "2025 年 10 月 14 日" | ✅   |
-| startTime     | String | 开始时间     | "HH:mm" 24 小时制        | "10:31"               | ✅   |
-| endTime       | String | 结束时间     | "HH:mm" 24 小时制        | "11:20"               | ✅   |
-| totalDuration | String | 总训练时长   | "HH:mm:ss"或"mm:ss"格式  | "00:49:30"            | ✅   |
-| entries       | Array  | 训练条目列表 | WorkoutLogEntry 对象数组 | 见下方说明            | ✅   |
+| 字段 | 类型 | 说明 | 示例 |
+| --- | --- | --- | --- |
+| `workoutName` | `String` | 训练名称 | `"A组卧推深蹲"` |
+| `workoutDate` | `String` | 训练日期，格式固定为 `yyyy年M月d日` | `"2025年10月14日"` |
+| `startTime` | `String` | 开始时间，`HH:mm` | `"10:31"` |
+| `endTime` | `String` | 结束时间，`HH:mm` | `"11:20"` |
+| `totalDuration` | `String` | 总时长，可能是 `mm:ss` 或 `HH:mm:ss` | `"49:30"` |
+| `entries` | `[WorkoutLogEntry]` | 训练条目列表 | 见上方示例 |
 
-### 训练条目对象 (WorkoutLogEntry)
+### WorkoutLogEntry
 
-| 字段名           | 类型         | 含义     | 格式要求                  | 示例值     | 必填 |
-| ---------------- | ------------ | -------- | ------------------------- | ---------- | ---- |
-| exercise         | String       | 动作名称 | UTF-8 字符串，长度 1-50   | "杠铃卧推" | ✅   |
-| setOrder         | Int          | 组序号   | 正整数，从 1 开始         | 1          | ✅   |
-| targetWeight     | Double       | 目标重量 | 正数，单位 kg，精度 0.1kg | 45.0       | ✅   |
-| actualWeight     | WorkoutValue | 实际重量 | 见特殊值处理说明          | 见下方     | ✅   |
-| targetReps       | Int          | 目标次数 | 正整数                    | 5          | ✅   |
-| actualReps       | WorkoutValue | 实际次数 | 见特殊值处理说明          | 见下方     | ✅   |
-| trainingDuration | WorkoutValue | 训练时长 | 见特殊值处理说明，单位秒  | 见下方     | ✅   |
-| restTime         | Double       | 组间休息 | 正数，单位秒              | 90.0       | ✅   |
-| notes            | String       | 备注     | UTF-8 字符串，长度 0-200  | ""、"放弃" | ✅   |
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `exercise` | `String` | 动作名称。若原计划用了超级组名称，这里会保留同一名称 |
+| `setOrder` | `Int` | 组序号，从 `1` 开始 |
+| `targetWeight` | `Double` | 目标重量，单位 kg。自重动作通常为 `0.0` |
+| `actualWeight` | `WorkoutValue` | 实际重量 |
+| `targetReps` | `Int` | 目标次数 |
+| `actualReps` | `WorkoutValue` | 实际次数 |
+| `trainingDuration` | `WorkoutValue` | 该组训练时长，单位秒 |
+| `restTime` | `Double` | 该组后休息时间，单位秒 |
+| `notes` | `String` | 导出备注，始终存在，可能为空字符串 |
 
-## 🎯 特殊值处理规则
+## WorkoutValue
 
-### WorkoutValue 联合类型
+`WorkoutValue` 是日志中的联合类型，用于同时表示有效数值和跳过状态。
 
-`WorkoutValue`是一个联合类型，用于处理数值和"N/A"特殊情况：
-
-#### 数值情况 (实际完成的训练)
+### 数值情况
 
 ```json
-{
-  "value": 45.0
-}
+{ "value": 45.0 }
 ```
 
-#### N/A 情况 (跳过的训练)
+### 跳过情况
 
 ```json
-{
-  "na": "N/A"
-}
+{ "na": "N/A" }
 ```
 
-#### 处理规则
+### 规则
 
-1. **实际完成的训练组**：使用`value`字段存储实际数值
+1. 实际完成的训练组使用 `value`
+2. 跳过的训练组使用 `na`
+3. `na` 的值固定是 `"N/A"`
+4. `actualWeight.value` 可以为 `0.0`，这表示自重动作，不表示跳过
 
-   - `actualWeight.value`：实际重量（kg）
-   - `actualReps.value`：实际次数（转换为 Double 类型）
-   - `trainingDuration.value`：实际训练时长（秒）
+## 备注字段的真实语义
 
-2. **跳过的训练组**：使用`na`字段存储"N/A"字符串
+当前应用不会只导出用户在弹窗里输入的备注，而是会按下面规则生成 `notes`：
 
-   - 当用户跳过某个训练组时，所有实际值字段都使用`{"na": "N/A"}`格式
-   - `notes`字段通常设置为"放弃"
+1. 只有计划备注：直接导出计划备注
+2. 只有用户备注：直接导出用户备注
+3. 两者都有：按 `计划备注 | 用户备注` 合并
+4. 跳过某组时：
+   - 无计划备注：`notes` 为 `放弃`
+   - 有计划备注：`notes` 为 `计划备注 | 放弃`
+5. 两边都没有：`notes` 为空字符串
 
-3. **数据转换规则**：
-   - 数值类型保留 1 位小数
-   - N/A 值统一使用大写"N/A"
-   - 解析时应检查哪个字段存在来区分情况
+示例：
 
-## ✅ 数据验证规则
-
-### 必填字段验证
-
-- 所有顶层字段都必须存在
-- 所有 entry 字段都必须存在
-- 不允许 null 值
-
-### 数据格式验证
-
-#### 数值范围验证
-
-```javascript
-// targetWeight和actualWeight.value
-{
-  "minimum": 0,
-  "maximum": 1000,
-  "type": "number",
-  "precision": 0.1
-}
-
-// targetReps和actualReps.value
-{
-  "minimum": 1,
-  "maximum": 100,
-  "type": "integer"
-}
-
-// restTime
-{
-  "minimum": 0,
-  "maximum": 3600,
-  "type": "number"
-}
+```json
+{ "notes": "A1. 哑铃平板卧推 - 控制离心。 | 最后一组略晃" }
 ```
 
-#### 时间格式验证
+## 格式约束
 
-```javascript
-// workoutDate格式：yyyy年M月d日
-{
-  "pattern": "^\\d{4}年\\d{1,2}月\\d{1,2}日$",
-  "examples": ["2025年10月14日", "2024年1月5日"]
-}
+### 时间格式
 
-// startTime和endTime格式：HH:mm
-{
-  "pattern": "^([01]?[0-9]|2[0-3]):[0-5][0-9]$",
-  "examples": ["09:00", "14:30", "23:59"]
-}
+- `workoutDate`: `yyyy年M月d日`
+- `startTime`: `HH:mm`
+- `endTime`: `HH:mm`
+- `totalDuration`: `mm:ss` 或 `HH:mm:ss`
 
-// totalDuration格式：HH:mm:ss或mm:ss
-{
-  "pattern": "^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$|^[0-5]?[0-9]:[0-5][0-9]$",
-  "examples": ["00:49:30", "49:30", "01:15:00"]
-}
-```
+### 数值格式
 
-#### WorkoutValue 验证
+- `targetWeight`: `Double`
+- `targetReps`: `Int`
+- `restTime`: `Double`
+- `WorkoutValue.value`: `Double`
 
-```javascript
-{
-  "oneOf": [
-    {
-      "type": "object",
-      "properties": {
-        "value": {
-          "type": "number",
-          "minimum": 0
-        }
-      },
-      "required": ["value"],
-      "additionalProperties": false
-    },
-    {
-      "type": "object",
-      "properties": {
-        "na": {
-          "type": "string",
-          "enum": ["N/A"]
-        }
-      },
-      "required": ["na"],
-      "additionalProperties": false
-    }
-  ]
-}
-```
+## AI / 数据处理建议
 
-## 🚀 使用场景和最佳实践
+1. 判断动作是否跳过时，不要只看 `notes`；应优先检查 `actualWeight`、`actualReps`、`trainingDuration` 是否为 `na`
+2. 分析训练表现时，可把 `notes` 当作额外上下文，但它不是结构化字段
+3. 如果 `exercise` 名称本身是超级组名称，具体 A1/A2 信息通常会写在 `notes`
+4. 解析日期时，不要假设中间有空格，当前应用输出没有空格
 
-### AI 系统集成场景
+## 最小校验清单
 
-#### 1. 训练进度跟踪
+处理日志时至少校验以下项目：
 
-```python
-def track_progress(current_workout, previous_workouts):
-    """
-    跟踪训练进度变化
-    """
-    current_date = parse_date(current_workout['workoutDate'])
-
-    # 找到相同训练计划的历史记录
-    similar_workouts = [w for w in previous_workouts
-                       if w['workoutName'] == current_workout['workoutName']]
-
-    if not similar_workouts:
-        return None
-
-    # 计算强度提升
-    current_intensity = calculate_average_intensity(current_workout)
-    previous_intensity = calculate_average_intensity(similar_workouts[-1])
-
-    improvement = ((current_intensity - previous_intensity) / previous_intensity) * 100
-
-    return {
-        'improvement_percentage': improvement,
-        'current_intensity': current_intensity,
-        'previous_intensity': previous_intensity
-    }
-```
-
-#### 2. 数据验证和清理
-
-```python
-def validate_workout_json(json_data):
-    """
-    验证训练日志JSON数据的完整性和正确性
-    """
-    try:
-        workout = json.loads(json_data)
-    except json.JSONDecodeError:
-        return False, "Invalid JSON format"
-
-    # 检查必填字段
-    required_fields = ['workoutName', 'workoutDate', 'startTime', 'endTime', 'totalDuration', 'entries']
-    for field in required_fields:
-        if field not in workout:
-            return False, f"Missing required field: {field}"
-
-    # 验证每个entry
-    for i, entry in enumerate(workout['entries']):
-        entry_validation = validate_entry(entry, i)
-        if not entry_validation[0]:
-            return entry_validation
-
-    return True, "Validation passed"
-```
+1. 顶层必须有 `workoutName`、`workoutDate`、`startTime`、`endTime`、`totalDuration`、`entries`
+2. 每个 `entry` 必须有 9 个字段
+3. `WorkoutValue` 只能是 `{ "value": number }` 或 `{ "na": "N/A" }`
+4. `setOrder` 应从 `1` 开始，且同一动作内通常递增
