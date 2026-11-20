@@ -5,7 +5,6 @@
 [![Swift](https://img.shields.io/badge/Swift-5.8+-FA7343.svg?style=flat-square)](https://swift.org)
 [![iOS](https://img.shields.io/badge/iOS-15.0+-000000.svg?style=flat-square)](https://developer.apple.com/ios/)
 [![SwiftUI](https://img.shields.io/badge/SwiftUI-4.0+-007AFF.svg?style=flat-square)](https://developer.apple.com/xcode/swiftui/)
-[![License](https://img.shields.io/badge/License-Private-red.svg?style=flat-square)](LICENSE)
 
 > **极简主义的个人健身训练记录应用**
 > 基于 SwiftUI 构建，专注于提供专注高效的训练数据记录体验
@@ -256,7 +255,7 @@ Fit/                          # iOS 应用源码
 ├── Assets.xcassets           # 资源
 └── ...                       # 其余技术实验/示例目录 (Performance、Integrations 等)
 FitTests/                     # 单元测试 (DataValidationTests.swift、DebugModeTests.swift)
-ForAI/                        # AI 相关文档 (提示模板、数据结构说明)
+ForAI/                        # AI 提示模板、导入格式和合成示例
 docs/                         # 项目文档 (功能规格、UX 流程、UI 规范等)
 scripts/                      # 构建/检查脚本
 11282025.json                 # 示例训练计划 (最新样例)

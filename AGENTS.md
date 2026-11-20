@@ -3,7 +3,7 @@
 ## 项目结构与模块组织
 - 主应用在 `Fit/`，关键子目录：`Views/`、`ViewModels/`、`Models/`、`Services/`、`DesignSystem/`、`Utilities/`、`Integrations/`、`Assets.xcassets`；根目录的 `NavigationManager.swift` 负责导航。
 - 测试位于 `FitTests/`（如 `DataValidationTests.swift`、`DebugModeTests.swift`），命名与生产类型对应并以 `Tests` 结尾。
-- 自动化脚本在 `scripts/`（`build.sh`、`pre-build-check.sh`、`deploy.sh`），常用别名在 `.dev-aliases`。文档在 `docs/`，AI 提示示例在 `ForAI/`，示例训练计划 `10202028.JSON`、`11222025.json` 可作为测试数据。
+- 自动化脚本在 `scripts/`（`build.sh`、`pre-build-check.sh`、`deploy.sh`），常用别名在 `.dev-aliases`。文档在 `docs/`，AI 提示示例在 `ForAI/`，`ForAI/test.json` 是可公开的合成训练计划示例。
 
 ## 构建、运行与开发命令
 - `source .dev-aliases` 加载别名。
